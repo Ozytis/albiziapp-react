@@ -1,16 +1,17 @@
+import { Box, createStyles, List, ListItem, ListItemIcon, ListItemText, MenuItem, Select, Tab, Tabs, Theme, WithStyles, withStyles } from "@material-ui/core";
+import { ChevronRight } from "@material-ui/icons";
+import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
-import { Theme, WithStyles, createStyles, withStyles, Box, List, ListItem, ListItemText, Select, MenuItem, Tabs, Tab, ListItemIcon } from "@material-ui/core";
 import { BaseComponent } from "../../components/base-component";
-import clsx from "clsx";
 import { FloraKeyModel } from "../../services/generated/flora-key-model";
 import { SpeciesModel } from "../../services/generated/species-model";
 import { SpeciesApi } from "../../services/species-service";
 import { t } from "../../services/translation-service";
-import { ChevronRight } from "@material-ui/icons";
 
-const styles = (style: Theme) => createStyles({
+// eslint-disable-next-line
+const styles = (theme: Theme) => createStyles({
     root: {
 
     },

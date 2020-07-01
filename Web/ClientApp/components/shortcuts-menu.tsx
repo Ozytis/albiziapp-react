@@ -7,9 +7,9 @@ import clsx from "clsx";
 import { t } from "../services/translation-service";
 import { Map, Home, Search, EditLocation } from "@material-ui/icons";
 
-
 export type ShortcutType = "map" | "mission" | "score" | "statements" | "folia" | "arboretum";
 
+// eslint-disable-next-line
 const styles = (theme: Theme) => createStyles({
     root: {
         padding: "1rem",

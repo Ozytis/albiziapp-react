@@ -1,18 +1,15 @@
-import React, { Component, useState } from "react";
-import { matchRoutes, RouteConfig, RouteConfigComponentProps } from "react-router-config";
+import React from "react";
+import { matchRoutes } from "react-router-config";
 import { RouteComponentProps, withRouter } from "react-router-dom";
+import { AuthenticationApi } from "../services/authentication-service";
 import { IPropsWithAppContext, withAppContext } from "./app-context";
 import { BaseComponent } from "./base-component";
-import { AuthenticationApi } from "../services/authentication-service";
-import { PageConfig } from "../pages/page-config";
-import { LoginPage } from "../pages/login/login-page";
 
 interface AuthorizationProps extends RouteComponentProps, IPropsWithAppContext {
 
 }
 
 class AuthorizationState {
-
     accessGranted = false;
 }
 

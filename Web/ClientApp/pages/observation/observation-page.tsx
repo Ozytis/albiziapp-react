@@ -6,11 +6,11 @@ import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
 import { BaseComponent } from "../../components/base-component";
 import { Confirm } from "../../components/confirm";
+import { ObservationModel } from "../../services/generated/observation-model";
+import { SpeciesInfoModel } from "../../services/generated/species-info-model";
 import { ObservationsApi } from "../../services/observation";
 import { SpeciesApi } from "../../services/species-service";
 import { t } from "../../services/translation-service";
-import { ObservationModel } from "../../services/generated/observation-model";
-import { SpeciesInfoModel } from "../../services/generated/species-info-model";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -181,7 +181,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                         <Switch
                                             title="Douteux"
                                             checked={false}
-                                            onChange={(val) => void (0)}
+                                            onChange={(e, val) => void (0)}
                                         />
                                     </Grid>
                                     <Grid item>

@@ -1,12 +1,12 @@
-import React from "react";
-import { BaseComponent } from "../../components/base-component";
-import { Card, CardContent, Typography, createStyles, Theme, WithStyles, withStyles, LinearProgress, Box } from "@material-ui/core";
-import { t } from "../../services/translation-service";
-import { withRouter, RouteComponentProps } from "react-router";
+import { Box, Card, CardContent, createStyles, LinearProgress, Theme, Typography, WithStyles, withStyles } from "@material-ui/core";
+import { DoneAll, HelpOutline, RadioButtonChecked, Search } from "@material-ui/icons";
 import clsx from "clsx";
-import { Search, HelpOutline, DoneAll, RadioButtonChecked } from "@material-ui/icons";
-import { ActivityModel } from "../../services/generated/activity-model";
+import React from "react";
+import { RouteComponentProps, withRouter } from "react-router";
+import { BaseComponent } from "../../components/base-component";
 import { ActivitiesApi } from "../../services/activities-service";
+import { ActivityModel } from "../../services/generated/activity-model";
+import { t } from "../../services/translation-service";
 
 const styles = (theme: Theme) => createStyles({
     card: {

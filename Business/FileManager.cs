@@ -1,10 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Ozytis.Common.Core.Utilities;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Business
@@ -20,19 +17,19 @@ namespace Business
 
         public async Task SaveFileAsync(string path, byte[] data)
         {
-            string fileName = Path.Combine(Configuration["ContentDir"], path);
+            string fileName = Path.Combine(this.Configuration["ContentDir"], path);
             await File.WriteAllBytesAsync(fileName, data);
         }
 
         public async Task<byte[]> ReadFileAsync(string path)
         {
-            string fileName = Path.Combine(Configuration["ContentDir"], path);
+            string fileName = Path.Combine(this.Configuration["ContentDir"], path);
             return await File.ReadAllBytesAsync(fileName);
         }
 
         public async Task<string> SaveDataUrlAsFileAsync(string directory, string dataUrl)
         {
-            string trueDirectory = Path.Combine(Configuration["ContentDir"], directory);
+            string trueDirectory = Path.Combine(this.Configuration["ContentDir"], directory);
 
             if (!Directory.Exists(trueDirectory))
             {
@@ -48,7 +45,6 @@ namespace Business
 
             string dataString = dataUrl.Substring(dataUrl.IndexOf(",") + 1);
             string hash = dataString.HashString("MD5");
-
 
             byte[] data = Convert.FromBase64String(dataString);
 

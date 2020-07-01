@@ -5,7 +5,8 @@ import { Theme, WithStyles, createStyles, withStyles, Box } from "@material-ui/c
 import { BaseComponent } from "../../components/base-component";
 import clsx from "clsx";
 
-const styles = (style: Theme) => createStyles({
+// eslint-disable-next-line
+const styles = (theme: Theme) => createStyles({
     root: {
 
     }

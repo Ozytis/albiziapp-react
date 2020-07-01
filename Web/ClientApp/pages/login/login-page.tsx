@@ -1,13 +1,14 @@
+import { Avatar, Button, Card, Container, createStyles, Theme, Typography, WithStyles, withStyles } from "@material-ui/core";
+import { Lock } from "@material-ui/icons";
+import clsx from "clsx";
 import React from "react";
-import { createStyles, WithStyles, Theme, withTheme, withStyles, Container, Avatar, Button, Typography, Card } from "@material-ui/core";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
 import { BaseComponent } from "../../components/base-component";
-import { t } from "../../services/translation-service";
-import clsx from "clsx";
-import { Lock } from "@material-ui/icons";
 import { AuthenticationApi } from "../../services/authentication-service";
+import { t } from "../../services/translation-service";
 
+// eslint-disable-next-line
 const styles = (theme: Theme) => createStyles({
     root: {
         backgroundImage: "url('./img/ash.jpg')",

@@ -1,15 +1,14 @@
 import React from 'react';
-import { RouteConfig } from 'react-router-config';
 import { PageConfig } from '../pages/page-config';
-import { ShortcutType } from './shortcuts-menu';
 
+// eslint-disable-next-line
 export interface IAppContext {
     routes: PageConfig[];
     menuIsOpen: boolean;
     updateContext: (property: string, value: any) => Promise<void>;
     title?: string;
-    addContextUpdateListener?: (listener :() => Promise<void>) => Promise<void>;
-    removeContextUpdateListener?: (listener :() => Promise<void>) => Promise<void>;
+    addContextUpdateListener?: (listener: () => Promise<void>) => Promise<void>;
+    removeContextUpdateListener?: (listener: () => Promise<void>) => Promise<void>;
 }
 
 export const AppContext = React.createContext({} as IAppContext);
@@ -25,6 +24,7 @@ export function withAppContext(Component) {
     };
 }
 
+// eslint-disable-next-line
 export interface IPropsWithAppContext {
     appContext: IAppContext;
 }

@@ -1,14 +1,15 @@
+import { Box, createStyles, Theme, WithStyles, withStyles } from "@material-ui/core";
+import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
-import { Theme, WithStyles, createStyles, withStyles, Box } from "@material-ui/core";
 import { BaseComponent } from "../../components/base-component";
-import clsx from "clsx";
-import { ObservationsApi } from "../../services/observation";
 import { AuthenticationApi } from "../../services/authentication-service";
-import { ArboretumCard } from "./arboretum-card";
 import { SpeciesModel } from "../../services/generated/species-model";
+import { ObservationsApi } from "../../services/observation";
+import { ArboretumCard } from "./arboretum-card";
 
+// eslint-disable-next-line
 const styles = (style: Theme) => createStyles({
     root: {
 

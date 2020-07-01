@@ -4,7 +4,6 @@ using Ozytis.Common.Core.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Business
@@ -36,7 +35,7 @@ namespace Business
 
         public async Task<Observation> CreateObservationAsync(Observation newObservation, string[] pictures)
         {
-            using var session = await this.DataContext.MongoClient.StartSessionAsync();
+            using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
 
             try
             {
@@ -60,10 +59,10 @@ namespace Business
                     newObservation.TelaBotanicaTaxon = species?.TelaBotanicaTaxon;
                 }
 
-                var user = await this.UsersManager.SelectAsync(newObservation.UserId);
+                User user = await this.UsersManager.SelectAsync(newObservation.UserId);
                 newObservation.AuthorName = user?.Name;
 
-                foreach (var picture in pictures.Where(p => !string.IsNullOrEmpty(p)))
+                foreach (string picture in pictures.Where(p => !string.IsNullOrEmpty(p)))
                 {
                     newObservation.Pictures.Add(await this.FileManager.SaveDataUrlAsFileAsync("observations", picture));
                 }
@@ -85,7 +84,7 @@ namespace Business
 
         public async Task DeleteObservationAsync(string observationId, string currentUserId)
         {
-            var observation = await this.DataContext.Observations.Find(o => o.Id == observationId).FirstOrDefaultAsync();
+            Observation observation = await this.DataContext.Observations.Find(o => o.Id == observationId).FirstOrDefaultAsync();
 
             if (observation.UserId != currentUserId)
             {

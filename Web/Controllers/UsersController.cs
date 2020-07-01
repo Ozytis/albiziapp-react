@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Api;
+﻿using Api;
 using Business;
 using Entities;
 using Microsoft.AspNetCore.Authentication;
@@ -13,6 +8,10 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Ozytis.Common.Core.Utilities;
 using Ozytis.Common.Core.Web.WebApi;
+using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Web.Mappings;
 
 namespace Web.Controllers
@@ -50,12 +49,6 @@ namespace Web.Controllers
                 new Claim("FullName", model.UserName)
             };
 
-            // Pas de gestion des rôles pour le moment
-            // foreach (string role in await this.UsersManager.GetRoleNamesAsync(user))
-            // {
-            //    claims.Add(new Claim(ClaimTypes.Role, role));
-            // }           
-
             ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
             AuthenticationProperties authProperties = new AuthenticationProperties
@@ -67,11 +60,9 @@ namespace Web.Controllers
             this.HttpContext.Response.Cookies.Append(
                 CookieRequestCultureProvider.DefaultCookieName,
                 CookieRequestCultureProvider.MakeCookieValue(new RequestCulture("fr-FR")),
-                new CookieOptions { Path = this.Url.Content("~/") }
-            );
+                new CookieOptions { Path = this.Url.Content("~/") });
 
             await this.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
-
 
             return user?.ToUserApiModel();
         }

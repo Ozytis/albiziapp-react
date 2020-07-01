@@ -1,8 +1,8 @@
-import React from "react";
-import { BaseComponent } from "./base-component";
-import { Modal, DialogActions, Dialog, createStyles, Theme, WithStyles, withStyles, Button, Icon, InputLabel } from "@material-ui/core";
+import { Button, createStyles, Dialog, DialogActions, Icon, InputLabel, Theme, WithStyles, withStyles } from "@material-ui/core";
 import clsx from "clsx";
+import React from "react";
 import { t } from "../services/translation-service";
+import { BaseComponent } from "./base-component";
 
 const styles = (theme: Theme) => createStyles({
     input: {
@@ -45,11 +45,7 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
     constructor(props: PhotoFormItemProps) {
         super(props, "photo-form-item", new PhotoFormItemState());
     }
-
-    async componentDidMount() {
-
-    }
-
+    
     async takeSnapShot() {
         await this.setState({ showSnapShot: true });
         const context = this.videoCanvas.getContext("2d");
@@ -67,16 +63,13 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
         else {
             await this.setState({ showCamera: true, showSnapShot: false });
 
-            var mediaConfig = { video: true };
-            var errBack = function (e) {
-                console.log('An error has occurred!', e)
-            };
+            const mediaConfig = { video: true };            
 
             // Put video listeners into place
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 const stream = await navigator.mediaDevices.getUserMedia(mediaConfig);
 
-                //video.src = window.URL.createObjectURL(stream);
+                // video.src = window.URL.createObjectURL(stream);
                 this.video.srcObject = stream;
                 this.video.play();
 
@@ -92,7 +85,7 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
 
         this.setState({ loading: true }).then(() => {
 
-            var reader = new FileReader();
+            const reader = new FileReader();
 
             reader.onloadend = result => {
                 this.setState({ loading: false, showSourceSelection: false });

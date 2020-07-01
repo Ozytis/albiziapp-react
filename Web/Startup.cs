@@ -1,18 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Business;
 using Entities;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Hosting;
+using System.IO;
 using Web.Utilities;
 
 namespace Web
@@ -21,7 +15,7 @@ namespace Web
     {
         public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
-            Configuration = configuration;
+            this.Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
@@ -37,9 +31,8 @@ namespace Web
 
             this.ConfigureSecurity(services);
 
-
             MongoDBConfig config = new MongoDBConfig();
-            Configuration.Bind("MongoDB", config);
+            this.Configuration.Bind("MongoDB", config);
 
             services.AddScoped<Entities.DataContext>((_) => new DataContext(config));
             services.AddScoped<UsersManager>();
@@ -54,7 +47,6 @@ namespace Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-
             app.UseDeveloperExceptionPage();
 
             app.UseDefaultFiles();
@@ -83,7 +75,6 @@ namespace Web
             {
                 endpoints.MapControllers();
                 endpoints.MapFallbackToFile("index.html");
-
             });
         }
 

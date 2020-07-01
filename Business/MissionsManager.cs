@@ -1,10 +1,8 @@
 ﻿using Entities;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using MongoDB.Driver;
 
 namespace Business
 {
@@ -22,7 +20,7 @@ namespace Business
 
         public async Task CreateMissionAsync(Mission mission)
         {
-            using var session = await this.DataContext.MongoClient.StartSessionAsync();
+            using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
 
             try
             {

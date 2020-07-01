@@ -1,5 +1,4 @@
 ﻿using MongoDB.Driver;
-using System;
 
 namespace Entities
 {
@@ -18,7 +17,7 @@ namespace Entities
                 return this.Database.GetCollection<User>("Users");
             }
         }
-        
+
         public IMongoCollection<Observation> Observations
         {
             get
@@ -26,23 +25,23 @@ namespace Entities
                 return this.Database.GetCollection<Observation>("Observations");
             }
         }
-        
+
         public IMongoCollection<Species> Species
         {
             get
             {
                 return this.Database.GetCollection<Species>("Species");
             }
-        }  
-        
+        }
+
         public IMongoCollection<FloraKey> FloraKeys
         {
             get
             {
                 return this.Database.GetCollection<FloraKey>("FloraKeys");
             }
-        } 
-        
+        }
+
         public IMongoCollection<Activity> Activities
         {
             get

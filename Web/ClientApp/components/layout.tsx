@@ -1,14 +1,14 @@
+import { AppBar, createStyles, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Theme, Toolbar, Typography, withStyles, WithStyles } from "@material-ui/core";
+import { AccountTree, Book, Eco, ExitToApp } from "@material-ui/icons";
+import clsx from "clsx";
 import React from "react";
+import { RouteComponentProps, withRouter } from "react-router";
+import { matchRoutes, renderRoutes } from "react-router-config";
+import { AuthenticationApi } from "../services/authentication-service";
+import { t } from "../services/translation-service";
 import { IPropsWithAppContext, withAppContext } from "./app-context";
 import { BaseComponent } from "./base-component";
-import { withStyles, createStyles, Theme, WithStyles, Drawer, AppBar, Toolbar, IconButton, Button, Typography, List, ListItem, ListItemText, ListItemIcon, Icon } from "@material-ui/core";
-import { Menu, Eco, ExitToApp, Home, Map, Book, AccountTree } from "@material-ui/icons";
-import { withRouter, RouteComponentProps, Route, Switch } from "react-router";
-import { renderRoutes, matchRoutes } from "react-router-config";
-import { t } from "../services/translation-service";
-import { AuthenticationApi } from "../services/authentication-service";
 import { ShortcutsMenu } from "./shortcuts-menu";
-import clsx from "clsx";
 
 const styles = (theme: Theme) => createStyles({
     menu: {
@@ -97,11 +97,7 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
     render() {
 
         const { classes, appContext } = this.props;
-        const routes = this.props.appContext.routes.map(route => route.routes).reduce((a, b) => a.concat(b), []);
-
-        const matched = matchRoutes(routes, this.props.location.pathname);
-
-        console.log("layout", routes);
+        const routes = this.props.appContext.routes.map(route => route.routes).reduce((a, b) => a.concat(b), []);        
 
         return (
             <div className={classes.root}>

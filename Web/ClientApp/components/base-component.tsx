@@ -1,4 +1,4 @@
-﻿import * as React from "react";
+﻿import React from "react";
 
 export class BaseComponent<P, S> extends React.Component<P, S> {
 
@@ -30,6 +30,8 @@ export class BaseComponent<P, S> extends React.Component<P, S> {
     checkStatePropertyFalse(propertyName: string) {
 
         return new Promise((resolve, reject) => {
+
+            // eslint-disable-next-line
             if (!!this.state[propertyName]) {
                 reject();
             }
@@ -51,34 +53,35 @@ export class BaseComponent<P, S> extends React.Component<P, S> {
 
         state = state || {} as S;
 
-        var persistedState = localStorage.getItem(this.getStorageKey());
+        const persistedState = localStorage.getItem(this.getStorageKey());
 
         if (persistedState) {
 
-            var persisted = JSON.parse(persistedState);
+            const persisted = JSON.parse(persistedState);
 
-            for (var prop in persisted) {
+            for (const prop in persisted) {
                 state[prop] = persisted[prop];
             }
         }
 
+        // eslint-disable-next-line
         this.state = state;
     }
 
     setPersistantState<K extends keyof S>(state: ((prevState: Readonly<S>, props: P) => (Pick<S, K> | S)) | (Pick<S, K> | S)) {
-        return new Promise<any>((resolve, reject) => {
+        return new Promise<any>((resolve) => {
 
             super.setState(state, () => {
 
-                var existingJSON = localStorage.getItem(this.getStorageKey());
-                var existing: any = {};
+                const existingJSON = localStorage.getItem(this.getStorageKey());
+                let existing: any = {};
 
 
                 if (existingJSON) {
                     existing = JSON.parse(existingJSON);
                 }
 
-                for (var prop in (state as any)) {
+                for (const prop in (state as any)) {
                     existing[prop] = state[prop];
                 }
 
@@ -93,7 +96,8 @@ export class BaseComponent<P, S> extends React.Component<P, S> {
 export class BaseComponentWithModel<P, S extends { model: any }> extends BaseComponent<P, S>
 {
     async updateModel(property: string, value: any) {
-        var model = this.state.model;
+
+        const model = this.state.model;
 
         if (!model) {
             throw "pas de model défini pour l'état de ce composant";

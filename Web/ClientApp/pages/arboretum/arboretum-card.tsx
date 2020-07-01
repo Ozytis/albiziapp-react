@@ -3,10 +3,10 @@ import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
 import { BaseComponent } from "../../components/base-component";
+import { SpeciesInfoModel } from "../../services/generated/species-info-model";
 import { SpeciesModel } from "../../services/generated/species-model";
 import { SpeciesApi } from "../../services/species-service";
 import { t } from "../../services/translation-service";
-import { SpeciesInfoModel } from "../../services/generated/species-info-model";
 
 
 const style = (theme: Theme) => createStyles({

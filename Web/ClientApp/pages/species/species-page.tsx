@@ -1,14 +1,14 @@
-import React from "react";
-import { Theme, createStyles, WithStyles, Box, withStyles, Typography, TextField, List, ListSubheader, ListItem, ListItemText, ListItemIcon } from "@material-ui/core";
-import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
-import { RouteComponentProps, withRouter } from "react-router";
-import { BaseComponent } from "../../components/base-component";
-import clsx from "clsx";
-import { t } from "../../services/translation-service";
-import { SpeciesApi } from "../../services/species-service";
-import { TreeGenusModel } from "../../services/models/tree-species";
+import { Box, createStyles, List, ListItem, ListItemIcon, ListItemText, ListSubheader, TextField, Theme, WithStyles, withStyles } from "@material-ui/core";
 import { ChevronRight } from "@material-ui/icons";
+import clsx from "clsx";
+import React from "react";
+import { RouteComponentProps, withRouter } from "react-router";
+import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
+import { BaseComponent } from "../../components/base-component";
 import { SpeciesModel } from "../../services/generated/species-model";
+import { TreeGenusModel } from "../../services/models/tree-species";
+import { SpeciesApi } from "../../services/species-service";
+import { t } from "../../services/translation-service";
 
 const styles = (theme: Theme) => createStyles({
     root: {

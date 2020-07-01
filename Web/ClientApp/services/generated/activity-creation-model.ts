@@ -5,10 +5,10 @@
 //----------------------
 
 export class ActivityCreationModel {
-    options: string[] = null;
     instructions = "";
-    type = 0;
+    options: string[] = null;
     order: number = null;
+    type = 0;
 
     validate() {
         const errors: string[] = [];

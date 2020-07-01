@@ -4,10 +4,8 @@ using Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Ozytis.Common.Core.Web.WebApi;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Web.Mappings;
 
@@ -27,7 +25,7 @@ namespace Web.Controllers
         [HttpGet("")]
         public async Task<IEnumerable<ObservationModel>> GetAllObservations()
         {
-            var observations = await this.ObservationsManager.GetAllObservations();
+            IEnumerable<Observation> observations = await this.ObservationsManager.GetAllObservations();
 
             return observations.Select(observation => observation.ToObservationModel());
         }
@@ -35,7 +33,7 @@ namespace Web.Controllers
         [HttpGet("/api/users/{userId}/observations")]
         public async Task<IEnumerable<ObservationModel>> GetUserObservations(string userId)
         {
-            var observations = await this.ObservationsManager.GetUserObservations(userId);
+            IEnumerable<Observation> observations = await this.ObservationsManager.GetUserObservations(userId);
             return observations.Select(observation => observation.ToObservationModel());
         }
 
@@ -43,15 +41,17 @@ namespace Web.Controllers
         [HandleBusinessException, ValidateModel]
         public async Task CreateObservationAysnc([FromBody] ObservationCreationModel model)
         {
-            await this.ObservationsManager.CreateObservationAsync(new Observation
-            {
-                Genus = model.Genus,
-                Confident = model.IsConfident,
-                Latitude = model.Latitude,
-                Longitude = model.Longitude,
-                SpeciesName = model.Species,
-                UserId = this.User.Identity.Name,
-            }, new[] { model.Image });
+            await this.ObservationsManager.CreateObservationAsync(
+                new Observation
+                {
+                    Genus = model.Genus,
+                    Confident = model.IsConfident,
+                    Latitude = model.Latitude,
+                    Longitude = model.Longitude,
+                    SpeciesName = model.Species,
+                    UserId = this.User.Identity.Name,
+                },
+                new[] { model.Image });
         }
 
         [HttpDelete("{observationId}")]

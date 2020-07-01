@@ -1,10 +1,6 @@
 ﻿using Api;
 using Entities;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Web.Mappings
 {
@@ -21,7 +17,6 @@ namespace Web.Mappings
                 SpeciesName = species.SpeciesName,
                 TelaBotanicaTaxon = species.TelaBotanicaTaxon,
                 FloraKeyValues = species.FloraKeyValues.ToArray(),
-
             };
         }
 
@@ -38,7 +33,7 @@ namespace Web.Mappings
                 Description = species.Description,
                 Habitat = species.Habitat,
                 Pictures = species.Pictures?.ToArray(),
-                Usage = species.Usage,                
+                Usage = species.Usage,
             };
         }
 

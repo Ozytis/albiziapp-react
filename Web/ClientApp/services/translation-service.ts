@@ -54,9 +54,9 @@ class TranslationService {
             return value;
         }
 
-        var word = this.dic[value];
+        const word = this.dic[value];
 
-        if (word == null) {
+        if (word === null) {
             //console.warn("pas traduit du tout", value);
             return this.format(value, args);
         }
@@ -74,14 +74,14 @@ class TranslationService {
 
         console.log("this.languageChangeHandlers", this, this.languageChangeHandlers);
 
-        for (var handler of this.languageChangeHandlers) {
+        for (const handler of this.languageChangeHandlers) {
             await handler(language);
         }
     }
 
     format = function (input: string, ...args: any[]) {
         return input.replace(/{(\d+)}/g, function (match, number) {
-            return typeof args[number] != 'undefined' ? args[number] : match;
+            return typeof args[number] !== 'undefined' ? args[number] : match;
         });
     }
 

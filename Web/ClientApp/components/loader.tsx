@@ -1,9 +1,6 @@
-import React from "react";
 import clsx from 'clsx';
+import React from "react";
 import { BaseComponent } from "./base-component";
-import LinearProgress from '@material-ui/core/LinearProgress';
-
-
 
 interface LoaderProps {
     loaderIcon?: string;

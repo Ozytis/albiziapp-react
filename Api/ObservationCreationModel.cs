@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Api
+﻿namespace Api
 {
     [GenerateClass]
     public class ObservationCreationModel
@@ -16,7 +10,7 @@ namespace Api
         public string Image { get; set; }
 
         public string Species { get; set; }
-        
+
         public decimal Latitude { get; set; }
 
         public decimal Longitude { get; set; }

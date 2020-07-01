@@ -1,12 +1,12 @@
-import React from "react";
-import { Theme, createStyles, WithStyles, Box, withStyles, Typography, Card, Icon, Tabs, Tab } from "@material-ui/core";
-import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
-import { RouteComponentProps, withRouter } from "react-router";
-import { BaseComponent } from "../../components/base-component";
+import { Box, createStyles, Icon, Tab, Tabs, Theme, WithStyles, withStyles } from "@material-ui/core";
 import clsx from "clsx";
-import { t } from "../../services/translation-service";
-import { SpeciesApi } from "../../services/species-service";
+import React from "react";
+import { RouteComponentProps, withRouter } from "react-router";
+import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
+import { BaseComponent } from "../../components/base-component";
 import { SpeciesInfoModel } from "../../services/generated/species-info-model";
+import { SpeciesApi } from "../../services/species-service";
+import { t } from "../../services/translation-service";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -116,7 +116,8 @@ class SpeciesInfoPageComponent extends BaseComponent<SpeciesPageProps, SpeciesPa
         const absX = Math.abs(distance);
 
         if (absX > 50) {
-            var index = this.state.currentPictureIndex;
+
+            let index = this.state.currentPictureIndex;
             index += distance < 0 ? 1 : -1;
 
             if (index > 0) {
@@ -135,7 +136,7 @@ class SpeciesInfoPageComponent extends BaseComponent<SpeciesPageProps, SpeciesPa
         this.swipeStartLocation = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     }
 
-    swipeStartLocation: { x: number, y: number; } = null;
+    swipeStartLocation: { x: number; y: number } = null;
 
     renderText(text: string) {
         if (!text) {
@@ -208,17 +209,19 @@ class SpeciesInfoPageComponent extends BaseComponent<SpeciesPageProps, SpeciesPa
 
                     {
                         this.state.currentTab === "description" &&
-
+                        // eslint-disable-next-line
                         <div dangerouslySetInnerHTML={{ __html: this.renderText(info.description) }} className={clsx(classes.text)} />
                     }
 
                     {
                         this.state.currentTab === "usage" &&
+                        // eslint-disable-next-line
                         <div dangerouslySetInnerHTML={{ __html: this.renderText(info.usage) }} className={clsx(classes.text)} />
                     }
 
                     {
                         this.state.currentTab === "habitat" &&
+                        // eslint-disable-next-line
                         <div dangerouslySetInnerHTML={{ __html: this.renderText(info.habitat) }} className={clsx(classes.text)} />
                     }
 

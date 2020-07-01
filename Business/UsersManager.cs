@@ -1,6 +1,5 @@
 ﻿using Entities;
 using MongoDB.Driver;
-using System;
 using System.Threading.Tasks;
 
 namespace Business
@@ -9,7 +8,6 @@ namespace Business
     {
         public UsersManager(DataContext dataContext) : base(dataContext)
         {
-
         }
 
         public async Task<User> SelectAsync(string osmId)

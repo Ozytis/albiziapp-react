@@ -1,5 +1,4 @@
-﻿// https://marcstan.net/blog/2018/08/11/Return-401-unauthorized-from-an-api-in-.Net-Core/
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Net;
 using System.Threading.Tasks;

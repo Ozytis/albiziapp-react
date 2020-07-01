@@ -3,7 +3,7 @@ import { BaseComponent } from "./base-component";
 import { t } from "../services/translation-service";
 
 
-export class ErrorSummary extends BaseComponent<{ errors: string[], globalText?: string }, {}>{
+export class ErrorSummary extends BaseComponent<{ errors: string[]; globalText?: string }, {}>{
     constructor(props?: { errors: string[] }) {
         super(props);
     }
@@ -17,7 +17,7 @@ export class ErrorSummary extends BaseComponent<{ errors: string[], globalText?:
         return (
             <div
                 className="validation-summary-errors alert alert-danger rounded-0"
-                style={{ background: "linear-gradient(to right,#ff6600 0%, #ff8800 100%)"}}
+                style={{ background: "linear-gradient(to right,#ff6600 0%, #ff8800 100%)" }}
                 role="alert">
 
                 {this.props.globalText || t.__("Veuillez corriger les erreurs suivantes :")}

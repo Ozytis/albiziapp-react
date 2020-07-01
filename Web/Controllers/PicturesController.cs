@@ -1,10 +1,6 @@
 ﻿using Business;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Web.Controllers
@@ -19,11 +15,11 @@ namespace Web.Controllers
 
         public FileManager FileManager { get; }
 
-        [HttpGet()]
+        [HttpGet]
         public async Task<IActionResult> GetPicture(string path)
         {
             byte[] data = await this.FileManager.ReadFileAsync(path);
-            return File(data, "image/" + Path.GetExtension(path).Substring(0));
+            return this.File(data, "image/" + Path.GetExtension(path).Substring(0));
         }
     }
 }

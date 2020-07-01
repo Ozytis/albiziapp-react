@@ -1,6 +1,4 @@
-import React from "react";
-import { createMuiTheme, MuiThemeProvider, Theme } from '@material-ui/core/styles';
-import createPalette from "@material-ui/core/styles/createPalette";
+import { createMuiTheme, Theme } from '@material-ui/core/styles';
 
 export const Themes: { [id: string]: Theme } = {
     "main": createMuiTheme({

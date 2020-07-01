@@ -8,13 +8,7 @@ class MissionsService extends BaseService {
         const remote = await this.get<MissionModel[]>("missions");
 
         return remote;
-
-    }
-
-    async createNewMission() {
-       
-
-    }
+    }   
 }
 
 export const MissionsApi = new MissionsService();

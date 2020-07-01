@@ -1,10 +1,9 @@
+import { Container, createStyles, Theme, WithStyles, withStyles } from "@material-ui/core";
+import clsx from "clsx";
 import React from "react";
-import { createStyles, WithStyles, Theme, withTheme, withStyles, Container, Typography, Tabs, Tab, BottomNavigation } from "@material-ui/core";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
 import { BaseComponent } from "../../components/base-component";
-import { t } from "../../services/translation-service";
-import clsx from "clsx";
 import { ActivitiesTab } from "./activities-tab";
 
 

@@ -3,10 +3,8 @@ using Business;
 using Entities;
 using Microsoft.AspNetCore.Mvc;
 using Ozytis.Common.Core.Web.WebApi;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Web.Mappings;
 
@@ -21,15 +19,6 @@ namespace Web.Controllers
         }
 
         public MissionsManager MissionsManager { get; }
-
-        [HttpGet]
-        public async Task<IEnumerable<MissionModel>> GetAllMissions()
-        {
-            IEnumerable<Mission> missions = await this.MissionsManager
-                .GetAllMissionsAsync();
-
-            return missions.OrderBy(m => m.Order).Select(mission => mission.ToMissionModel());
-        }
 
         [HttpPost]
         [HandleBusinessException, ValidateModel]
@@ -46,6 +35,15 @@ namespace Web.Controllers
                     Type = (ActivityType)a.Type
                 }).ToList()
             });
+        }
+
+        [HttpGet]
+        public async Task<IEnumerable<MissionModel>> GetAllMissions()
+        {
+            IEnumerable<Mission> missions = await this.MissionsManager
+                .GetAllMissionsAsync();
+
+            return missions.OrderBy(m => m.Order).Select(mission => mission.ToMissionModel());
         }
     }
 }

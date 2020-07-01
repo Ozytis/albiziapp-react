@@ -1,10 +1,7 @@
 ﻿using Entities;
 using MongoDB.Driver;
-using Ozytis.Common.Core.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Business
@@ -36,13 +33,13 @@ namespace Business
 
         public async Task CreateOrUpdateSpeciesAsync(Species species, string[] pictures)
         {
-            using var session = await this.DataContext.MongoClient.StartSessionAsync();
+            using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
 
             try
             {
                 session.StartTransaction();
 
-                var existing = await this.SelectByTaxonAsync(species.TelaBotanicaTaxon);
+                Species existing = await this.SelectByTaxonAsync(species.TelaBotanicaTaxon);
 
                 if (existing != null)
                 {
@@ -53,7 +50,7 @@ namespace Business
 
                 species.Pictures = new List<string>();
 
-                foreach (var picture in pictures)
+                foreach (string picture in pictures)
                 {
                     species.Pictures.Add(await this.FileManager.SaveDataUrlAsFileAsync("species", picture));
                 }
@@ -76,14 +73,14 @@ namespace Business
 
         public async Task CreateOrUpdateFloraKeyAsync(FloraKey floraKey, FloraKeyValue[] floraKeyValues)
         {
-            using var session = await this.DataContext.MongoClient.StartSessionAsync();
+            using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
 
             try
             {
                 session.StartTransaction();
                 await session.CommitTransactionAsync();
 
-                var existing = this.DataContext.FloraKeys.Find(key => key.NormalizedForm == floraKey.NormalizedForm);
+                IFindFluent<FloraKey, FloraKey> existing = this.DataContext.FloraKeys.Find(key => key.NormalizedForm == floraKey.NormalizedForm);
 
                 if (existing != null)
                 {
@@ -93,7 +90,7 @@ namespace Business
                 floraKey.Id = Guid.NewGuid().ToString("N");
                 floraKey.Values = new List<FloraKeyValue>();
 
-                foreach (var value in floraKeyValues)
+                foreach (FloraKeyValue value in floraKeyValues)
                 {
                     value.FloraKeyId = floraKey.Id;
                     floraKey.Values.Add(value);

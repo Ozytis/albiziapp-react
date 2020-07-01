@@ -1,8 +1,8 @@
-import * as React from "react";
-import * as ReactDOM from "react-dom";
-import { BaseComponent } from "./base-component";
-import { Button, Modal, Icon, Dialog, DialogActions, DialogContent, DialogContentText } from "@material-ui/core";
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, Icon } from "@material-ui/core";
+import React from "react";
+import ReactDOM from "react-dom";
 import { t } from "../services/translation-service";
+import { BaseComponent } from "./base-component";
 
 interface ConfirmComponentProps {
 
@@ -13,6 +13,12 @@ class ConfirmComponentState {
     text = "";
     onValidate: (value: boolean) => Promise<any>;
 }
+
+let confirmComponent: ConfirmComponent;
+
+const confirmHolder = document.createElement("div");
+confirmHolder.id = "confirm-holder";
+document.body.appendChild(confirmHolder);
 
 export class ConfirmComponent extends BaseComponent<ConfirmComponentProps, ConfirmComponentState>{
     constructor(props: ConfirmComponentProps) {
@@ -60,13 +66,6 @@ export class ConfirmComponent extends BaseComponent<ConfirmComponentProps, Confi
         )
     }
 }
-
-let confirmComponent: ConfirmComponent;
-
-
-const confirmHolder = document.createElement("div");
-confirmHolder.id = "confirm-holder";
-document.body.appendChild(confirmHolder);
 
 ReactDOM.render(<ConfirmComponent ref={c => confirmComponent = c} />, confirmHolder);
 

@@ -1,16 +1,16 @@
+import { Box, createStyles, Icon, Theme, WithStyles, withStyles } from "@material-ui/core";
+import clsx from "clsx";
+import { LatLng } from "leaflet";
 import React from "react";
+import { Circle, Map, Marker, TileLayer } from "react-leaflet";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
-import { Theme, WithStyles, createStyles, withStyles, Box, Icon } from "@material-ui/core";
 import { BaseComponent } from "../../components/base-component";
-import clsx from "clsx";
-import { Map, Marker, TileLayer, Circle } from "react-leaflet";
-import { LatLng } from "leaflet";
-import { ObservationsApi } from "../../services/observation";
 import { Confirm } from "../../components/confirm";
-import { t } from "../../services/translation-service";
 import { AuthenticationApi } from "../../services/authentication-service";
 import { ObservationModel } from "../../services/generated/observation-model";
+import { ObservationsApi } from "../../services/observation";
+import { t } from "../../services/translation-service";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -46,13 +46,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         super(props, "MapPage", new MapPageState());
     }
 
-    async componentDidMount() {
-
-        let options = {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-        };
+    async componentDidMount() {       
 
         navigator.geolocation.getCurrentPosition(async (position) => {
 
@@ -114,8 +108,6 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         } else {
             return "//wxs.ign.fr/1zk8fc4pfkpf90fgudlyn643/geoportail/wmts?service=WMTS&request=GetTile&version=1.0.0&tilematrixset=PM&tilematrix={z}&tilecol={x}&tilerow={y}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&format=image/jpeg&style=normal";
         }
-
-        //"//wxs.ign.fr/1zk8fc4pfkpf90fgudlyn643/geoportail/wmts?service=WMTS&request=GetTile&version=1.0.0&tilematrixset=PM&tilematrix={z}&tilecol={x}&tilerow={y}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&format=image/jpeg&style=normal"
     }
 
     getColor(observation: ObservationModel) {
@@ -151,7 +143,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         />
 
                         {
-                            this.state.observations && this.state.observations.map((observation, index) => {
+                            this.state.observations && this.state.observations.map((observation) => {
                                 return (
                                     <Circle
                                         key={observation.id}

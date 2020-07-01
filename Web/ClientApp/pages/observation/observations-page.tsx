@@ -9,7 +9,8 @@ import { AuthenticationApi } from "../../services/authentication-service";
 import { ChevronRight } from "@material-ui/icons";
 import { ObservationModel } from "../../services/generated/observation-model";
 
-const styles = (style: Theme) => createStyles({
+// eslint-disable-next-line
+const styles = (theme: Theme) => createStyles({
     root: {
 
     }

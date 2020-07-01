@@ -1,17 +1,17 @@
-import React, { useState } from "react";
-import { MuiThemeProvider, Button } from "@material-ui/core";
-import { Router, HashRouter, BrowserRouter } from "react-router-dom";
-import { Themes } from "./components/theme";
+import { MuiThemeProvider } from "@material-ui/core";
+import { BrowserHistory, createBrowserHistory } from 'history';
+import React from "react";
 import ReactDOM from "react-dom";
-import { createBrowserHistory, BrowserHistory } from 'history';
-import { AuthenticationApi } from "./services/authentication-service";
-import { Authorization } from "./components/authorization";
+import { BrowserRouter } from "react-router-dom";
 import { AppContext, IAppContext } from "./components/app-context";
-import { Layout } from "./components/layout";
+import { Authorization } from "./components/authorization";
 import { BaseComponent } from "./components/base-component";
+import { Layout } from "./components/layout";
+import { Themes } from "./components/theme";
 import routes from './routes-config';
-import { SpeciesApi } from "./services/species-service";
+import { AuthenticationApi } from "./services/authentication-service";
 import { ObservationsApi } from "./services/observation";
+import { SpeciesApi } from "./services/species-service";
 
 interface AppProps {
     theme?: string;
@@ -19,7 +19,7 @@ interface AppProps {
 
 class AppState {
 
-    constructor(context:IAppContext){
+    constructor(context: IAppContext) {
         this.context = context;
     }
 
@@ -29,7 +29,7 @@ class AppState {
 class App extends BaseComponent<AppProps, AppState>{
 
     constructor(props: AppProps) {
-        
+
         super(props, "app", new AppState({
             updateContext: (property: string, value: any) => this.updateContext(property, value),
             menuIsOpen: false,
@@ -67,7 +67,7 @@ class App extends BaseComponent<AppProps, AppState>{
         context[property] = value;
         await this.setState({ context: context });
 
-        for (var listener of this.contextUpdateListeners) {
+        for (const listener of this.contextUpdateListeners) {
             await listener(context, oldContext);
         }
     }
@@ -80,9 +80,9 @@ class App extends BaseComponent<AppProps, AppState>{
     render() {
 
         const props = this.props;
-        let { context } = this.state;
+        const { context } = this.state;
 
-        console.log("routes", routes);       
+        console.log("routes", routes);
 
         return (
             <MuiThemeProvider
