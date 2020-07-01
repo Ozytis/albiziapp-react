@@ -1,0 +1,41 @@
+version: '3.4'
+volumes:
+    web_data:
+        external: true
+services:    
+  mongodb:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+        - type: volume
+          source : web_data
+          target: /data/db:rw
+  web:
+    image: ${DOCKER_REGISTRY-}web
+    environment:    
+        - MongoDB__Host=mongodb
+        - MongoDB__User=
+        - MongoDB__Password=
+        - MongoDB__Port=27017
+        - ContentDir=/albiziapp
+    restart: always
+    build:
+      context: .
+      dockerfile: Web/Dockerfile
+    depends_on:
+        - mongodb
+    ports:
+        - 5100:80
+        - 5102:443  
+    volumes:
+      - web_data:/albiziapp:rw
+  mongoclient:
+    image: mongoclient/mongoclient
+    environment:
+        - MONGOCLIENT_DEFAULT_CONNECTION_URL=mongodb://mongodb
+    depends_on:
+        - mongodb
+    ports:
+        - 5103:3000

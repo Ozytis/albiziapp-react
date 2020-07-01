@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>0affd6b6-92d6-47fa-999d-7d67184c9a28</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\js\global.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\css\global.min.css" />
+    <None Include="wwwroot\css\global.scss" />
+    <None Include="wwwroot\favicon.ico" />
+    <None Include="wwwroot\favicon.png" />
+    <None Include="wwwroot\img\ash.jpg" />
+    <None Include="wwwroot\js\global.js" />
+    <None Include="wwwroot\js\index.js" />
+    <None Include="wwwroot\land.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Api\Api.csproj" />
+    <ProjectReference Include="..\Business\Business.csproj" />
+    <ProjectReference Include="..\Entities\Entities.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.5" />
+    <PackageReference Include="Ozytis.Common.Core.Storage" Version="1.0.0" />
+    <PackageReference Include="Ozytis.Common.Core.Utilities" Version="1.5.0" />
+    <PackageReference Include="Ozytis.Common.Core.Web.WebApi" Version="1.2.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\index.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ClientApp\services\generated\" />
+  </ItemGroup>
+
+</Project>
