@@ -13,7 +13,7 @@ namespace Entities
 
         public string Name { get; set; }
 
-        public int ExploraitonPoints { get; set; }
+        public int ExplorationPoints { get; set; }
 
         public int KnowledgePoints { get; set; }
 
@@ -22,5 +22,7 @@ namespace Entities
         public string CurrentMissionId { get; set; }
 
         public string[] Trophies { get; set; }
+
+        public string[] Titles { get; set; }
     }
 }

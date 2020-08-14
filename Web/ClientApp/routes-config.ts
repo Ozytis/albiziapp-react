@@ -10,6 +10,7 @@ import { PageConfig } from "./pages/page-config";
 import { ScorePageConfig } from "./pages/score/score-page-config";
 import { SpeciesInfoPageConfig } from "./pages/species/species-info-page-config";
 import { SpeciesPageConfig } from "./pages/species/species-page-config";
+import { EditObservationPageConfig } from "./pages/observation/edit-observation-page-config";
 
 const routesConfig = [
     HomePageConfig,
@@ -22,7 +23,8 @@ const routesConfig = [
     SpeciesPageConfig,
     ArboretumPageConfig,
     ObservationsPageConfig,
-    DeterminationKeyPageConfig
+    DeterminationKeyPageConfig,
+    EditObservationPageConfig
 ]
 
 class RouteUtils {

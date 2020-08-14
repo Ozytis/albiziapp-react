@@ -11,7 +11,9 @@ namespace Entities
 
         public string[] Options { get; set; }
 
-        public string Instructions { get; set; }
+        public ActivityInstruction Instructions { get; set; }
+
+        public ActivityEndCondition[] EndConditions { get; set; }
 
         public int Order { get; set; }
     }

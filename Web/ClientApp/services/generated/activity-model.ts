@@ -4,10 +4,13 @@
 // </auto-generated>
 //----------------------
 
+import { ActivityInstructionModel } from "./activity-instruction-model";
+import { ActivityEndConditionModel } from "./activity-end-condition-model";
 export interface ActivityModel {
     options: string[];
-    instructions: string;
+    instructions: ActivityInstructionModel;
     id: string;
     type: number;
     order: number;
+    endConditions: ActivityEndConditionModel[];
 }

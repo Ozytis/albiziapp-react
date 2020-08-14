@@ -114,7 +114,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         if (observation.isIdentified) {
             return "blue";
         }
-        return AuthenticationApi.user.id === observation.userId ? "red" : "lime";
+        return AuthenticationApi.user.osmId === observation.userId ? "red" : "lime";
     }
 
     render() {

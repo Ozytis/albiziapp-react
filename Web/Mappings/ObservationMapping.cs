@@ -22,7 +22,8 @@ namespace Web.Mappings
                 SpeciesName = observation.SpeciesName,
                 UserId = observation.UserId,
                 IsIdentified = observation.IsIdentified,
-                AuthorName = observation.AuthorName
+                AuthorName = observation.AuthorName,
+                Validations = observation.Validations?.Select(x => x.OsmId).ToArray()
             };
         }
     }

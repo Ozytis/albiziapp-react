@@ -29,7 +29,8 @@ namespace Web.Controllers
                 Order = model.Order,
                 Activities = model.Activities?.Select(a => new Activity
                 {
-                    Instructions = a.Instructions,
+                    Instructions = new ActivityInstruction { Long = a.Instructions.Long, Short = a.Instructions.Short },
+                    EndConditions =  a.EndConditions.Select(x =>  new ActivityEndCondition {  ActionCount = x.ActionCount,Time = x.Time}).ToArray(),                    
                     Options = a.Options,
                     Order = a.Order,
                     Type = (ActivityType)a.Type

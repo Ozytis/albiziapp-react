@@ -58,6 +58,22 @@ namespace Entities
             }
         }
 
+        public IMongoCollection<Trophy> Trophies
+        {
+            get
+            {
+                return this.Database.GetCollection<Trophy>("Trophies");
+            }
+        }
+
+        public IMongoCollection<Title> Titles
+        {
+            get
+            {
+                return this.Database.GetCollection<Title>("Titles");
+            }
+        }
+
         public MongoClient MongoClient { get; }
 
         public IMongoDatabase Database { get; }

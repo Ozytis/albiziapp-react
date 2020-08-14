@@ -13,6 +13,10 @@ import { ObservationModel } from "../../services/generated/observation-model";
 const styles = (theme: Theme) => createStyles({
     root: {
 
+    },
+    card: {
+        //color: theme.palette.common.white,
+        cursor: "pointer",        
     }
 });
 
@@ -71,7 +75,7 @@ class ObservationsPageComponent extends BaseComponent<ObservationsPageProps, Obs
                     {
                         this.state.observations && this.state.observations.map(observation => {
                             return (
-                                <ListItem key={observation.id} onClick={()=>this.goTo(`observation/${observation.id}`)}>
+                                <ListItem key={observation.id} onClick={() => this.goTo(`observation/${observation.id}`)} className={clsx(classes.card)}>
                                     <ListItemText primary={observation.speciesName} secondary={new Date(observation.date).toLocaleString()} />
                                     <ListItemIcon>
                                         <ChevronRight />

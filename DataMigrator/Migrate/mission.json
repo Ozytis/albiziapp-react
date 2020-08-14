@@ -1,0 +1,67 @@
+﻿[
+  {
+    "type": 1,
+    "option": "NONE",
+    "instructions": {
+      "long": "Faites 5 relevés",
+      "short": "Faites relevés"
+    },
+    "endConditions": [
+      {
+        "actionCount": 5
+      }
+    ]
+  },
+  {
+    "type": 1,
+    "option": "DIFFERENTGENUS",
+    "instructions": {
+      "long": "Faites 3 relevés de genres différents",
+      "short": "Faites relevés genres différents"
+    },
+    "endConditions": [
+      {
+        "actionCount": 3
+      }
+    ]
+  },
+  {
+    "type": 2,
+    "option": "NONE",
+    "instructions": {
+      "long": "Vérifiez 3 relevés d'un autre utilisateur (cercle vert clignotant)",
+      "short": "Vérifiez relevés"
+    },
+    "endConditions": [
+      {
+        "actionCount": 3
+      }
+    ]
+  },
+  {
+    "type": 4,
+    "option": "NONE",
+    "instructions": {
+      "long": "Identifiez 3 relevés d'expert (cercle bleu clignotant)",
+      "short": "Identifiez relevés experts"
+    },
+    "endConditions": [
+      {
+        "actionCount": 3
+      }
+    ]
+  },
+  {
+    "type": 1,
+    "option": "NONE",
+    "instructions": {
+      "long": "Faites un maximum de relevé en un temps limite",
+      "short": "Faites relevés"
+    },
+    "endConditions": [
+      {
+        "time": 900
+      }
+    ]
+  }
+  ]

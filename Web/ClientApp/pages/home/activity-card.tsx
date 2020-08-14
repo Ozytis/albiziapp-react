@@ -62,7 +62,7 @@ class ActivityCardComponent extends BaseComponent<ActivityCardProps, ActivityCar
                         <Box width="100%" >
 
                             <Typography variant="caption" component="h2">
-                                {t.__(activity.instructions)}
+                                {t.__(activity.instructions.long)}
                             </Typography>
 
                             {

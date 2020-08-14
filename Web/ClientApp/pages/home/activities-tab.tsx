@@ -10,6 +10,7 @@ interface ActivitiesTabProps extends RouteComponentProps {
 }
 
 class ActivitiesTabState {
+    missions: MissionModel[];
     currentMission: MissionModel;
     currentActivityIndex = 0;
 }
@@ -22,7 +23,7 @@ class ActivitiesTabComponent extends BaseComponent<ActivitiesTabProps, Activitie
 
     async refreshMissions() {
         const missions = await MissionsApi.getMissions();
-
+        console.log(missions)
         /** TODO : récupérer l'activité actuelle */
         await this.setPersistantState({ currentMission: missions[0], currentActivityIndex: 0 });
     }

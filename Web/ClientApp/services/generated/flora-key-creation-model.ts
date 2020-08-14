@@ -13,7 +13,7 @@ export class FloraKeyCreationModel {
     values : FloraKeyValueCreationModel[] = null;
 
     validate() {
-        const errors: string[] = [];
+        let errors: string[] = [];
 
         return errors;
     }

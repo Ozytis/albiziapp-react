@@ -6,14 +6,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Migrate\mission.json" />
     <None Remove="Migrate\species.json" />
+    <None Remove="Migrate\title.json" />
+    <None Remove="Migrate\trophy.json" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Migrate\mission.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Migrate\species.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Migrate\title.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Migrate\trophy.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 

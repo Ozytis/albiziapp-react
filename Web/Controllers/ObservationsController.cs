@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Ozytis.Common.Core.Web.WebApi;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Web.Mappings;
@@ -15,10 +16,13 @@ namespace Web.Controllers
     [Authorize]
     public class ObservationsController : ControllerBase
     {
-        public ObservationsController(ObservationsManager observationsManager)
+        public ObservationsController(ObservationsManager observationsManager, FileManager fileManager)
         {
             this.ObservationsManager = observationsManager;
+            this.FileManager = fileManager;
         }
+
+        public FileManager FileManager { get; }
 
         public ObservationsManager ObservationsManager { get; }
 
@@ -54,11 +58,51 @@ namespace Web.Controllers
                 new[] { model.Image });
         }
 
+        [HttpGet("picture/{observationId}")]
+        [HandleBusinessException, ValidateModel]
+        public async Task<IActionResult> GetFirstObservationPicture(string observationId)
+        {
+            var observation = await this.ObservationsManager.GetUserObservationbyId(observationId);
+            if (observation.Pictures.Any())
+            {
+                var picturePath = observation.Pictures.FirstOrDefault();
+                byte[] data = await this.FileManager.ReadFileAsync(picturePath);
+                return this.File(data, "image/" + Path.GetExtension(picturePath).Substring(0));
+            }
+
+            return null;
+        }
+
+        [HttpPut]
+        [HandleBusinessException, ValidateModel]
+        public async Task EditObservationAysnc([FromBody] ObservationEditionModel model)
+        {
+            await this.ObservationsManager.EditObservationAsync(
+                new Observation
+                {
+                    Id = model.Id,
+                    Genus = model.Genus,
+                    Confident = model.IsConfident,
+                    Latitude = model.Latitude,
+                    Longitude = model.Longitude,
+                    SpeciesName = model.Species,
+                    UserId = this.User.Identity.Name,
+                },
+                new[] { model.Image }, this.User.Identity.Name);
+        }
+
         [HttpDelete("{observationId}")]
         [HandleBusinessException, ValidateModel]
         public async Task DeleteObservationAsync(string observationId)
         {
             await this.ObservationsManager.DeleteObservationAsync(observationId, this.User.Identity.Name);
+        }
+
+        [HttpPut("validate/{observationId}")]
+        [HandleBusinessException, ValidateModel]
+        public async Task ValidateObservationAsync(string observationId)
+        {
+            await this.ObservationsManager.VaidateObservationAsync(observationId, this.User.Identity.Name);
         }
     }
 }

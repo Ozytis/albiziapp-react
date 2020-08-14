@@ -55,8 +55,7 @@ class TranslationService {
         }
 
         const word = this.dic[value];
-
-        if (word === null) {
+        if (word == null) {
             //console.warn("pas traduit du tout", value);
             return this.format(value, args);
         }
@@ -80,6 +79,7 @@ class TranslationService {
     }
 
     format = function (input: string, ...args: any[]) {
+        if (input == null) return "";
         return input.replace(/{(\d+)}/g, function (match, number) {
             return typeof args[number] !== 'undefined' ? args[number] : match;
         });

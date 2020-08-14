@@ -6,7 +6,9 @@ namespace Api
     public class ActivityCreationModel
     {
         [Required(ErrorMessage = "Veuillez fournir les instructions de l'activité")]
-        public string Instructions { get; set; }
+        public ActivityInstructionModel Instructions { get; set; }
+
+        public ActivityEndConditionModel[] EndConditions { get; set; }
 
         public string[] Options { get; set; }
 

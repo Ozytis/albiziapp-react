@@ -1,10 +1,12 @@
 ﻿using Api;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace DataMigrator
@@ -19,6 +21,9 @@ namespace DataMigrator
                 Console.WriteLine("Veuillez choisir une opération :");
                 Console.WriteLine("\t1 - Essences d'arbres");
                 Console.WriteLine("\t2 - Clef de détermination");
+                Console.WriteLine("\t3 - Mission");
+                Console.WriteLine("\t4 - Trophée");
+                Console.WriteLine("\t5 - Titre");
                 Console.WriteLine("\tQ - Quitter");
 
                 ConsoleKeyInfo key = Console.ReadKey();
@@ -32,6 +37,15 @@ namespace DataMigrator
                         break;
                     case '2':
                         await MigrateFloraKeysAsync();
+                        break;
+                    case '3':
+                        await MigrateMission();
+                        break;
+                    case '4':
+                        await MigrateTrophies();
+                        break;
+                    case '5':
+                        await MigrateTitles();
                         break;
                     case 'q':
                         return;
@@ -76,7 +90,7 @@ namespace DataMigrator
                     {
                         webClient.Headers.Add("Accept", "text/json");
                         webClient.Headers.Add("Content-Type", "text/json");
-                        await webClient.UploadDataTaskAsync(new Uri("https://localhost:5001/api/species"), Encoding.UTF8.GetBytes(json));
+                        await webClient.UploadDataTaskAsync(new Uri("https://localhost:44345/api/species"), Encoding.UTF8.GetBytes(json));
                     }
 
                     Console.WriteLine(species.Common + " " + species.Common_genus);
@@ -119,10 +133,103 @@ namespace DataMigrator
                     {
                         webClient.Headers.Add("Accept", "text/json");
                         webClient.Headers.Add("Content-Type", "text/json");
-                        await webClient.UploadDataTaskAsync(new Uri("https://localhost:5001/api/species/keys"), Encoding.UTF8.GetBytes(json));
+                        await webClient.UploadDataTaskAsync(new Uri("https://localhost:44345/api/species/keys"), Encoding.UTF8.GetBytes(json));
                     }
 
                     Console.WriteLine(key.Prop.NormalizedForm);
+                }
+            }
+        }
+
+        private static async Task MigrateMission()
+        {
+            using StreamReader reader = new StreamReader(Path.Combine(Directory.GetCurrentDirectory(), "Migrate", "mission.json"));
+            using JsonTextReader jsonReader = new JsonTextReader(reader);
+
+            jsonReader.SupportMultipleContent = true;
+
+            JsonSerializer serializer = new JsonSerializer();
+
+            int order = 1;
+            List<ActivityCreationModel> activities = new List<ActivityCreationModel>();
+            while (jsonReader.Read())
+            {
+                if (jsonReader.TokenType == JsonToken.StartObject)
+                {
+
+                    ActivityCreationModel key = serializer.Deserialize<ActivityCreationModel>(jsonReader);
+                    key.Order = order;
+                    activities.Add(key);
+                    order++;
+                    Console.WriteLine(key.Instructions.Long);
+                }
+            }
+            MissionCreationModel model = new MissionCreationModel();
+            model.Order = 1;
+            model.Activities = activities.ToArray();
+            string json = JsonConvert.SerializeObject(model);
+            using (WebClient webClient = new WebClient())
+            {
+                webClient.Headers.Add("Accept", "text/json");
+                webClient.Headers.Add("Content-Type", "text/json");
+                await webClient.UploadDataTaskAsync(new Uri("https://localhost:44345/api/missions"), Encoding.UTF8.GetBytes(json));
+            }
+        }
+
+        private static async Task MigrateTrophies()
+        {
+            using StreamReader reader = new StreamReader(Path.Combine(Directory.GetCurrentDirectory(), "Migrate", "trophy.json"));
+            using JsonTextReader jsonReader = new JsonTextReader(reader);
+
+            jsonReader.SupportMultipleContent = true;
+
+            JsonSerializer serializer = new JsonSerializer();
+
+
+
+            while (jsonReader.Read())
+            {
+                if (jsonReader.TokenType == JsonToken.StartObject)
+                {
+
+                    TrophyCreationModel trophy = serializer.Deserialize<TrophyCreationModel>(jsonReader);
+                    Console.WriteLine(JsonConvert.SerializeObject(trophy));
+                    string json = JsonConvert.SerializeObject(trophy);
+                    using (WebClient webClient = new WebClient())
+                    {
+                        webClient.Headers.Add("Accept", "text/json");
+                        webClient.Headers.Add("Content-Type", "text/json");
+                        await webClient.UploadDataTaskAsync(new Uri("https://localhost:44345/api/trophies"), Encoding.UTF8.GetBytes(json));
+                    }
+                }
+            }
+        }
+
+        private static async Task MigrateTitles()
+        {
+            using StreamReader reader = new StreamReader(Path.Combine(Directory.GetCurrentDirectory(), "Migrate", "title.json"));
+            using JsonTextReader jsonReader = new JsonTextReader(reader);
+
+            jsonReader.SupportMultipleContent = true;
+
+            JsonSerializer serializer = new JsonSerializer();
+
+
+
+            while (jsonReader.Read())
+            {
+                if (jsonReader.TokenType == JsonToken.StartObject)
+                {
+
+                    TitleCreationModel title = serializer.Deserialize<TitleCreationModel>(jsonReader);
+                    Console.WriteLine(JsonConvert.SerializeObject(title));
+                    string json = JsonConvert.SerializeObject(title);
+                    using (WebClient webClient = new WebClient())
+                    {
+                        webClient.Headers.Add("Accept", "text/json");
+                        webClient.Headers.Add("Content-Type", "text/json");
+                        await webClient.UploadDataTaskAsync(new Uri("https://localhost:44345/api/titles"), Encoding.UTF8.GetBytes(json));
+                    }
                 }
             }
         }

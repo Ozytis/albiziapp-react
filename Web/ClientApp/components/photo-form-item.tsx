@@ -20,9 +20,14 @@ const styles = (theme: Theme) => createStyles({
         margin: `${theme.spacing(1)}px auto`,
         width: "33vh",
         height: "25vh",
+        backgroundRepeat: "no-repeat",
+        backgroundSize : "contain"
     },
     label: {
         margin: theme.spacing(1),
+    },
+    cameraIcon: {
+        color: theme.palette.common.black
     }
 })
 
@@ -50,8 +55,14 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
         await this.setState({ showSnapShot: true });
         const context = this.videoCanvas.getContext("2d");
 
-        console.log(this.video.videoWidth, this.video.videoHeight, this.video);
-        context.drawImage(this.video, 0, 0, this.video.videoWidth, this.video.videoHeight);
+        var w, h, ratio : number;
+        ratio = this.video.videoWidth / this.video.videoHeight;
+        w = this.video.videoWidth - 100;
+        h = parseInt(w as any / ratio as any, 10);
+        this.videoCanvas.width = w;
+        this.videoCanvas.height = h;
+        context.drawImage(this.video, 0, 0, w, h);
+
         await this.setState({ showCamera: false });
     }
 
@@ -64,15 +75,23 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
             await this.setState({ showCamera: true, showSnapShot: false });
 
             const mediaConfig = { video: true };            
+            try {
+                // Put video listeners into place
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    const stream = await navigator.mediaDevices.getUserMedia(mediaConfig);
 
-            // Put video listeners into place
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                const stream = await navigator.mediaDevices.getUserMedia(mediaConfig);
+                    // video.src = window.URL.createObjectURL(stream);
+                    this.video.srcObject = stream;
+                    this.video.play();
 
-                // video.src = window.URL.createObjectURL(stream);
-                this.video.srcObject = stream;
-                this.video.play();
-
+                }
+            } catch (e) {
+                if (e.name == "NotAllowedError") {
+                    alert(t.__("Vous n'avez pas autorisé à utiliser la caméra"));
+                } else {
+                    alert(t.__("Une erreur s'est produite."));
+                }
+                console.log(e);
             }
         }
     }
@@ -101,7 +120,6 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
     video: HTMLVideoElement;
 
     openModale = () => {
-        console.log('open photo modale');
         this.setState({ showSourceSelection: true });
     }
 
@@ -125,7 +143,7 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
                     }
                     {
                         <div className="photo-form-item-button text-center m-2" onClick={() => this.openModale()}>
-                            <Icon className="fas fa-camera" />
+                            <Icon className={clsx("fas fa-camera",this.props.classes.cameraIcon)} />
                             <input type="file" accept="image/*"
                                 capture="camera" ref={input => this.control = input} onChange={(e) => this.onFileSelected(e.target.files)}
                                 className={clsx(this.props.classes.input)}

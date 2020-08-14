@@ -3,6 +3,7 @@ import { LatLng } from "leaflet";
 import { SpeciesApi } from "./species-service";
 import { ObservationModel } from "./generated/observation-model";
 import { ObservationCreationModel } from "./generated/observation-creation-model";
+import { ObservationEditionModel } from "./generated/observation-edition-model";
 
 class ObservationsService extends BaseService {
 
@@ -10,18 +11,7 @@ class ObservationsService extends BaseService {
         return await this.get<ObservationModel[]>(`users/${userId}/observations`);
     }
 
-    async deleteObservation(observation: ObservationModel) {
-
-        const result = await this.delete(`observations/${observation.id}`);
-
-        if (!result.success) {
-            return result;
-        }
-
-        this.loadObservations();
-
-        return result;
-    }
+ 
 
     constructor() {
         super();
@@ -52,6 +42,43 @@ class ObservationsService extends BaseService {
 
         return result;
     }
+
+    async editObservation(observation: ObservationEditionModel) {
+
+        const result = await this.put<ObservationModel>(`observations`, observation);
+
+        if (result.success) {
+            this.loadObservations();
+        }
+
+        return result;
+    }
+
+    async deleteObservation(observation: ObservationModel) {
+
+        const result = await this.delete(`observations/${observation.id}`);
+
+        if (!result.success) {
+            return result;
+        }
+
+        this.loadObservations();
+
+        return result;
+    }
+    async ValidateObservation(observation: ObservationModel) {
+
+        const result = await this.put(`observations/validate/${observation.id}`,null);
+
+        if (!result.success) {
+            return result;
+        }
+
+        this.loadObservations();
+
+        return result;
+    }
+
 
     private observations: ObservationModel[];
 

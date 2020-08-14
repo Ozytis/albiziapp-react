@@ -20,7 +20,6 @@ import { t } from "../../services/translation-service";
 
 const styles = (theme: Theme) => createStyles({
     root: {
-        backgroundColor: theme.palette.primary.main,
         minHeight: "calc(100vh - 120px)",
         maxHeight: "calc(100vh - 120px)",
         overflowY: "auto",

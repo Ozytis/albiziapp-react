@@ -31,5 +31,7 @@ namespace Api
         public string AuthorName { get; set; }
 
         public bool IsIdentified { get; set; }
+
+        public string [] Validations { get; set; }
     }
 }

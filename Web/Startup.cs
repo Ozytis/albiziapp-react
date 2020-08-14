@@ -40,6 +40,8 @@ namespace Web
             services.AddScoped<ObservationsManager>();
             services.AddScoped<SpeciesManager>();
             services.AddScoped<FileManager>();
+            services.AddScoped<TrophiesManager>();
+            services.AddScoped<TitlesManager>();
 
             services.AddSwaggerGen();
         }

@@ -4,16 +4,19 @@
 // </auto-generated>
 //----------------------
 
+import { ActivityInstructionModel } from "./activity-instruction-model";
+import { ActivityEndConditionModel } from "./activity-end-condition-model";
 export class ActivityCreationModel {
-    instructions = "";
+    instructions : ActivityInstructionModel = null;
+    endConditions : ActivityEndConditionModel[] = null;
     options: string[] = null;
     order: number = null;
     type = 0;
 
     validate() {
-        const errors: string[] = [];
+        let errors: string[] = [];
 
-        if (!this.instructions || this.instructions.length < 1) {
+        if (!this.instructions) {
             errors.push("Veuillez fournir les instructions de l'activité");
         }
 

@@ -9,7 +9,7 @@ export class FloraKeyValueCreationModel {
     normalizedForm = "";
 
     validate() {
-        const errors: string[] = [];
+        let errors: string[] = [];
 
         return errors;
     }

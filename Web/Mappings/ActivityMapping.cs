@@ -10,7 +10,7 @@ namespace Web.Mappings
             return new ActivityModel
             {
                 Id = activity.Id,
-                Instructions = activity.Instructions,
+                Instructions = new ActivityInstructionModel { Long = activity.Instructions.Long, Short = activity.Instructions.Short },
                 Options = activity.Options,
                 Type = (int)activity.Type,
                 Order = activity.Order
