@@ -9,15 +9,18 @@ namespace Business
 {
     public class UsersManager : BaseManager
     {
-        public UsersManager(DataContext dataContext, TitlesManager titlesManager, MissionsManager missionsManager) : base(dataContext)
+        public UsersManager(DataContext dataContext, TitlesManager titlesManager, MissionsManager missionsManager,TrophiesManager trophiesManager) : base(dataContext)
         {
             this.TitlesManager = titlesManager;
             this.MissionsManager = missionsManager;
+            this.TrophiesManager = trophiesManager;
         }
 
         public TitlesManager TitlesManager { get; }
 
         public MissionsManager MissionsManager { get; }
+
+        public TrophiesManager TrophiesManager { get; }
 
         public async Task<User> SelectAsync(string osmId)
         {
@@ -97,6 +100,30 @@ namespace Business
             }
         }
 
+        public async Task AddTrophies(string userId)
+        {
+            var user = await this.SelectAsync(userId);
+            if (user == null)
+            {
+                return;
+            }
+            var trophies = await this.TrophiesManager.GetTrophiesBySuccessActivitiesCount(user.MissionCompleted?.Sum(x => x.ActivitiesCompleted.Count()) ?? 0);
+            if (trophies != null && trophies.Count > 0)
+            {
+                if (user.Trophies == null)
+                {
+                    user.Trophies = trophies.Select(t => t.Id).ToArray();
+                }
+                else
+                {
+                    var trophiesToAdd = trophies.Where(t => !user.Trophies.Any(ut => ut == t.Id)).Select(t => t.Id).ToList();
+                    user.Trophies = user.Trophies.Concat(trophiesToAdd).ToArray();
+                }
+                await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
+            }
+
+        }
+
         public async Task UpdateMissionProgression(string userId, MissionProgress progress)
         {
             var user = await this.SelectAsync(userId);
@@ -145,8 +172,6 @@ namespace Business
             missionComplete.ActivitiesCompleted = activities.ToArray();
 
 
-
-            //user.MissionProgress = progress;
             if (missionsCompleted == null)
             {
                 missionsCompleted = new List<MissionComplete>();
@@ -181,7 +206,6 @@ namespace Business
             }
             else
             {
-                //mission.Activities.
                 var nextActivity = mission.Activities.FirstOrDefault(a => a.Order > mission.Activities.First(x => x.Id == user.MissionProgress.ActivityId).Order);
                 if (nextActivity != null)
                 {
@@ -192,9 +216,10 @@ namespace Business
                     user.MissionProgress = null;
                 }
             }
-            //update next activity
 
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
+
+            await this.AddTrophies(user.OsmId);
         }
 
         public async Task StartFirstMission(string userId)

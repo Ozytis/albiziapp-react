@@ -31,7 +31,11 @@ namespace Business
                 await session.AbortTransactionAsync();
                 throw;
             }
+        }
 
+        public async Task<List<Trophy>> GetTrophiesBySuccessActivitiesCount(int count)
+        {
+            return await this.DataContext.Trophies.Find(s => s.CountSuccessFullActivities >= count).ToListAsync();
         }
     }
 }
