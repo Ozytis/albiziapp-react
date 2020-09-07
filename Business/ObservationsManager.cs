@@ -1,4 +1,5 @@
-﻿using Entities;
+﻿using Business.MissionValidation;
+using Entities;
 using MongoDB.Bson.IO;
 using MongoDB.Driver;
 using Ozytis.Common.Core.Utilities;
@@ -15,14 +16,16 @@ namespace Business
         public FileManager FileManager { get; }
         public SpeciesManager SpeciesManager { get; }
         public UsersManager UsersManager { get; }
+        public IServiceProvider ServiceProvider { get; }
 
         public ObservationsManager(DataContext dataContext, FileManager fileManager,
-            SpeciesManager speciesManager, UsersManager usersManager)
+            SpeciesManager speciesManager, UsersManager usersManager,IServiceProvider serviceProvider)
             : base(dataContext)
         {
             this.FileManager = fileManager;
             this.SpeciesManager = speciesManager;
             this.UsersManager = usersManager;
+            this.ServiceProvider = serviceProvider;
         }
 
         public async Task<IEnumerable<Observation>> GetAllObservations()
@@ -33,6 +36,18 @@ namespace Business
         public async Task<IEnumerable<Observation>> GetUserObservations(string userId)
         {
             return await this.DataContext.Observations.Find(obs => obs.UserId == userId).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Observation>> GetUserVerifyObservations(string userId)
+        {
+            return await this.DataContext.Observations.Find(obs => obs.History[0] != null && obs.History[0].UserId != userId &&
+            (obs.UserId == userId || obs.History != null && obs.History.Skip(1).Any(x => x.UserId == userId))).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Observation>> GetUserIdentifyObservations(string userId)
+        {
+            return await this.DataContext.Observations.Find(obs => obs.IsIdentified &&  obs.History[0] != null && obs.History[0].UserId != userId &&
+            (obs.UserId == userId || obs.History != null && obs.History.Skip(1).Any(x => x.UserId == userId))).ToListAsync();
         }
 
         public async Task<Observation> GetUserObservationbyId(string observationId)
@@ -49,7 +64,7 @@ namespace Business
                 session.StartTransaction();
                 newObservation.Id = Guid.NewGuid().ToString("N");
                 newObservation.Pictures = new List<string>();
-
+                newObservation.Date = DateTime.UtcNow;
                 if (!string.IsNullOrEmpty(newObservation.Genus))
                 {
                     newObservation.CommonGenus = (await this.SpeciesManager
@@ -80,7 +95,8 @@ namespace Business
 
                 //await this.CalculateExploraitonPointsForNewObservation(newObservation);
                 // TODO: mettre à jour la mission
-
+                var validator = await MissionValidator.GetValidatorFromActivity(this.ServiceProvider, user);
+                await validator.UpdateActivityProgression();
             }
             catch
             {
@@ -91,7 +107,7 @@ namespace Business
             return newObservation;
         }
 
-        public async Task AddExploraitonPointsForNewObservation(Observation observation)
+        public async Task AddExplorationPointsForNewObservation(Observation observation)
         {
             // 1 point pour l'ajout d'un relevé
             var pointsToAdd = 1;
@@ -118,9 +134,10 @@ namespace Business
             await this.UsersManager.AddTitles(observation.UserId);
         }
 
-        public async Task CalculateKnowledegePointsForNewObersvation(Observation newObservation, Observation compareObservation)
+        public async Task CalculateKnowledegePoints(Observation newObservation)
         {
             int pointsToAdd = 0;
+            Observation compareObservation = (Observation) newObservation.History.LastOrDefault();
             if (compareObservation.IsIdentified)
             {
                 if (newObservation.Genus == compareObservation.Genus)
@@ -132,12 +149,102 @@ namespace Business
                 {
                     pointsToAdd = +15;
                 }
+                await this.UsersManager.AddKnowledegePoints(newObservation.UserId, pointsToAdd);
+                await this.UsersManager.AddTitles(newObservation.UserId);
             }
+            else
+            {
+                if (compareObservation.History != null && compareObservation.History.Count == 1)
+                {
+                    if (newObservation.Genus == compareObservation.Genus)
+                    {
+                        pointsToAdd = +4;
+                    }
 
-            await this.UsersManager.AddKnowledegePoints(newObservation.UserId, pointsToAdd);
-            await this.UsersManager.AddTitles(newObservation.UserId);
+                    if (newObservation.SpeciesName == compareObservation.SpeciesName || newObservation.CommonSpeciesName == compareObservation.CommonSpeciesName)
+                    {
+                        pointsToAdd = +2;
+                    }
+                    if (newObservation.Confident)
+                    {
+                        pointsToAdd += 2;
+                    }
+                    await this.UsersManager.AddKnowledegePoints(compareObservation.UserId, pointsToAdd);
+                    await this.UsersManager.AddTitles(compareObservation.UserId);
+                }
+                else
+                {
+                    if (compareObservation.History != null && compareObservation.History.Count > 1)
+                    {
+                        int pointsToAddP0 = 0;
+                        int pointsToAddPb = 0;
+                        bool speciesPnToP0Isvalid = false;
+                        bool genusPnToP0Isvalid = false;
+
+                        // compareObservation = Pb
+                        // compareHistory = P0
+                        // newObservation = Pn
+                        foreach (var compareHistory in compareObservation.History)
+                        {
+
+
+                            if (newObservation.Genus == compareHistory.Genus)
+                            {
+                                pointsToAddP0 =+ (!speciesPnToP0Isvalid ? 4 : 2);
+                                genusPnToP0Isvalid = true;
+                            }
+                      
+
+                            if (newObservation.SpeciesName == compareHistory.SpeciesName || newObservation.CommonSpeciesName == compareHistory.CommonSpeciesName)
+                            {
+                                pointsToAddP0 =+(!speciesPnToP0Isvalid ? 2 : 1);
+                                speciesPnToP0Isvalid = true;
+                            }
+
+                            if (newObservation.Confident)
+                            {
+                                pointsToAddP0 += 2;
+                            }
+
+                            await this.UsersManager.AddKnowledegePoints(compareHistory.UserId, pointsToAddP0);
+                            await this.UsersManager.AddTitles(compareHistory.UserId);
+                        }
+
+                        if (newObservation.Genus == compareObservation.Genus)
+                        {
+                            if (genusPnToP0Isvalid)
+                            {
+                                pointsToAddPb = +4;
+                            }
+                            else
+                            {
+                                pointsToAddPb = +2;
+                            }
+                        }
+
+                        if (newObservation.SpeciesName == compareObservation.SpeciesName || newObservation.CommonSpeciesName == compareObservation.CommonSpeciesName)
+                        {
+                            if (speciesPnToP0Isvalid)
+                            {
+                                pointsToAddPb = +2;
+                            }
+                            else
+                            {
+                                pointsToAddPb = +2;
+                            }
+                        }
+                        if (newObservation.Confident)
+                        {
+                            pointsToAddPb += 2;
+                        }
+
+                        await this.UsersManager.AddKnowledegePoints(compareObservation.UserId, pointsToAddPb);
+                        await this.UsersManager.AddTitles(compareObservation.UserId);
+                    }
+                  
+                }
+            }
         }
-
 
 
         public async Task<Observation> EditObservationAsync(Observation editObservation, string[] pictures, string currentUserId)
@@ -148,11 +255,11 @@ namespace Business
             {
                 throw new BusinessException("Ce relevé n'existe pas");
             }
-           
+
             try
             {
                 session.StartTransaction();
-                if(existingObservation.History == null)
+                if (existingObservation.History == null)
                 {
                     existingObservation.History = new List<BaseObservation>();
                 }
@@ -160,8 +267,8 @@ namespace Business
                 if (existingObservation.UserId != currentUserId)
                 {
                     existingObservation.History.Add(this.CloneObservationToBaseObservation(existingObservation));
-                }             
-                
+                }
+
 
                 if (!string.IsNullOrEmpty(editObservation.Genus))
                 {
@@ -183,9 +290,10 @@ namespace Business
                 existingObservation.UserId = editObservation.UserId;
                 existingObservation.AuthorName = user?.Name;
                 existingObservation.Confident = editObservation.Confident;
+                existingObservation.UpdateDate = DateTime.UtcNow;
                 if (pictures.Length > 0)
                 {
-                    if(existingObservation.Pictures == null)
+                    if (existingObservation.Pictures == null)
                     {
                         existingObservation.Pictures = new List<string>();
                     }
@@ -201,15 +309,12 @@ namespace Business
                     }
                 }
 
-
-               
-
-
-
                 await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
-
-                // TODO: calculer les points
+                
+                await this.CalculateKnowledegePoints(existingObservation);
                 // TODO: mettre à jour la mission
+                var validator = await MissionValidator.GetValidatorFromActivity(this.ServiceProvider, user);
+                await validator.UpdateActivityProgression();
 
             }
             catch
@@ -237,23 +342,22 @@ namespace Business
         {
             Observation observation = await this.DataContext.Observations.Find(o => o.Id == observationId).FirstOrDefaultAsync();
 
-            if(observation.Validations == null)
+            if (observation.Validations == null)
             {
-                observation.Validations = new List<ObervationValidation>();
+                observation.Validations = new List<ObservationValidation>();
             }
 
-            if(!observation.Validations.Any(v => v.OsmId == currentUserId))
+            if (!observation.Validations.Any(v => v.OsmId == currentUserId))
             {
-                observation.Validations.Add(new ObervationValidation { OsmId = currentUserId, ValidationDate = DateTime.UtcNow });
+                observation.Validations.Add(new ObservationValidation { OsmId = currentUserId, ValidationDate = DateTime.UtcNow });
                 await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == observation.Id, observation);
             }
-   
         }
 
 
         private BaseObservation CloneObservationToBaseObservation(Observation observation)
         {
-            var serializeObservation =  JsonSerializer.Serialize<BaseObservation>(observation);
+            var serializeObservation = JsonSerializer.Serialize<BaseObservation>(observation);
             return JsonSerializer.Deserialize<BaseObservation>(serializeObservation);
         }
     }

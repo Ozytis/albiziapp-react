@@ -51,7 +51,7 @@ class ActivityCardComponent extends BaseComponent<ActivityCardProps, ActivityCar
         const { activity, classes, completion, active } = this.props;
 
         const ActivityIcon = this.getIcon();
-
+        console.log(activity);
         return (
             <Card className={clsx(classes.card, !active && classes.disabledCard)} variant="elevation" raised={active}>
                 <CardContent>
@@ -66,14 +66,14 @@ class ActivityCardComponent extends BaseComponent<ActivityCardProps, ActivityCar
                             </Typography>
 
                             {
-                                activity.options && activity.options.length > 0 && activity.options[0] &&
+                               active && activity.endConditions && activity.endConditions.length > 0 && activity.endConditions[0] && activity.endConditions[0].actionCount != null &&
                                 <Box display="flex" alignItems="center" mt={1}>
                                     <Box width="100%" mr={1}>
-                                        <LinearProgress variant="determinate" value={Math.round(completion * 100 / parseInt(activity.options[0], 10))} />
+                                        <LinearProgress variant="determinate" value={Math.round(completion * 100 / activity.endConditions[0].actionCount)} />
                                     </Box>
                                     <Box minWidth={35}>
                                         <Typography variant="body2" color={active ? "textSecondary" : "inherit"}>
-                                            {completion} / {activity.options[0]}
+                                            {completion} / {activity.endConditions[0].actionCount}
                                         </Typography>
                                     </Box>
                                 </Box>

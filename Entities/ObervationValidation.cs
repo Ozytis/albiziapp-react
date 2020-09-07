@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Entities
 {
-    public class ObervationValidation
+    public class ObservationValidation
     {
         public string OsmId { get; set; }
 

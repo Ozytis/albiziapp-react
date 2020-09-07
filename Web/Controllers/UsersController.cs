@@ -3,6 +3,7 @@ using Business;
 using Entities;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
@@ -63,8 +64,21 @@ namespace Web.Controllers
                 new CookieOptions { Path = this.Url.Content("~/") });
 
             await this.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
+            if(user != null)
+            {
+                await this.UsersManager.StartFirstMission(model.OsmId);
+            }
 
             return user?.ToUserApiModel();
         }
+
+        [HttpGet("missions")]
+        [Authorize]
+        public async Task<MissionUserModel> GetMissionsForUser()
+        {
+            var user = await this.UsersManager.SelectAsync(this.User.Identity.Name);
+
+            return user?.ToMissionUserModel();
+        } 
     }
 }

@@ -15,7 +15,7 @@ namespace Entities
 
         public List<string> Pictures { get; set; }
 
-        public List<ObervationValidation> Validations { get; set; }
+        public List<ObservationValidation> Validations { get; set; }
 
         public List<BaseObservation> History { get; set; }
     }

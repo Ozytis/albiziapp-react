@@ -17,12 +17,13 @@ namespace Entities
 
         public int KnowledgePoints { get; set; }
 
-        public string CurrentActivityId { get; set; }
+        public MissionProgress MissionProgress { get; set; }
 
-        public string CurrentMissionId { get; set; }
+        public MissionComplete[] MissionCompleted { get; set; }
 
         public string[] Trophies { get; set; }
 
         public string[] Titles { get; set; }
+
     }
 }

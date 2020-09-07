@@ -2,6 +2,7 @@ import osmAuth from "osm-auth";
 import { BaseService } from "./base-service";
 import { UserModel } from "./generated/user-model";
 import { UserLoginModel } from "./generated/user-login-model";
+import { MissionUserModel } from "./generated/mission-user-model";
 
 class AuthenticationService extends BaseService {
 
@@ -82,6 +83,13 @@ class AuthenticationService extends BaseService {
         this.user = result.data;
 
         return result.data;
+    }
+
+    async getUserMission() {
+
+        const remote = await this.get<MissionUserModel>("users/missions");
+
+        return remote;
     }
 
 

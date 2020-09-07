@@ -15,7 +15,12 @@ namespace Business
 
         public async Task<IEnumerable<Mission>> GetAllMissionsAsync()
         {
-            return await this.DataContext.Missions.Find(_ => true).ToListAsync();
+            return await this.DataContext.Missions.Find(_ => true).SortBy( m => m.Order).ToListAsync();
+        }
+
+        public async Task<Mission> GetMissionById(string missionId)
+        {
+            return await this.DataContext.Missions.Find(m => m.Id == missionId).FirstOrDefaultAsync();
         }
 
         public async Task CreateMissionAsync(Mission mission)
@@ -35,7 +40,6 @@ namespace Business
                 await session.AbortTransactionAsync();
                 throw;
             }
-
         }
 
     }

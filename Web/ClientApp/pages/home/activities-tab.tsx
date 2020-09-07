@@ -4,6 +4,8 @@ import { BaseComponent } from "../../components/base-component";
 import { MissionModel } from "../../services/generated/mission-model";
 import { MissionsApi } from "../../services/missions-service";
 import { ActivityCard } from "./activity-card";
+import { AuthenticationApi } from "../../services/authentication-service";
+import { MissionUserModel } from "../../services/generated/mission-user-model";
 
 interface ActivitiesTabProps extends RouteComponentProps {
 
@@ -12,7 +14,8 @@ interface ActivitiesTabProps extends RouteComponentProps {
 class ActivitiesTabState {
     missions: MissionModel[];
     currentMission: MissionModel;
-    currentActivityIndex = 0;
+    currentActivityId: string;
+    missionProgress: MissionUserModel;
 }
 
 class ActivitiesTabComponent extends BaseComponent<ActivitiesTabProps, ActivitiesTabState>{
@@ -23,9 +26,12 @@ class ActivitiesTabComponent extends BaseComponent<ActivitiesTabProps, Activitie
 
     async refreshMissions() {
         const missions = await MissionsApi.getMissions();
-        console.log(missions)
-        /** TODO : récupérer l'activité actuelle */
-        await this.setPersistantState({ currentMission: missions[0], currentActivityIndex: 0 });
+        var userMissions = await AuthenticationApi.getUserMission();    
+        await this.setPersistantState({
+            currentMission: missions.find(m => m.id == userMissions.missionProgression.missionId),
+            currentActivityId: userMissions.missionProgression.activityId,
+            missionProgress: userMissions
+        });
     }
 
     render() {
@@ -35,10 +41,10 @@ class ActivitiesTabComponent extends BaseComponent<ActivitiesTabProps, Activitie
                     this.state.currentMission && this.state.currentMission.activities && this.state.currentMission.activities.map((activity, index) => {
 
                         /** TODO: récupérer la complétion d'une activité */
-                        const completion = 0;
-
+                        const completion = this.state.missionProgress.missionProgression.progression ?? 0;
+                        
                         return (
-                            <ActivityCard completion={completion} key={index} activity={activity} active={this.state.currentActivityIndex === index} />
+                            <ActivityCard completion={completion} key={index} activity={activity} active={this.state.currentActivityId == activity.id} />
                         )
                     })
                 }

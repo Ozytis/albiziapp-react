@@ -31,5 +31,6 @@ namespace Web.Controllers
                 CountSuccessFullActivities = model.CountSuccessFullActivities
             });
         }
+
     }
 }

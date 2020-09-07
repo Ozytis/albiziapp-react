@@ -1,5 +1,6 @@
 ﻿using Api;
 using Entities;
+using System.Linq;
 
 namespace Web.Mappings
 {
@@ -13,7 +14,8 @@ namespace Web.Mappings
                 Instructions = new ActivityInstructionModel { Long = activity.Instructions.Long, Short = activity.Instructions.Short },
                 Options = activity.Options,
                 Type = (int)activity.Type,
-                Order = activity.Order
+                Order = activity.Order,
+                EndConditions = activity.EndConditions?.Select(ec => new ActivityEndConditionModel { ActionCount = ec.ActionCount, Time = ec.Time }).ToArray(),
             };
         }
     }

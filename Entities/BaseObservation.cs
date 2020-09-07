@@ -24,8 +24,7 @@ namespace Entities
 
         public bool Confident { get; set; }
 
-        public string TelaBotanicaTaxon { get; set; }
-     
+        public string TelaBotanicaTaxon { get; set; }     
 
         public string AuthorName { get; set; }
     }
