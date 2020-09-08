@@ -37,5 +37,10 @@ namespace Business
         {
             return await this.DataContext.Trophies.Find(s => s.CountSuccessFullActivities >= count).ToListAsync();
         }
+
+        public async Task<List<Trophy>> GetAllTrophiesAsync()
+        {
+            return await this.DataContext.Trophies.Find(_ => true).ToListAsync();
+        }
     }
 }

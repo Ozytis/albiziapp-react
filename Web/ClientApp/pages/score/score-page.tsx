@@ -1,14 +1,26 @@
-import React from "react";
+﻿import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
-import { Theme, WithStyles, createStyles, withStyles, Box } from "@material-ui/core";
+import { Theme, WithStyles, createStyles, withStyles, Box, List, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import { BaseComponent } from "../../components/base-component";
 import clsx from "clsx";
+import { __ } from "../../services/translation";
+import { ChevronRight } from "@material-ui/icons";
+import { TitlesApi } from "../../services/titles-service";
+import { TrophiesApi } from "../../services/trophies-service";
+import { AuthenticationApi } from "../../services/authentication-service";
+import { TitleModel } from "../../services/generated/title-model";
+import { TrophyModel } from "../../services/generated/trophy-model";
+import { UserScoreModel } from "../../services/generated/user-score-model";
 
 // eslint-disable-next-line
 const styles = (theme: Theme) => createStyles({
     root: {
 
+    },
+    card: {
+        //color: theme.palette.common.white,
+        cursor: "pointer",
     }
 });
 
@@ -17,7 +29,9 @@ interface ScorePageProps extends RouteComponentProps, IPropsWithAppContext, With
 }
 
 class ScorePageState {
-
+    titles: TitleModel[];
+    trophies: TrophyModel[];
+    score: UserScoreModel;
 }
 
 class ScorePageComponent extends BaseComponent<ScorePageProps, ScorePageState>{
@@ -25,13 +39,53 @@ class ScorePageComponent extends BaseComponent<ScorePageProps, ScorePageState>{
         super(props, "ScorePage", new ScorePageState());
     }
 
+    async componentDidMount() {
+        const [titles, trophies, userScore] = await Promise.all([TitlesApi.getTitles(), TrophiesApi.getTrophies(), AuthenticationApi.getUserScore()]);
+        this.setState({ titles: titles, trophies: trophies, score: userScore });
+    }
+
+    async goTo(path: string) {
+        this.props.history.push({
+            pathname: path
+        })
+    }
     render() {
 
         const { classes } = this.props;
 
         return (
             <Box className={clsx(classes.root)}>
-                Scores
+                {this.state.titles != null && this.state.trophies != null && this.state.score != null &&
+                    <List>
+
+                        <ListItem className={clsx(classes.card)}>
+                        <ListItemText primary={__("Points d'exploration")} secondary={this.state.score.explorationPoints} onClick={() => this.goTo(`exploration-points`)} />
+                            <ListItemIcon>
+                                <ChevronRight />
+                            </ListItemIcon>
+                        </ListItem>
+                        <ListItem className={clsx(classes.card)}>
+                        <ListItemText primary={__("Points de connaissance")} secondary={this.state.score.knowledgePoints} onClick={() => this.goTo(`knowledge-points`)} />
+                            <ListItemIcon>
+                                <ChevronRight />
+                            </ListItemIcon>
+                        </ListItem>
+
+                        <ListItem className={clsx(classes.card)}>
+                        <ListItemText primary={__("Trophées")} secondary={`${this.state.score.trophiesId != null ? this.state.score.trophiesId.length : 0} / ${this.state.trophies.length}`} onClick={() => this.goTo(`trophies`)} />
+                            <ListItemIcon>
+                                <ChevronRight />
+                            </ListItemIcon>
+                        </ListItem>
+
+                        <ListItem className={clsx(classes.card)}>
+                        <ListItemText primary={__("Titres")} secondary={`${this.state.score.titlesId != null ? this.state.score.titlesId.length : 0} / ${this.state.titles.length}`} onClick={() => this.goTo(`titles`)}/>
+                            <ListItemIcon>
+                                <ChevronRight />
+                            </ListItemIcon>
+                        </ListItem>
+                    </List>
+                }
             </Box>
         )
     }

@@ -32,5 +32,11 @@ namespace Web.Controllers
                 KnowledgePoints = model.KnowledgePoints
             });
         }
+
+        [HttpGet]
+        public async Task<TitleModel[]> GetTitles()
+        {
+            return (await this.TitlesManager.GetAllTitlesAsync()).Select(x => new TitleModel { Id = x.Id, Name = x.Name }).ToArray();
+        }
     }
 }

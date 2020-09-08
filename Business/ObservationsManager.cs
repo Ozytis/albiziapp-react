@@ -93,8 +93,8 @@ namespace Business
 
                 await this.DataContext.Observations.InsertOneAsync(newObservation);
 
-                //await this.CalculateExploraitonPointsForNewObservation(newObservation);
-                // TODO: mettre à jour la mission
+                await this.AddExplorationPointsForNewObservation(newObservation);
+
                 var validator = await MissionValidator.GetValidatorFromActivity(this.ServiceProvider, user);
                 await validator.UpdateActivityProgression();
             }
@@ -130,7 +130,7 @@ namespace Business
                 pointsToAdd = +3;
             }
 
-            await this.UsersManager.AddExploraitonPoints(observation.UserId, pointsToAdd);
+            await this.UsersManager.AddExplorationPoints(observation.UserId, pointsToAdd);
             await this.UsersManager.AddTitles(observation.UserId);
         }
 

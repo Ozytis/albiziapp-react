@@ -13,6 +13,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientApp\pages\score\exploration-points-page.tsx" />
+    <None Remove="ClientApp\pages\score\knowledge-points-page.tsx" />
+    <None Remove="ClientApp\pages\score\title-page.tsx" />
+    <None Remove="ClientApp\pages\score\trophy-page.tsx" />
+    <None Remove="ClientApp\services\titles-service.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
   </ItemGroup>
 
@@ -48,6 +56,21 @@
 
   <ItemGroup>
     <Folder Include="ClientApp\services\generated\" />
+    <Folder Include="wwwroot\img\trophy\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\pages\score\title-page.tsx">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="ClientApp\pages\score\trophy-page.tsx">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="ClientApp\pages\score\knowledge-points-page.tsx">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="ClientApp\pages\score\exploration-points-page.tsx" />
+    <TypeScriptCompile Include="ClientApp\services\titles-service.ts" />
   </ItemGroup>
 
 </Project>

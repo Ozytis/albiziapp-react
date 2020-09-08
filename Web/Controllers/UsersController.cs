@@ -79,6 +79,15 @@ namespace Web.Controllers
             var user = await this.UsersManager.SelectAsync(this.User.Identity.Name);
 
             return user?.ToMissionUserModel();
-        } 
+        }
+
+        [HttpGet("score")]
+        [Authorize]
+        public async Task<UserScoreModel> GetScore()
+        {
+            var user = await this.UsersManager.SelectAsync(this.User.Identity.Name);
+
+            return user?.ToUserScoreModel();
+        }
     }
 }

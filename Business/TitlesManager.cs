@@ -37,5 +37,10 @@ namespace Business
         {
             return await this.DataContext.Titles.Find(s => s.ExplorationPoints <= explorationPoints && s.KnowledgePoints <= knowledgePoints).ToListAsync();
         }
+
+        public async Task<List<Title>> GetAllTitlesAsync()
+        {
+            return await this.DataContext.Titles.Find(_ => true).ToListAsync();
+        }
     }
 }

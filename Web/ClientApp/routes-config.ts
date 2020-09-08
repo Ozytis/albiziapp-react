@@ -11,6 +11,10 @@ import { ScorePageConfig } from "./pages/score/score-page-config";
 import { SpeciesInfoPageConfig } from "./pages/species/species-info-page-config";
 import { SpeciesPageConfig } from "./pages/species/species-page-config";
 import { EditObservationPageConfig } from "./pages/observation/edit-observation-page-config";
+import { ExplorationPointsPageConfig } from "./pages/score/exploration-points-page-config";
+import { KnowledgePointsPageConfig } from "./pages/score/knowledge-points-page-config";
+import { TrophyPageConfig } from "./pages/score/trophy-page-config";
+import { TitlePageConfig } from "./pages/score/title-page-config";
 
 const routesConfig = [
     HomePageConfig,
@@ -24,7 +28,11 @@ const routesConfig = [
     ArboretumPageConfig,
     ObservationsPageConfig,
     DeterminationKeyPageConfig,
-    EditObservationPageConfig
+    EditObservationPageConfig,
+    ExplorationPointsPageConfig,
+    KnowledgePointsPageConfig,
+    TrophyPageConfig,
+    TitlePageConfig
 ]
 
 class RouteUtils {

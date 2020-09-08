@@ -28,9 +28,16 @@ namespace Web.Controllers
             await this.TrophiesManager.CreateTrophyAsync(new Trophy
             {
                 Title = model.Title,
+                Image = model.Image,
                 CountSuccessFullActivities = model.CountSuccessFullActivities
             });
         }
+
+        [HttpGet]
+        public async Task<TrophyModel[]> GetTrophies()
+        {
+            return (await this.TrophiesManager.GetAllTrophiesAsync()).Select(x => new TrophyModel { Id = x.Id, Image = x.Image = x.Image, Name = x.Title, CountSuccessFullActivities = x.CountSuccessFullActivities }).ToArray();
+        }       
 
     }
 }

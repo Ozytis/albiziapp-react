@@ -6,5 +6,6 @@
 
 export interface TrophyCreationModel {
     title: string;
+    image: string;
     countSuccessFullActivities: number;
 }

@@ -44,5 +44,17 @@ namespace Web.Mappings
 
             return model;
         }
+
+        public static UserScoreModel ToUserScoreModel(this User user)
+        {
+            return new UserScoreModel
+            {
+                OsmId = user.OsmId,
+                ExplorationPoints = user.ExplorationPoints,
+                KnowledgePoints = user.KnowledgePoints,
+                TitlesId = user.Titles,
+                TrophiesId = user.Trophies
+            };
+        }
     }
 }

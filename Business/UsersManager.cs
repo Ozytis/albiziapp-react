@@ -51,7 +51,7 @@ namespace Business
         }
 
 
-        public async Task AddExploraitonPoints(string userId, int points)
+        public async Task AddExplorationPoints(string userId, int points)
         {
             var user = await this.SelectAsync(userId);
             if (user == null)

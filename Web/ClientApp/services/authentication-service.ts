@@ -3,6 +3,7 @@ import { BaseService } from "./base-service";
 import { UserModel } from "./generated/user-model";
 import { UserLoginModel } from "./generated/user-login-model";
 import { MissionUserModel } from "./generated/mission-user-model";
+import { UserScoreModel } from "./generated/user-score-model";
 
 class AuthenticationService extends BaseService {
 
@@ -86,10 +87,11 @@ class AuthenticationService extends BaseService {
     }
 
     async getUserMission() {
+        return await this.get<MissionUserModel>("users/missions");
+    }
 
-        const remote = await this.get<MissionUserModel>("users/missions");
-
-        return remote;
+    async getUserScore() {
+        return await this.get<UserScoreModel>("users/score");
     }
 
 
