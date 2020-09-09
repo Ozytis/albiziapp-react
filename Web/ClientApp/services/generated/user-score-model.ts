@@ -4,10 +4,13 @@
 // </auto-generated>
 //----------------------
 
+import { PointHistoryModel } from "./point-history-model";
 export interface UserScoreModel {
     osmId: string;
     explorationPoints: number;
+    explorationPointsHistory: PointHistoryModel[];
     knowledgePoints: number;
+    knowledgePointsHistory: PointHistoryModel[];
     trophiesId: string[];
     titlesId: string[];
 }

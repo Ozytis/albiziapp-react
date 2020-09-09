@@ -15,7 +15,11 @@ namespace Entities
 
         public int ExplorationPoints { get; set; }
 
+        public PointHistory[] ExplorationPointsHistory { get; set; }
+
         public int KnowledgePoints { get; set; }
+
+        public PointHistory[] KnowledgePointsHistory { get; set; }
 
         public MissionProgress MissionProgress { get; set; }
 

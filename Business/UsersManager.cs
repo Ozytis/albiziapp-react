@@ -51,20 +51,30 @@ namespace Business
         }
 
 
-        public async Task AddExplorationPoints(string userId, int points)
+        public async Task AddExplorationPoints(string userId, List<PointHistory> points)
         {
             var user = await this.SelectAsync(userId);
             if (user == null)
             {
                 return;
             }
-
-            user.ExplorationPoints += points;
+            
+            user.ExplorationPoints += points.Sum(p => p.Point);
+            if (user.ExplorationPointsHistory == null)
+            {
+                user.ExplorationPointsHistory = points.ToArray();
+            }
+            else
+            {
+                var pointsList = user.ExplorationPointsHistory.ToList();
+                pointsList.AddRange(points);
+                user.ExplorationPointsHistory = pointsList.ToArray();
+            }
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
         }
 
 
-        public async Task AddKnowledegePoints(string userId, int points)
+        public async Task AddKnowledegePoints(string userId, List<PointHistory>  points)
         {
             var user = await this.SelectAsync(userId);
             if (user == null)
@@ -72,8 +82,17 @@ namespace Business
                 return;
             }
 
-            user.KnowledgePoints += points;
-
+            user.KnowledgePoints += points.Sum(p => p.Point);
+            if(user.KnowledgePointsHistory == null)
+            {
+                user.KnowledgePointsHistory = points.ToArray();
+            }
+            else
+            {
+                var pointsList = user.KnowledgePointsHistory.ToList();
+                pointsList.AddRange(points);
+                user.KnowledgePointsHistory = pointsList.ToArray(); 
+            }
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
         }
 

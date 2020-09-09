@@ -52,13 +52,23 @@ class ExplorationPointsPageComponent extends BaseComponent<ExplorationPointsPage
         this.setState({ score: score });
     }
 
+    getName(type: number) {
+        switch (type) {
+            case 1: return __("Faire un relevé");
+            case 2: return __("Photographier un arbre");
+            case 3: return __("Completer le champ 'genre' d'un relevé");
+            case 4: return __("Completer le champ 'espèce' d'un relevé");
+            case 5: return __("Completer le champ 'nom commun' d'un relevé");
+        }
+    }
+
     render() {
         const { classes } = this.props;
         return (
             <Box className={clsx(classes.root)}>
                 <List>
                     <ListItem className={clsx(classes.headerItem)}>
-                        <ListItemText primary={__("Points d'exploration acquis")} />
+                        <ListItemText primary={__("Points d'exploration")} />
                         {this.state.score != null &&
                             <ListItemSecondaryAction className={clsx(classes.headerItemSecondary)}>
                                 <ListItemText primary={this.state.score.explorationPoints} />
@@ -66,14 +76,30 @@ class ExplorationPointsPageComponent extends BaseComponent<ExplorationPointsPage
                         }
                     </ListItem>
                 </List>
-                {/* todo list des points acquis */}
+                <Box maxHeight={10}>
+                    <List>
+                        <ListItem className={clsx(classes.headerItem)}>
+                            <ListItemText primary={__("Points acquis")} />
+
+                        </ListItem>
+                        {this.state.score != null && this.state.score.explorationPointsHistory != null && this.state.score.explorationPointsHistory.map(h => (
+                            <ListItem >
+                                <ListItemText primary={this.getName(h.type)} />
+                                <ListItemSecondaryAction>
+                                    <ListItemText primary={h.point} />
+                                </ListItemSecondaryAction>
+                            </ListItem>
+                        ))}
+
+                    </List>
+                </Box>
                 <List>
                     <ListItem className={clsx(classes.headerItem)}>
                         <ListItemText primary={__("Comment obtenir des points?")} />
-                        
+
                     </ListItem>
                     <ListItem >
-                        <ListItemText primary={__("Faire un relevé")}/>
+                        <ListItemText primary={__("Faire un relevé")} />
                         <ListItemSecondaryAction>
                             <ListItemText primary={1} />
                         </ListItemSecondaryAction>
@@ -85,19 +111,19 @@ class ExplorationPointsPageComponent extends BaseComponent<ExplorationPointsPage
                         </ListItemSecondaryAction>
                     </ListItem>
                     <ListItem >
-                        <ListItemText primary={__("Completer le champ 'genre' d'un relevé")}  />
+                        <ListItemText primary={__("Completer le champ 'genre' d'un relevé")} />
                         <ListItemSecondaryAction>
                             <ListItemText primary={3} />
                         </ListItemSecondaryAction>
                     </ListItem>
                     <ListItem >
-                        <ListItemText primary={__("Completer le champ 'espèce' d'un relevé")}  />
+                        <ListItemText primary={__("Completer le champ 'espèce' d'un relevé")} />
                         <ListItemSecondaryAction>
                             <ListItemText primary={6} />
                         </ListItemSecondaryAction>
                     </ListItem>
                     <ListItem >
-                        <ListItemText primary={__("Completer le champ 'nom commun' d'un relevé")}  />
+                        <ListItemText primary={__("Completer le champ 'nom commun' d'un relevé")} />
                         <ListItemSecondaryAction>
                             <ListItemText primary={6} />
                         </ListItemSecondaryAction>

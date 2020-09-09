@@ -51,7 +51,9 @@ namespace Web.Mappings
             {
                 OsmId = user.OsmId,
                 ExplorationPoints = user.ExplorationPoints,
+                ExplorationPointsHistory = user.ExplorationPointsHistory?.OrderByDescending(x => x.Date).Select(eph => new PointHistoryModel { Date = eph.Date, Point = eph.Point, Type = eph.Type }).ToArray(),
                 KnowledgePoints = user.KnowledgePoints,
+                KnowledgePointsHistory =  user.KnowledgePointsHistory?.OrderByDescending(x => x.Date).Select(eph => new PointHistoryModel { Date = eph.Date, Point = eph.Point, Type = eph.Type }).ToArray(),
                 TitlesId = user.Titles,
                 TrophiesId = user.Trophies
             };

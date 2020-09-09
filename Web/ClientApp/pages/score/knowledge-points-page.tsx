@@ -53,6 +53,26 @@ class KnowledgePointsPageComponent extends BaseComponent<KnowledgePointsPageProp
         this.setState({ score: score });
     }
 
+
+    getName(type: number) {
+        switch (type) {
+            case 1: return __("Déclarer un arbre douteux");
+            case 2: return __("Utiliser Folia");
+            case 3: return __("Validation d'un de vos relevés avec le même genre");
+            case 4: return __("Validation d'un de vos relevés avec le même espèce");
+            case 5: return __("Validation d'un de vos relevés avec le même nom commun");
+            case 6: return __("Genre correctement identifié");
+            case 7: return __("Espèce correctement identifié");
+            case 8: return __("Nom commun correctement identifié");
+            case 9: return __("Modifier le champ 'genre' d'un relevé");
+            case 10: return __("Modifier le champ 'espèce' d'un relevé");
+            case 11: return __("Modifier le champ 'nom commun' d'un relevé");
+            case 12: return __("Valider un relevé");
+            case 13: return __("Confiant sur le relevé");
+        }
+    }
+
+
     render() {
         const { classes } = this.props;
         return (
@@ -67,7 +87,21 @@ class KnowledgePointsPageComponent extends BaseComponent<KnowledgePointsPageProp
                         }
                     </ListItem>
                 </List>
-                {/* todo list des points acquis */}
+                <List>
+                    <ListItem className={clsx(classes.headerItem)}>
+                        <ListItemText primary={__("Points acquis")} />
+
+                    </ListItem>
+                    {this.state.score != null && this.state.score.knowledgePointsHistory != null && this.state.score.knowledgePointsHistory.map(h => (
+                        <ListItem >
+                            <ListItemText primary={this.getName(h.type)} />
+                            <ListItemSecondaryAction>
+                                <ListItemText primary={h.point} />
+                            </ListItemSecondaryAction>
+                        </ListItem>
+                    ))}
+
+                </List>
                 <List>
                     <ListItem className={clsx(classes.headerItem)}>
                         <ListItemText primary={__("Comment obtenir des points?")} />
