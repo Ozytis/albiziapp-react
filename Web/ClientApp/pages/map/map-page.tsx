@@ -11,6 +11,9 @@ import { AuthenticationApi } from "../../services/authentication-service";
 import { ObservationModel } from "../../services/generated/observation-model";
 import { ObservationsApi } from "../../services/observation";
 import { t } from "../../services/translation-service";
+import { MissionsApi } from "../../services/missions-service";
+import { ActivityModel } from "../../services/generated/activity-model";
+import { MissionProgressionModel } from "../../services/generated/mission-progression-model";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -21,7 +24,7 @@ const styles = (theme: Theme) => createStyles({
     },
 
     map: {
-        height: "calc(100vh - 120px)",
+        height: "calc(100vh - 180px)",
         width: "100vw",
         maxWidth: "100vw",
         position: "relative",
@@ -29,6 +32,15 @@ const styles = (theme: Theme) => createStyles({
     },
     loading: {
         padding: theme.spacing(3)
+    },
+    missionBox: {
+        height: "60px",
+        backgroundColor: theme.palette.primary.dark,
+        color: theme.palette.secondary.contrastText,
+        display: "flex",
+        flexDirection:"column",
+        alignItems: "center",
+        justifyContent: "center"
     }
 });
 
@@ -39,6 +51,8 @@ interface MapPageProps extends RouteComponentProps, IPropsWithAppContext, WithSt
 class MapPageState {
     userPosition: Position = null;
     observations: ObservationModel[];
+    currentActivity: ActivityModel;
+    missionProgression: MissionProgressionModel;
 }
 
 class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
@@ -46,7 +60,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         super(props, "MapPage", new MapPageState());
     }
 
-    async componentDidMount() {       
+    async componentDidMount() {
 
         navigator.geolocation.getCurrentPosition(async (position) => {
 
@@ -64,6 +78,18 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         ObservationsApi.registerObservationsListener(() => this.loadObservations());
 
         this.loadObservations();
+
+        var missions = await MissionsApi.getMissions();
+        var userMissions = await AuthenticationApi.getUserMission();
+        var currentMission = missions.find(m => m.id == userMissions.missionProgression.missionId);
+        var currentActivityId = userMissions.missionProgression.activityId;
+        if (currentMission != null && currentActivityId != null) {
+            var activity = currentMission.activities.find(a => a.id == currentActivityId);
+            await this.setState({
+                currentActivity: activity,
+                missionProgression: userMissions.missionProgression
+            });
+        }
     }
 
     async loadObservations() {
@@ -87,6 +113,8 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         }
 
         ObservationsApi.unregisterObservationsListener(() => this.loadObservations());
+
+
     }
 
     async onMapClicked(e: { latlng: LatLng }) {
@@ -157,6 +185,14 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         }
 
                     </Map>
+
+                }
+                {this.state.currentActivity != null &&
+                    <Box className={clsx(classes.missionBox)}>{this.state.currentActivity.instructions.long}
+                    {this.state.currentActivity.endConditions && this.state.currentActivity.endConditions.length > 0 && this.state.currentActivity.endConditions[0] && this.state.currentActivity.endConditions[0].actionCount != null &&
+                        <div>{this.state.missionProgression.progression ?? 0}/{this.state.currentActivity.endConditions[0].actionCount}</div>
+                    }
+                </Box>
                 }
                 {
                     !this.state.userPosition &&
