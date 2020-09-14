@@ -1,4 +1,4 @@
-import { Box, Button, createStyles, FormControl, Grid, InputLabel, MenuItem, Select, Switch, Theme, Typography, WithStyles, withStyles } from "@material-ui/core";
+import { Box, Button, createStyles, FormControl, Grid, InputLabel, MenuItem, Select, Switch, Theme, Typography, WithStyles, withStyles, TextField } from "@material-ui/core";
 import { Undo } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
@@ -16,7 +16,7 @@ import { TreeGenusModel } from "../../services/models/tree-species";
 import { ObservationsApi } from "../../services/observation";
 import { SpeciesApi } from "../../services/species-service";
 import { t } from "../../services/translation-service";
-
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -30,6 +30,7 @@ const styles = (theme: Theme) => createStyles({
         marginTop: theme.spacing(1),
         marginLeft: theme.spacing(1),
         marginRight: theme.spacing(1),
+        color: theme.palette.primary.light
     },
     formControl: {
         margin: theme.spacing(1),
@@ -125,7 +126,8 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         const model = this.state.model;
         const species = this.state.species.find(g => g.commonSpeciesName === common);
         model.species = species.speciesName;
-        await this.setState({ model: model, commonName: species.commonSpeciesName  });
+        
+        await this.setState({ model: model, commonName: species.commonSpeciesName });
     }
 
     async updateSpecies(speciesName: string) {
@@ -140,7 +142,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         const model = this.state.model;
         const genus = this.state.genus.find(g => g.genus === genusName);
         model.genus = genus.genus;
-        
+
         await this.setState({ model: model, commonGenus: genus.commonGenus });
     }
 
@@ -172,8 +174,8 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
     render() {
 
         const { classes } = this.props;
-        const { model, genus } = this.state;
-        let { species } = this.state;
+        const { model } = this.state;
+        let { species, genus } = this.state;
 
         if (!species) {
             return (
@@ -183,10 +185,16 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
             )
         }
 
+
+
         if (model.genus && model.genus.length > 0) {
             species = species.filter(species => species.genus === model.genus);
         }
 
+        if (model.species && model.species.length > 0 && (model.genus == null || model.genus.length == 0)) {
+            let s = this.state.species.filter(g => g.speciesName === model.species).map(s => s.genus);
+            genus = genus.filter(g => s.indexOf(g.genus) != -1);
+        }
 
         return (
             <Box className={clsx(classes.root)}>
@@ -198,38 +206,26 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                 </Typography>
 
                 <FormControl className={clsx(classes.formControl)}>
-                    <InputLabel id="commonGenusLabel">{t.__("Commun")}</InputLabel>
-                    <Select
-                        labelId="commonGenusLabel"
-                        id="commonGenusSelect"
-                        value={this.state.commonGenus}
-                        onChange={(e) => this.updateCommonGenus(e.target.value as string)}
-                    >
-                        {
-                            genus.sort((g1, g2) => g1.commonGenus.localeCompare(g2.commonGenus)).map(genus => {                              
-                                return (
-                                    <MenuItem value={genus.commonGenus} key={genus.genus}>{t.__(genus.commonGenus)}</MenuItem>
-                                )
-                            })
-                        }
 
-                    </Select>
+                    <Autocomplete
+                        id="commonGenusSelect"
+                        options={genus.sort((g1, g2) => g1.commonGenus.localeCompare(g2.commonGenus))}
+                        getOptionLabel={(option: TreeGenusModel) => option.commonGenus}
+                        renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}
+                        onChange={(e, v) => this.updateCommonGenus((v as any).commonGenus)}
+                    />
+
                 </FormControl>
 
                 <FormControl className={clsx(classes.formControl)}>
-                    <InputLabel id="genusLabel">{t.__("Latin")}</InputLabel>
-                    <Select
-                        labelId="genusLabel"
-                        id="genusSelect"
-                        value={model.genus}
-                        onChange={(e) => this.updateGenus(e.target.value as string)}
-                    >
-                        {
-                            genus.sort((g1, g2) => g1.genus.localeCompare(g2.genus)).map(genus => (
-                                <MenuItem value={genus.genus} key={genus.genus}>{t.__(genus.genus)}</MenuItem>
-                            ))
-                        }
-                    </Select>
+                    <Autocomplete
+                        id="commonGenusSelect"
+                        options={genus.sort((g1, g2) => g1.genus.localeCompare(g2.genus))}
+                        getOptionLabel={(option: TreeGenusModel) => option.genus}
+                        renderInput={(params) => <TextField {...params} label="Latin" variant="outlined" />}
+                        onChange={(e, v) => this.updateGenus((v as any).genus)}
+                    />
+
                 </FormControl>
 
                 <Typography variant="h6" className={clsx(classes.sectionHeading)}>
@@ -237,39 +233,26 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                 </Typography>
 
                 <FormControl className={clsx(classes.formControl)}>
-                    <InputLabel id="commonLabel">{t.__("Commune")}</InputLabel>
-                    <Select
-                        labelId="commonLabel"
-                        id="commonSelect"
-                        value={this.state.commonName}
-                        onChange={(e) => this.updateCommon(e.target.value as string)}
-                    >
-                        {
-                            species.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName)).map(species => (
-                                <MenuItem value={species.commonSpeciesName} key={species.speciesName}>
-                                    {t.__(species.commonSpeciesName)}
-                                </MenuItem>
-                            ))
-                        }
-                    </Select>
+
+                    <Autocomplete
+                        id="commonGenusSelect"
+                        options={species.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName))}
+                        getOptionLabel={(option: SpeciesModel) => option.commonSpeciesName}
+                        renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}                        
+                        onChange={(e, v) => this.updateCommon((v as any).commonSpeciesName)}
+                    />
+
                 </FormControl>
 
                 <FormControl className={clsx(classes.formControl)}>
-                    <InputLabel id="specieLabel">{t.__("Latine")}</InputLabel>
-                    <Select
-                        labelId="specieLabel"
-                        id="specieSelect"
-                        value={model.species}
-                        onChange={(e) => this.updateSpecies(e.target.value as string)}
-                    >
-                        {
-                            species.sort((s1, s2) => s1.speciesName.localeCompare(s2.speciesName)).map(species => (
-                                <MenuItem value={species.speciesName} key={species.speciesName}>
-                                    {t.__(species.speciesName)}
-                                </MenuItem>
-                            ))
-                        }
-                    </Select>
+
+                    <Autocomplete
+                        id="commonGenusSelect"
+                        options={species.sort((s1, s2) => s1.speciesName.localeCompare(s2.speciesName))}
+                        getOptionLabel={(option: SpeciesModel) => option.commonSpeciesName}
+                        renderInput={(params) => <TextField {...params} label="Latine" variant="outlined" />}                        
+                        onChange={(e, v) => this.updateSpecies((v as any).speciesName)}
+                    />
                 </FormControl>
 
 

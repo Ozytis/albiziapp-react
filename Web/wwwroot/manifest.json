@@ -1,0 +1,16 @@
+{
+  "short_name": "Albiziapp",
+  "name": "Albiziapp",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "150x150",
+      "type": "image/png"
+    }
+
+  ],
+  "start_url": ".",
+  "display": "fullscreen",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}

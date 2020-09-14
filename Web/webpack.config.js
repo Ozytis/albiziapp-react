@@ -14,12 +14,13 @@ module.exports = (env, { mode = 'development' }) => {
             children: false
         },
         entry: {
-            index: path.join(__dirname, "clientapp/app.tsx"),
-            "global": path.join(__dirname, "wwwroot/css/global.scss"),
+            "js/index": path.join(__dirname, "clientapp/app.tsx"),
+            "sw": path.join(__dirname, "clientapp/service-worker.ts"),
+            "js/global": path.join(__dirname, "wwwroot/css/global.scss"),
         },
         output: {
             filename: "[name].js",
-            path: path.join(__dirname, "wwwroot/js")
+            path: path.join(__dirname, "wwwroot")
         },
         resolve: {
 

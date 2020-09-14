@@ -1,4 +1,4 @@
-import { Box, Button, createStyles, FormControl, Grid, InputLabel, MenuItem, Select, Switch, Theme, Typography, WithStyles, withStyles } from "@material-ui/core";
+import { Box, Button, createStyles, FormControl, Grid, InputLabel, MenuItem, Select, Switch, Theme, Typography, WithStyles, withStyles, TextField } from "@material-ui/core";
 import { Undo } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
@@ -17,6 +17,7 @@ import { ObservationsApi } from "../../services/observation";
 import { SpeciesApi } from "../../services/species-service";
 import { t } from "../../services/translation-service";
 import { ObservationEditionModel } from "../../services/generated/observation-edition-model";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -31,6 +32,7 @@ const styles = (theme: Theme) => createStyles({
         marginTop: theme.spacing(1),
         marginLeft: theme.spacing(1),
         marginRight: theme.spacing(1),
+        color: theme.palette.primary.light
     },
     formControl: {
         margin: theme.spacing(1),
@@ -61,10 +63,14 @@ class EditObservationPageState {
     isProcessing = false;
     errors: string[];
     model = new ObservationEditionModel();
-    species: SpeciesModel[];
-    genus: TreeGenusModel[];
-    commonGenus = "";
-    commonName = "";
+    speciesData: SpeciesModel[];
+    genusData: TreeGenusModel[];
+    commonGenus: TreeGenusModel;
+    genus: TreeGenusModel;
+
+    speciesName: SpeciesModel;
+    speciesCommonName: SpeciesModel;
+    loaded: boolean;
 }
 
 class EditObservationPageComponent extends BaseComponent<EditObservationPageProps, EditObservationPageState>{
@@ -90,15 +96,21 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
         model.species = observation.speciesName;
         model.commonGenus = observation.commonGenus;
         model.commonSpeciesName = observation.commonSpeciesName;
-        await this.setState({ model: model, commonGenus: model.commonGenus, commonName: model.commonSpeciesName });
-       
+
+
+        await this.setState({ model: model });
+
 
         AuthenticationApi.refreshUser();
 
         this.listener = SpeciesApi.registerSpeciesListener(() => this.refreshSpecies());
 
         await this.refreshSpecies();
-   
+        await this.updateCommonGenus(model.commonGenus);
+        await this.updateGenus(model.genus);
+        await this.updateCommon(model.commonSpeciesName);
+        await this.updateSpecies(model.species);
+        await this.setState({ loaded: true });
     }
 
     listener: () => Promise<void>;
@@ -113,7 +125,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
             SpeciesApi.getAllGenus()
         ]);
 
-        await this.setState({ genus: genus, species: species });
+        await this.setState({ genusData: genus, speciesData: species });
     }
 
     async updateModel(propertyName: string, value: any) {
@@ -132,33 +144,33 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
 
     async updateCommonGenus(commonGenus: string) {
         const model = this.state.model;
-        const genus = this.state.genus.find(g => g.commonGenus === commonGenus);
+        const genus = this.state.genusData.find(g => g.commonGenus === commonGenus);
         model.genus = genus.genus;
-
-        await this.setState({ model: model, commonGenus: genus.commonGenus });
+        console.log(genus)
+        await this.setState({ model: model, commonGenus: genus });
     }
 
     async updateCommon(common: string) {
         const model = this.state.model;
-        const species = this.state.species.find(g => g.commonSpeciesName === common);
+        const species = this.state.speciesData.find(g => g.commonSpeciesName === common);
         model.species = species.speciesName;
-        await this.setState({ model: model, commonName: species.commonSpeciesName  });
+        await this.setState({ model: model, speciesCommonName: species });
     }
 
     async updateSpecies(speciesName: string) {
         const model = this.state.model;
-        const species = this.state.species.find(g => g.speciesName === speciesName);
+        const species = this.state.speciesData.find(g => g.speciesName === speciesName);
         model.species = species.speciesName;
 
-        await this.setState({ model: model, commonName: species.commonSpeciesName });
+        await this.setState({ model: model, speciesName: species });
     }
 
     async updateGenus(genusName: string) {
         const model = this.state.model;
-        const genus = this.state.genus.find(g => g.genus === genusName);
+        const genus = this.state.genusData.find(g => g.genus === genusName);
         model.genus = genus.genus;
-        
-        await this.setState({ model: model, commonGenus: genus.commonGenus });
+
+        await this.setState({ model: model, genus: genus });
     }
 
     async process() {
@@ -179,7 +191,6 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
         }
         else {
             await this.setState({ isProcessing: false });
-
             this.props.history.push({
                 pathname: "/observations"
             })
@@ -189,10 +200,10 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
     render() {
 
         const { classes } = this.props;
-        const { model, genus } = this.state;
-        let { species } = this.state;
+        const { model} = this.state;
+        let { speciesData, genusData } = this.state;
 
-        if (!species) {
+        if (!speciesData) {
             return (
                 <Box className={clsx(classes.root)}>
                     <Loader loading /> {t.__("Chargement...")}
@@ -201,8 +212,14 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
         }
 
         if (model.genus && model.genus.length > 0) {
-            species = species.filter(species => species.genus === model.genus);
+            speciesData = speciesData.filter(species => species.genus === model.genus);
         }
+
+        if (model.species && model.species.length > 0 && (model.genus == null || model.genus.length == 0)) {
+            let s = this.state.speciesData.filter(g => g.speciesName === model.species).map(s => s.genus);
+            genusData = genusData.filter(g => s.indexOf(g.genus) != -1);
+        }
+
 
 
         return (
@@ -213,112 +230,92 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                 <Typography variant="h6" className={clsx(classes.sectionHeading)}>
                     {t.__("Genre")}
                 </Typography>
+                {this.state.loaded != null &&
+                    <>
+                        <FormControl className={clsx(classes.formControl)}>
 
-                <FormControl className={clsx(classes.formControl)}>
-                    <InputLabel id="commonGenusLabel">{t.__("Commun")}</InputLabel>
-                    <Select
-                        labelId="commonGenusLabel"
-                        id="commonGenusSelect"
-                        value={this.state.commonGenus}
-                        onChange={(e) => this.updateCommonGenus(e.target.value as string)}
-                    >
-                        {
-                            genus.sort((g1, g2) => g1.commonGenus.localeCompare(g2.commonGenus)).map(genus => {                              
-                                return (
-                                    <MenuItem value={genus.commonGenus} key={genus.genus}>{t.__(genus.commonGenus)}</MenuItem>
-                                )
-                            })
-                        }
+                            <Autocomplete
+                                id="commonGenusSelect"
+                                options={genusData.sort((g1, g2) => g1.commonGenus.localeCompare(g2.commonGenus))}
+                                getOptionLabel={(option: TreeGenusModel) => option.commonGenus}
+                                renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}
+                                getOptionSelected={(o, v) => o.commonGenus == v?.commonGenus}
+                                value={this.state.commonGenus}
 
-                    </Select>
-                </FormControl>
-
-                <FormControl className={clsx(classes.formControl)}>
-                    <InputLabel id="genusLabel">{t.__("Latin")}</InputLabel>
-                    <Select
-                        labelId="genusLabel"
-                        id="genusSelect"
-                        value={model.genus}
-                        onChange={(e) => this.updateGenus(e.target.value as string)}
-                    >
-                        {
-                            genus.sort((g1, g2) => g1.genus.localeCompare(g2.genus)).map(genus => (
-                                <MenuItem value={genus.genus} key={genus.genus}>{t.__(genus.genus)}</MenuItem>
-                            ))
-                        }
-                    </Select>
-                </FormControl>
-
-                <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                    {t.__("Espèce")}
-                </Typography>
-
-                <FormControl className={clsx(classes.formControl)}>
-                    <InputLabel id="commonLabel">{t.__("Commune")}</InputLabel>
-                    <Select
-                        labelId="commonLabel"
-                        id="commonSelect"
-                        value={this.state.commonName}
-                        onChange={(e) => this.updateCommon(e.target.value as string)}
-                    >
-                        {
-                            species.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName)).map(species => (
-                                <MenuItem value={species.commonSpeciesName} key={species.speciesName}>
-                                    {t.__(species.commonSpeciesName)}
-                                </MenuItem>
-                            ))
-                        }
-                    </Select>
-                </FormControl>
-
-                <FormControl className={clsx(classes.formControl)}>
-                    <InputLabel id="specieLabel">{t.__("Latine")}</InputLabel>
-                    <Select
-                        labelId="specieLabel"
-                        id="specieSelect"
-                        value={model.species}
-                        onChange={(e) => this.updateSpecies(e.target.value as string)}
-                    >
-                        {
-                            species.sort((s1, s2) => s1.speciesName.localeCompare(s2.speciesName)).map(species => (
-                                <MenuItem value={species.speciesName} key={species.speciesName}>
-                                    {t.__(species.speciesName)}
-                                </MenuItem>
-                            ))
-                        }
-                    </Select>
-                </FormControl>
-
-
-                <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                    {t.__("Confiance")}
-                </Typography>
-
-                <Typography component="div">
-                    <Grid component="label" container alignItems="center" spacing={1}>
-                        <Grid item>
-                            <InputLabel className={clsx(classes.label)}>{t.__("Peu confiant")}</InputLabel>
-                        </Grid>
-                        <Grid item>
-                            <Switch
-                                checked={model.isConfident}
-                                onChange={(val) => this.updateModel("isConfident", val.target.checked)}
                             />
-                        </Grid>
-                        <Grid item>
-                            <InputLabel className={clsx(classes.label)}>
-                                {t.__("Confiant")}
-                            </InputLabel>
-                        </Grid>
-                    </Grid>
-                </Typography>
 
-                <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                    {t.__("Photographie")}
-                </Typography>
+                        </FormControl>
 
-                <PhotoFormItem label={t.__("Prendre une photo")} value={model.image} onChange={val => this.updateModel("image", val)} />
+                        <FormControl className={clsx(classes.formControl)}>
+                            <Autocomplete
+                                id="genusSelect"
+                                options={genusData.sort((g1, g2) => g1.genus.localeCompare(g2.genus))}
+                                getOptionLabel={(option: TreeGenusModel) => option.genus}
+                                renderInput={(params) => <TextField {...params} label="Latin" variant="outlined" />}
+                                value={this.state.genus}
+                                onChange={(e, v) => this.updateGenus((v as any).genus)}
+                            />
+                        </FormControl>
 
+                        <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                            {t.__("Espèce")}
+                        </Typography>
+
+                        <FormControl className={clsx(classes.formControl)}>
+                            <Autocomplete
+                                id="speciesCommonNameSelect"
+                                options={speciesData.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName))}
+                                getOptionLabel={(option: SpeciesModel) => option.commonSpeciesName}
+                                renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}
+                                
+                                onChange={(e, v) => this.updateCommon((v as any).commonSpeciesName)}
+                                value={this.state.speciesCommonName}
+                            />
+                        </FormControl>
+
+                        <FormControl className={clsx(classes.formControl)}>
+                            <Autocomplete
+                                id="speciesNameSelect"
+                                options={speciesData.sort((s1, s2) => s1.speciesName.localeCompare(s2.speciesName))}
+                                getOptionLabel={(option: SpeciesModel) => option.commonSpeciesName}
+                                renderInput={(params) => <TextField {...params} label="Latine" variant="outlined" />}
+                                //getOptionDisabled={(option) => { console.log(option); return option != null && genus.find(g => g.commonGenus == option.commonGenus && g.genus == option.genus) == null; }}
+                                onChange={(e, v) => this.updateSpecies((v as any).speciesName)}
+                                value={this.state.speciesName}
+                            />
+                        </FormControl>
+
+
+                        <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                            {t.__("Confiance")}
+                        </Typography>
+
+                        <Typography component="div">
+                            <Grid component="label" container alignItems="center" spacing={1}>
+                                <Grid item>
+                                    <InputLabel className={clsx(classes.label)}>{t.__("Peu confiant")}</InputLabel>
+                                </Grid>
+                                <Grid item>
+                                    <Switch
+                                        checked={model.isConfident}
+                                        onChange={(val) => this.updateModel("isConfident", val.target.checked)}
+                                    />
+                                </Grid>
+                                <Grid item>
+                                    <InputLabel className={clsx(classes.label)}>
+                                        {t.__("Confiant")}
+                                    </InputLabel>
+                                </Grid>
+                            </Grid>
+                        </Typography>
+
+                        <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                            {t.__("Photographie")}
+                        </Typography>
+
+                        <PhotoFormItem label={t.__("Prendre une photo")} value={model.image} onChange={val => this.updateModel("image", val)} />
+                    </>
+                }
                 <Button color="secondary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.process()}>
                     <Loader loading={this.state.isProcessing} usualIcon="check" />
                     {t.__("Valider")}

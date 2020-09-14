@@ -105,3 +105,8 @@ class App extends BaseComponent<AppProps, AppState>{
 AuthenticationApi.refreshUser().then(() => {
     ReactDOM.render(<App />, document.getElementById('root'));
 });
+
+if (navigator.serviceWorker) {
+    console.log("REGISTER sw");
+    navigator.serviceWorker.register("/sw.js").then((r) => console.log("REGISTER SUCCESS",r)).catch(err => console.error(err));
+}

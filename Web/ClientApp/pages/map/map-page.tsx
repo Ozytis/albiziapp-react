@@ -38,7 +38,7 @@ const styles = (theme: Theme) => createStyles({
         backgroundColor: theme.palette.primary.dark,
         color: theme.palette.secondary.contrastText,
         display: "flex",
-        flexDirection:"column",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center"
     }
@@ -189,10 +189,10 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                 }
                 {this.state.currentActivity != null &&
                     <Box className={clsx(classes.missionBox)}>{this.state.currentActivity.instructions.long}
-                    {this.state.currentActivity.endConditions && this.state.currentActivity.endConditions.length > 0 && this.state.currentActivity.endConditions[0] && this.state.currentActivity.endConditions[0].actionCount != null &&
-                        <div>{this.state.missionProgression.progression ?? 0}/{this.state.currentActivity.endConditions[0].actionCount}</div>
-                    }
-                </Box>
+                        {this.state.currentActivity.endConditions && this.state.currentActivity.endConditions.length > 0 && this.state.currentActivity.endConditions[0] && this.state.currentActivity.endConditions[0].actionCount != null &&
+                            <div>{this.state.missionProgression.progression ?? 0}/{this.state.currentActivity.endConditions[0].actionCount}</div>
+                        }
+                    </Box>
                 }
                 {
                     !this.state.userPosition &&

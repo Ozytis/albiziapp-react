@@ -62,7 +62,9 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
         this.videoCanvas.width = w;
         this.videoCanvas.height = h;
         context.drawImage(this.video, 0, 0, w, h);
-
+        this.videoStream.getTracks().forEach(function (track) {
+            track.stop();
+        });
         await this.setState({ showCamera: false });
     }
 
@@ -78,11 +80,12 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
             try {
                 // Put video listeners into place
                 if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    const stream = await navigator.mediaDevices.getUserMedia(mediaConfig);
+                    this.videoStream = await navigator.mediaDevices.getUserMedia(mediaConfig);
 
                     // video.src = window.URL.createObjectURL(stream);
-                    this.video.srcObject = stream;
+                    this.video.srcObject = this.videoStream;
                     this.video.play();
+                  
 
                 }
             } catch (e) {
@@ -118,7 +121,7 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
     control: HTMLInputElement;
     videoCanvas: HTMLCanvasElement;
     video: HTMLVideoElement;
-
+    videoStream: MediaStream;
     openModale = () => {
         this.setState({ showSourceSelection: true });
     }

@@ -8,7 +8,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
 COPY ["Web/Web.csproj", "Web/"]
-RUN dotnet restore "Web/Web.csproj"
+RUN dotnet restore "Web/Web.csproj" --source https://oznuget.azurewebsites.net/api/v2 --source https://api.nuget.org/v3/index.json
 COPY . .
 WORKDIR "/src/Web"
 RUN dotnet build "Web.csproj" -c Release -o /app/build
