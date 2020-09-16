@@ -13,26 +13,29 @@ namespace DataMigrator
 {
     internal class Program
     {
+        static string URL = "http://localhost:5100";
+
         private static async Task Main(string[] args)
         {
-            string url = "http://localhost:5100 ";
+            Console.WriteLine("Quelle est l'URL du site (http://localhost:5100 par défaut si vide) :");
+
+            var newUrl = Console.ReadLine();
+            if (!string.IsNullOrEmpty(newUrl))
+            {
+                if (Uri.IsWellFormedUriString(newUrl, UriKind.Absolute))
+                {
+                    URL = newUrl;
+                }
+                else
+                {
+                    Console.WriteLine("Url incorrecte,l'url de base va être utilisé");
+                }
+            }
+            Console.WriteLine("L'url du serveur utilisé sera :" + URL);
+
             while (true)
             {
-                Console.WriteLine("Quelle est l'URL du site (http://localhost:5100 par défaut si vide) :");
-
-                var newUrl = Console.ReadLine();
-                if (!string.IsNullOrEmpty(newUrl))
-                {
-                    if (Uri.IsWellFormedUriString(newUrl, UriKind.Absolute))
-                    {
-                        url = newUrl;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Url incorrecte,l'url de base va être utilisé");
-                    }
-                }
-                Console.WriteLine("L'url du serveur utilisé sera :" + url);
+               
 
                 Console.WriteLine("Veuillez choisir une opération :");
                 Console.WriteLine("\t1 - Essences d'arbres");
@@ -106,7 +109,7 @@ namespace DataMigrator
                     {
                         webClient.Headers.Add("Accept", "text/json");
                         webClient.Headers.Add("Content-Type", "text/json");
-                        await webClient.UploadDataTaskAsync(new Uri("https://localhost:44345/api/species"), Encoding.UTF8.GetBytes(json));
+                        await webClient.UploadDataTaskAsync(new Uri($"{URL}/api/species"), Encoding.UTF8.GetBytes(json));
                     }
 
                     Console.WriteLine(species.Common + " " + species.Common_genus);
@@ -149,7 +152,7 @@ namespace DataMigrator
                     {
                         webClient.Headers.Add("Accept", "text/json");
                         webClient.Headers.Add("Content-Type", "text/json");
-                        await webClient.UploadDataTaskAsync(new Uri("https://localhost:44345/api/species/keys"), Encoding.UTF8.GetBytes(json));
+                        await webClient.UploadDataTaskAsync(new Uri($"{URL}/api/species/keys"), Encoding.UTF8.GetBytes(json));
                     }
 
                     Console.WriteLine(key.Prop.NormalizedForm);
@@ -188,7 +191,7 @@ namespace DataMigrator
             {
                 webClient.Headers.Add("Accept", "text/json");
                 webClient.Headers.Add("Content-Type", "text/json");
-                await webClient.UploadDataTaskAsync(new Uri("https://localhost:44345/api/missions"), Encoding.UTF8.GetBytes(json));
+                await webClient.UploadDataTaskAsync(new Uri($"{URL}/api/missions"), Encoding.UTF8.GetBytes(json));
             }
         }
 
@@ -215,7 +218,7 @@ namespace DataMigrator
                     {
                         webClient.Headers.Add("Accept", "text/json");
                         webClient.Headers.Add("Content-Type", "text/json");
-                        await webClient.UploadDataTaskAsync(new Uri("https://localhost:44345/api/trophies"), Encoding.UTF8.GetBytes(json));
+                        await webClient.UploadDataTaskAsync(new Uri($"{URL}/api/trophies"), Encoding.UTF8.GetBytes(json));
                     }
                 }
             }
@@ -244,7 +247,7 @@ namespace DataMigrator
                     {
                         webClient.Headers.Add("Accept", "text/json");
                         webClient.Headers.Add("Content-Type", "text/json");
-                        await webClient.UploadDataTaskAsync(new Uri("https://localhost:44345/api/titles"), Encoding.UTF8.GetBytes(json));
+                        await webClient.UploadDataTaskAsync(new Uri($"{URL}/api/titles"), Encoding.UTF8.GetBytes(json));
                     }
                 }
             }
