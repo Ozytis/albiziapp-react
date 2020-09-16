@@ -15,9 +15,25 @@ namespace DataMigrator
     {
         private static async Task Main(string[] args)
         {
-
+            string url = "http://localhost:5100 ";
             while (true)
             {
+                Console.WriteLine("Quelle est l'URL du site (http://localhost:5100 par défaut si vide) :");
+
+                var newUrl = Console.ReadLine();
+                if (!string.IsNullOrEmpty(newUrl))
+                {
+                    if (Uri.IsWellFormedUriString(newUrl, UriKind.Absolute))
+                    {
+                        url = newUrl;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Url incorrecte,l'url de base va être utilisé");
+                    }
+                }
+                Console.WriteLine("L'url du serveur utilisé sera :" + url);
+
                 Console.WriteLine("Veuillez choisir une opération :");
                 Console.WriteLine("\t1 - Essences d'arbres");
                 Console.WriteLine("\t2 - Clef de détermination");

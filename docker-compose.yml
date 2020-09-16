@@ -13,7 +13,7 @@ services:
           source : web_data
           target: /data/db:rw
   web:
-    image: ${DOCKER_REGISTRY-}web
+    image: ${DOCKER_REGISTRY-}ozytis/albiziapp-react
     environment:    
         - MongoDB__Host=mongodb
         - MongoDB__User=

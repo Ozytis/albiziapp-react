@@ -266,8 +266,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                                 id="speciesCommonNameSelect"
                                 options={speciesData.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName))}
                                 getOptionLabel={(option: SpeciesModel) => option.commonSpeciesName}
-                                renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}
-                                
+                                renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}                                
                                 onChange={(e, v) => this.updateCommon((v as any).commonSpeciesName)}
                                 value={this.state.speciesCommonName}
                             />
@@ -278,8 +277,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                                 id="speciesNameSelect"
                                 options={speciesData.sort((s1, s2) => s1.speciesName.localeCompare(s2.speciesName))}
                                 getOptionLabel={(option: SpeciesModel) => option.commonSpeciesName}
-                                renderInput={(params) => <TextField {...params} label="Latine" variant="outlined" />}
-                                //getOptionDisabled={(option) => { console.log(option); return option != null && genus.find(g => g.commonGenus == option.commonGenus && g.genus == option.genus) == null; }}
+                                renderInput={(params) => <TextField {...params} label="Latine" variant="outlined" />}                                
                                 onChange={(e, v) => this.updateSpecies((v as any).speciesName)}
                                 value={this.state.speciesName}
                             />
