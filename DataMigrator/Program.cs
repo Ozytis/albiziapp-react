@@ -34,9 +34,7 @@ namespace DataMigrator
             Console.WriteLine("L'url du serveur utilisé sera :" + URL);
 
             while (true)
-            {
-               
-
+            {              
                 Console.WriteLine("Veuillez choisir une opération :");
                 Console.WriteLine("\t1 - Essences d'arbres");
                 Console.WriteLine("\t2 - Clef de détermination");
