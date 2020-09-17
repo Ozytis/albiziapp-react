@@ -1,5 +1,5 @@
-import { Box, createStyles, List, ListItem, ListItemIcon, ListItemText, MenuItem, Select, Tab, Tabs, Theme, WithStyles, withStyles } from "@material-ui/core";
-import { ChevronRight } from "@material-ui/icons";
+import { Box, createStyles, List, ListItem, ListItemIcon, ListItemText, MenuItem, Select, Tab, Tabs, Theme, WithStyles, withStyles, Popper, Fade, ClickAwayListener } from "@material-ui/core";
+import { InfoRounded, ChevronRight } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -20,7 +20,12 @@ const styles = (theme: Theme) => createStyles({
     },
     select: {
         flexBasis: "100%"
-    }
+    },
+    paper: {
+        border: '1px solid',
+        padding: theme.spacing(1),
+        backgroundColor: theme.palette.background.paper,
+    },
 });
 
 interface DeterminationKeyPageProps extends RouteComponentProps, IPropsWithAppContext, WithStyles<typeof styles> {
@@ -32,6 +37,9 @@ class DeterminationKeyPageState {
     species: SpeciesModel[];
     filters: { [key: string]: string } = {};
     currentTab: "filters" | "results" = "filters";
+    currentPopperOpen = "";
+    anchorEl: any;
+
 }
 
 class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPageProps, DeterminationKeyPageState>{
@@ -103,8 +111,27 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
                                     <ListItem key={key.id} className={clsx(classes.filter)}>
                                         <ListItemText
                                             primary={key.frTitle}
-                                            secondary={key.frSubTitle}
+                                           
+                                            onClick={(e) => { this.setState({ currentPopperOpen: key.id, anchorEl: e.currentTarget }) }}
                                         />
+                                        {(key.frSubTitle != null && key.frSubTitle.length > 0) &&
+                                            <>
+                                                <ListItemIcon>
+                                                    <InfoRounded />
+                                                </ListItemIcon>
+
+                                            <Popper open={this.state.currentPopperOpen == key.id} anchorEl={this.state.anchorEl} transition >
+                                                    {({ TransitionProps }) => (
+                                                        <Fade {...TransitionProps} timeout={350}>
+                                                            <ClickAwayListener onClickAway={() => { if (this.state.currentPopperOpen == key.id) this.setState({ currentPopperOpen: null, anchorEl: null }) }}  >
+                                                                <div className={classes.paper}>{key.frSubTitle}</div>
+                                                            </ClickAwayListener>
+                                                        </Fade>
+                                                    )}
+                                                </Popper>
+
+                                            </>
+                                        }
                                         <Select
                                             label={t.__("Choisir")}
                                             value={filters[key.id]}
@@ -138,12 +165,12 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
                     this.state.currentTab === "results" && filteredSpecies &&
                     <List>
                         {
-                            filteredSpecies.map(species=> (
+                            filteredSpecies.map(species => (
                                 <ListItem key={species.id}>
-                                    <ListItemText 
-                                        primary={species.speciesName} 
-                                        secondary={ species.commonSpeciesName} 
-                                        onClick={()=> this.props.history.push({ pathname: `species/${species.telaBotanicaTaxon}`})}
+                                    <ListItemText
+                                        primary={species.speciesName}
+                                        secondary={species.commonSpeciesName}
+                                        onClick={() => this.props.history.push({ pathname: `species/${species.telaBotanicaTaxon}` })}
                                     />
                                     <ListItemIcon>
                                         <ChevronRight />
