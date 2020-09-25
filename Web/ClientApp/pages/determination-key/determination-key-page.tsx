@@ -1,5 +1,5 @@
 import { Box, createStyles, List, ListItem, ListItemIcon, ListItemText, MenuItem, Select, Tab, Tabs, Theme, WithStyles, withStyles, Popper, Fade, ClickAwayListener } from "@material-ui/core";
-import { InfoRounded, ChevronRight } from "@material-ui/icons";
+import { InfoRounded, ChevronRight, Height } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -26,6 +26,17 @@ const styles = (theme: Theme) => createStyles({
         padding: theme.spacing(1),
         backgroundColor: theme.palette.background.paper,
     },
+    tabs: {
+        position: "fixed",
+        backgroundColor: theme.palette.background.paper,
+        height: "4vh",
+        width: '100%',
+        zIndex:999
+    },
+    tabList: {
+        paddingTop: "48px",
+        paddingBottom: "48px",
+    }
 });
 
 interface DeterminationKeyPageProps extends RouteComponentProps, IPropsWithAppContext, WithStyles<typeof styles> {
@@ -95,6 +106,7 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
             <Box className={clsx(classes.root)}>
 
                 <Tabs
+                    className={clsx(classes.tabs)}
                     value={this.state.currentTab}
                     onChange={(_, val) => this.setState({ currentTab: val })}
                 >
@@ -104,7 +116,7 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
 
                 {
                     this.state.currentTab === "filters" && keys &&
-                    <List>
+                    <List className={clsx(classes.tabList)}>
                         {
                             keys.map(key => {
                                 return (
@@ -139,7 +151,7 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
                                             className={clsx(classes.select)}
                                         >
                                             <MenuItem key={"non"} value="">
-                                                {t.__("N/R")}
+                                                {t.__("Non renseigné")}
                                             </MenuItem>
                                             {
                                                 key.values && key.values.map(value => {
@@ -163,7 +175,7 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
 
                 {
                     this.state.currentTab === "results" && filteredSpecies &&
-                    <List>
+                    <List className={clsx(classes.tabList)}>
                         {
                             filteredSpecies.map(species => (
                                 <ListItem key={species.id}>

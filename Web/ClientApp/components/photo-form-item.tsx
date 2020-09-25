@@ -30,14 +30,14 @@ const styles = (theme: Theme) => createStyles({
         color: theme.palette.common.black
     },
     dialogChoiceModal: {
-        height:'15vh'
+        height: '15vh'
     },
     dialogChoice: {
         display: "flex",
         flexDirection: "column",
     },
     dialogChoiceButton: {
-        marginBottom:"10px"
+        marginBottom: "10px"
     }
 })
 
@@ -196,7 +196,7 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
                         }
 
                         <DialogActions className={clsx(this.props.classes.dialogChoiceModal)}>
-                            <div className={clsx(this.props.classes.dialogChoice,"text-center")}>
+                            <div className={clsx(this.props.classes.dialogChoice, "text-center")}>
                                 {
                                     !this.state.showCamera && !this.state.showSnapShot &&
                                     <Button color="primary" className={clsx(this.props.classes.dialogChoiceButton, "button button-primary button-block mt-1")} variant="contained"
