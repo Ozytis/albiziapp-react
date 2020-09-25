@@ -1,4 +1,5 @@
 ﻿using Business.MissionValidation;
+using Common;
 using Entities;
 using MongoDB.Bson.IO;
 using MongoDB.Driver;
@@ -18,14 +19,17 @@ namespace Business
         public UsersManager UsersManager { get; }
         public IServiceProvider ServiceProvider { get; }
 
+        public IUserNotify UserNotify { get; }
+
         public ObservationsManager(DataContext dataContext, FileManager fileManager,
-            SpeciesManager speciesManager, UsersManager usersManager, IServiceProvider serviceProvider)
+            SpeciesManager speciesManager, UsersManager usersManager, IServiceProvider serviceProvider, IUserNotify userNotify)
             : base(dataContext)
         {
             this.FileManager = fileManager;
             this.SpeciesManager = speciesManager;
             this.UsersManager = usersManager;
             this.ServiceProvider = serviceProvider;
+            this.UserNotify = userNotify;
         }
 
         public async Task<IEnumerable<Observation>> GetAllObservations()
@@ -95,14 +99,26 @@ namespace Business
 
                 await this.AddExplorationPointsForNewObservation(newObservation);
 
+
+               
+
                 var validator = await MissionValidator.GetValidatorFromActivity(this.ServiceProvider, user);
                 await validator.UpdateActivityProgression();
+
+                
+
             }
             catch
             {
                 await session.AbortTransactionAsync();
                 throw;
             }
+
+
+
+
+            
+
 
             return newObservation;
         }
@@ -286,7 +302,7 @@ namespace Business
                     }
                     foreach (var existingPictures in existingObservation.Pictures)
                     {
-                        this.FileManager.DeleteFile(existingPictures);
+                        await this.FileManager.DeleteFile(existingPictures);
                     }
                     existingObservation.Pictures.Clear();
 

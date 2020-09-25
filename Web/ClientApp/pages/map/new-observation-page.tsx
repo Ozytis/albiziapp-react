@@ -118,7 +118,6 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         const model = this.state.model;
         const genus = this.state.genus.find(g => g.commonGenus === commonGenus);
         model.genus = genus.genus;
-
         await this.setState({ model: model, commonGenus: genus.commonGenus });
     }
 

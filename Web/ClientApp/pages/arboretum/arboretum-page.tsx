@@ -8,12 +8,23 @@ import { AuthenticationApi } from "../../services/authentication-service";
 import { SpeciesModel } from "../../services/generated/species-model";
 import { ObservationsApi } from "../../services/observation";
 import { ArboretumCard } from "./arboretum-card";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // eslint-disable-next-line
 const styles = (style: Theme) => createStyles({
     root: {
 
     }
+});
+const notify = () => toast.success(' Wow so easy!', {
+    position: toast.POSITION.BOTTOM_CENTER,
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
 });
 
 interface ArboretumPageProps extends RouteComponentProps, IPropsWithAppContext, WithStyles<typeof styles> {
@@ -40,7 +51,22 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
         const { classes } = this.props;
 
         return (
-            <Box className={clsx(classes.root)}>
+            <Box>
+                <Box>
+                    <button onClick={notify}>Notify !</button>
+                    <ToastContainer
+                        position="bottom-center"
+                        autoClose={5000}
+                        hideProgressBar={false}
+                        newestOnTop={false}
+                        closeOnClick
+                        rtl={false}
+                        pauseOnFocusLoss
+                        draggable
+                        pauseOnHover
+                    />
+                </Box>
+                 <Box className={clsx(classes.root)}>
                 {
                     this.state.species && this.state.species.map(arboretum => {
                         return (
@@ -48,6 +74,8 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
                         )
                     })
                 }
+                </Box>
+               
             </Box>
         )
     }

@@ -54,6 +54,10 @@ module.exports = (env, { mode = 'development' }) => {
                         },
                         "sass-loader"
                     ]
+                },
+                {
+                    test: /\.css$/i,
+                    use: ['style-loader', 'css-loader'],
                 }
             ]
         },

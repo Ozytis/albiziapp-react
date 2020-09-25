@@ -1,5 +1,5 @@
 import { AppBar, createStyles, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Theme, Toolbar, Typography, withStyles, WithStyles } from "@material-ui/core";
-import { AccountTree, Book, Eco, ExitToApp } from "@material-ui/icons";
+import { AccountTree, Book, Eco, ExitToApp, Search } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -140,6 +140,12 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                                 <Book />
                             </ListItemIcon>
                             <ListItemText primary={t.__("Flore")} />
+                        </ListItem>
+                        <ListItem button onClick={() => this.goTo("/folia")}>
+                            <ListItemIcon>
+                                <Search />
+                            </ListItemIcon>
+                            <ListItemText primary={t.__("Folia")} />
                         </ListItem>
                         <ListItem button onClick={() => this.goTo("/determination-key")}>
                             <ListItemIcon>

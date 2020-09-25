@@ -29,7 +29,7 @@ namespace Business
 
         public async Task DeleteFile(string path)
         {
-            File.Delete(path);
+             File.Delete(path);
         }
 
         public async Task<string> SaveDataUrlAsFileAsync(string directory, string dataUrl)

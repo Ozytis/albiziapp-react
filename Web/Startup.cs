@@ -1,4 +1,5 @@
 using Business;
+using Common;
 using Entities;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -6,7 +7,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Ozytis.Common.Core.Storage;
 using System.IO;
+using Web.Hubs;
 using Web.Utilities;
 
 namespace Web
@@ -42,7 +45,9 @@ namespace Web
             services.AddScoped<FileManager>();
             services.AddScoped<TrophiesManager>();
             services.AddScoped<TitlesManager>();
-
+            services.AddSignalR();
+            services.AddSingleton<HubConnectionManager>();
+            services.AddSingleton<IUserNotify, NotifyHub>();
             services.AddSwaggerGen();
         }
 
@@ -77,6 +82,7 @@ namespace Web
             {
                 endpoints.MapControllers();
                 endpoints.MapFallbackToFile("index.html");
+                endpoints.MapHub<NotifyHub>("/notifyhub");
             });
         }
 

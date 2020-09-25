@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Api;
 using Business;
+using Common;
 using Entities;
 using Microsoft.AspNetCore.Mvc;
 using Ozytis.Common.Core.Web.WebApi;
@@ -14,12 +15,15 @@ namespace Web.Controllers
     public class TitlesController : Controller
     {
 
-        public TitlesController(TitlesManager titlesManager)
+        public TitlesController(TitlesManager titlesManager,IUserNotify userNotify)
         {
             this.TitlesManager = titlesManager;
+            this.UserNotify = userNotify;
         }
 
         public TitlesManager TitlesManager { get; }
+
+        public IUserNotify UserNotify { get; }
 
         [HttpPost]
         [HandleBusinessException, ValidateModel]
@@ -37,6 +41,11 @@ namespace Web.Controllers
         public async Task<TitleModel[]> GetTitles()
         {
             return (await this.TitlesManager.GetAllTitlesAsync()).Select(x => new TitleModel { Id = x.Id, Name = x.Name }).ToArray();
+        }
+        [HttpGet("toto")]
+        public async void Toto()
+        {
+            await this.UserNotify.SendNotif(this.User.Identity.Name, "Coucou");
         }
     }
 }

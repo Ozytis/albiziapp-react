@@ -1,4 +1,5 @@
-﻿using Entities;
+﻿using Common;
+using Entities;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -9,13 +10,15 @@ namespace Business
 {
     public class UsersManager : BaseManager
     {
-        public UsersManager(DataContext dataContext, TitlesManager titlesManager, MissionsManager missionsManager,TrophiesManager trophiesManager) : base(dataContext)
+        public UsersManager(DataContext dataContext, TitlesManager titlesManager, MissionsManager missionsManager,TrophiesManager trophiesManager, IUserNotify userNotify) : base(dataContext)
         {
             this.TitlesManager = titlesManager;
             this.MissionsManager = missionsManager;
             this.TrophiesManager = trophiesManager;
-        }
+            this.UserNotify = userNotify;
 
+        }
+        public IUserNotify UserNotify { get; }
         public TitlesManager TitlesManager { get; }
 
         public MissionsManager MissionsManager { get; }
@@ -70,6 +73,7 @@ namespace Business
                 pointsList.AddRange(points);
                 user.ExplorationPointsHistory = pointsList.ToArray();
             }
+           
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
         }
 

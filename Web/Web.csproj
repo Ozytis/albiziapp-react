@@ -36,6 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Common\Common.csproj" />
     <ProjectReference Include="..\Api\Api.csproj" />
     <ProjectReference Include="..\Business\Business.csproj" />
     <ProjectReference Include="..\Entities\Entities.csproj" />
@@ -43,8 +44,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.5" />
     <PackageReference Include="Ozytis.Common.Core.Storage" Version="1.0.0" />
-    <PackageReference Include="Ozytis.Common.Core.Utilities" Version="1.5.0" />
-    <PackageReference Include="Ozytis.Common.Core.Web.WebApi" Version="1.2.3" />
+    <PackageReference Include="Ozytis.Common.Core.Utilities" Version="1.7.0" />
+    <PackageReference Include="Ozytis.Common.Core.Web.WebApi" Version="1.2.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1" />
   </ItemGroup>
 
@@ -57,6 +58,7 @@
   <ItemGroup>
     <Folder Include="ClientApp\services\generated\" />
     <Folder Include="wwwroot\img\trophy\" />
+    <Folder Include="wwwroot\lib\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -166,13 +166,13 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                     }
                                 </ListItem>
                                 <ListItem>
-                                    <ListItemText primary={t.__("Nom vernaculaire")} secondary={observation.commonSpeciesName || t.__("Non renseignée")} />
+                                    <ListItemText primary={t.__("Nom vernaculaire")} secondary={observation.commonSpeciesName || t.__("Non renseigné")} />
                                 </ListItem>
                                 <ListItem>
                                     <ListItemText primary={t.__("Genre")} secondary={observation.genus || t.__("Non renseignée")} />
                                 </ListItem>
                                 <ListItem>
-                                    <ListItemText primary={t.__("Genre vernaculaire")} secondary={observation.commonGenus || t.__("Non renseignée")} />
+                                    <ListItemText primary={t.__("Genre vernaculaire")} secondary={observation.commonGenus || t.__("Non renseigné")} />
                                 </ListItem>
                                 <ListItem>
                                     <ListItemText
@@ -190,10 +190,11 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                             <Box className={clsx(classes.buttonsDiv)}>
                                 <Button color="primary" variant="contained" startIcon={<Edit />} onClick={() => this.editObservation()}>
                                     {t.__("Modifier")}
-                                </Button>
-                                <Button color="secondary" disabled={this.state.isValidated} variant="contained" startIcon={<Check />} onClick={() => this.validateObservation()}>
-                                    {t.__("Confirmer")}
-                                </Button>
+                                </Button>                              
+                                    <Button color="secondary" disabled={this.state.isValidated} variant="contained" startIcon={<Check />} onClick={() => this.validateObservation()}>
+                                        {t.__("Confirmer")}
+                                    </Button>
+                                
                             </Box>
                             <Typography variant="body2">
                                 <p className={clsx(classes.instructions)}>
