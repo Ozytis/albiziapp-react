@@ -44,6 +44,7 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
 
         const species = await ObservationsApi.getUserArboretum(AuthenticationApi.user.osmId);
         await this.setState({ species: species });
+       
     }
 
     render() {
@@ -54,7 +55,7 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
             <Box>
                 <Box>
                     <button onClick={notify}>Notify !</button>
-                    <ToastContainer
+                    <ToastContainer                        
                         position="bottom-center"
                         autoClose={5000}
                         hideProgressBar={false}
