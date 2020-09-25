@@ -59,6 +59,7 @@ class ObservationPageState {
     isDeleting = false;
     specyInfo: SpeciesInfoModel;
     isValidated: boolean = false;
+    displayConfirmButton: boolean = true;
 }
 
 class ObservationPageComponent extends BaseComponent<ObservationPageProps, ObservationPageState>{
@@ -71,6 +72,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         console.log(observation);
         await this.setState({ observation: observation });
         await this.isValidated();
+        await this.enableConfirmButton();
         if (observation.telaBotanicaTaxon) {
             const info = await SpeciesApi.getSpeciesInfo(observation.telaBotanicaTaxon);
             await this.setState({ specyInfo: info[0] });
@@ -99,23 +101,31 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         });
     }
 
-    async isValidated(){
+    async isValidated() {
         if (this.state.observation != null && this.state.observation.validations != null) {
-            console.log(this.state.observation);
-            console.log(AuthenticationApi.user.osmId);
             var isValidated = this.state.observation.validations.findIndex(x => x == AuthenticationApi.user.osmId);
             console.log((isValidated != -1))
             await this.setState({ isValidated: (isValidated != -1) });
-
         } else {
             await this.setState({ isValidated: false });
+        }
+    }
+
+    async enableConfirmButton() {
+        if (this.state.observation.historyEditor != null) {
+            console.log(this.state.observation);
+            console.log(AuthenticationApi.user.osmId);
+            var displayConfirmButton = this.state.observation.historyEditor.findIndex(x => x == AuthenticationApi.user.osmId);
+            await this.setState({ displayConfirmButton: (displayConfirmButton == -1 || this.state.observation.userId != AuthenticationApi.user.osmId ) });
+        } else {
+            await this.setState({ displayConfirmButton: this.state.observation.userId != AuthenticationApi.user.osmId });
         }
     }
 
     async validateObservation() {
         await this.setState({ isDeleting: true });
         const result = await ObservationsApi.ValidateObservation(this.state.observation);
-        await this.setState({ isDeleting: false, isValidated : true });
+        await this.setState({ isDeleting: false, isValidated: true });
     }
 
     async goTo(path: string) {
@@ -190,11 +200,12 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                             <Box className={clsx(classes.buttonsDiv)}>
                                 <Button color="primary" variant="contained" startIcon={<Edit />} onClick={() => this.editObservation()}>
                                     {t.__("Modifier")}
-                                </Button>                              
+                                </Button>
+                                {this.state.displayConfirmButton &&
                                     <Button color="secondary" disabled={this.state.isValidated} variant="contained" startIcon={<Check />} onClick={() => this.validateObservation()}>
                                         {t.__("Confirmer")}
                                     </Button>
-                                
+                                }
                             </Box>
                             <Typography variant="body2">
                                 <p className={clsx(classes.instructions)}>

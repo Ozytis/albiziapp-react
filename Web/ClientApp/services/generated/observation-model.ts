@@ -21,4 +21,5 @@ export interface ObservationModel {
     authorName: string;
     isIdentified: boolean;
     validations: string [];
+    historyEditor: string[];
 }
