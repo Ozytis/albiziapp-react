@@ -6,6 +6,7 @@ using Ozytis.Common.Core.Web.WebApi;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Web.Hubs;
 using Web.Mappings;
 
 namespace Web.Controllers
@@ -13,12 +14,15 @@ namespace Web.Controllers
     [Route("api/[controller]")]
     public class MissionsController : ControllerBase
     {
-        public MissionsController(MissionsManager missionsManager)
+        public MissionsController(MissionsManager missionsManager, NotifyHub notifyHub)
         {
             this.MissionsManager = missionsManager;
+            this.NotifyHub = notifyHub;
         }
 
         public MissionsManager MissionsManager { get; }
+
+        public NotifyHub NotifyHub { get; }
 
         [HttpPost]
         [HandleBusinessException, ValidateModel]

@@ -1,4 +1,4 @@
-import { Box, createStyles, List, ListItem, ListItemIcon, ListItemText, MenuItem, Select, Tab, Tabs, Theme, WithStyles, withStyles, Popper, Fade, ClickAwayListener } from "@material-ui/core";
+import { Box, createStyles, List, ListItem, ListItemIcon, ListItemText, MenuItem, Select, Tab, Tabs, Theme, WithStyles, withStyles, Popper, Fade, ClickAwayListener, Button } from "@material-ui/core";
 import { InfoRounded, ChevronRight } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
@@ -48,6 +48,7 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
     }
 
     async componentDidMount() {
+       
         const [species, keys] = await Promise.all([
             SpeciesApi.getAllSpecies(),
             SpeciesApi.getAllFloraKeys()
@@ -66,11 +67,14 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
         });
     }
 
+        
     async updateFilter(keyId: string, value: string) {
         const filters = this.state.filters;
         filters[keyId] = value;
         await this.setState({ filters: filters });
     }
+
+    
 
     render() {
 
@@ -94,12 +98,14 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
         return (
             <Box className={clsx(classes.root)}>
 
-                <Tabs
+                <Tabs                    
                     value={this.state.currentTab}
                     onChange={(_, val) => this.setState({ currentTab: val })}
+                    
                 >
                     <Tab value="filters" label={t.__("Critères")} />
-                    <Tab value="results" label={t.__("Résultats ({0})", filteredSpecies && filteredSpecies.length)} />
+                    <Tab value="results" label={t.__("Résultats ({0})", filteredSpecies && filteredSpecies.length) } 
+                    />
                 </Tabs>
 
                 {
@@ -139,7 +145,7 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
                                             className={clsx(classes.select)}
                                         >
                                             <MenuItem key={"non"} value="">
-                                                {t.__("N/R")}
+                                                {t.__("Non renseigné")}
                                             </MenuItem>
                                             {
                                                 key.values && key.values.map(value => {
@@ -180,7 +186,11 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
                         }
                     </List>
                 }
+
+               
+                    
             </Box >
+
         )
     }
 }

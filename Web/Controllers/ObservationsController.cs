@@ -1,5 +1,6 @@
 ﻿using Api;
 using Business;
+using Common;
 using Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Web.Hubs;
 using Web.Mappings;
 
 namespace Web.Controllers
@@ -16,13 +18,16 @@ namespace Web.Controllers
     [Authorize]
     public class ObservationsController : ControllerBase
     {
-        public ObservationsController(ObservationsManager observationsManager, FileManager fileManager)
+        public ObservationsController(ObservationsManager observationsManager, FileManager fileManager, IUserNotify userNotify)
         {
             this.ObservationsManager = observationsManager;
             this.FileManager = fileManager;
+            this.UserNotify = userNotify;
         }
 
         public FileManager FileManager { get; }
+
+        public IUserNotify UserNotify { get; }
 
         public ObservationsManager ObservationsManager { get; }
 
@@ -30,7 +35,6 @@ namespace Web.Controllers
         public async Task<IEnumerable<ObservationModel>> GetAllObservations()
         {
             IEnumerable<Observation> observations = await this.ObservationsManager.GetAllObservations();
-
             return observations.Select(observation => observation.ToObservationModel());
         }
 

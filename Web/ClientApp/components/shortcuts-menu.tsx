@@ -77,11 +77,6 @@ export class ShortcutsMenuComponent extends BaseComponent<ShortcutsMenuProps, Sh
                     pathname: "/observations"
                 });
                 break;
-            case "folia":
-                this.props.history.push({
-                    pathname: "/folia"
-                });
-                break;
             default: break;
         }
     }
@@ -119,7 +114,6 @@ export class ShortcutsMenuComponent extends BaseComponent<ShortcutsMenuProps, Sh
                     <BottomNavigationAction className={clsx(classes.menuItem)} disableRipple disableTouchRipple value="score" label={t.__("Score")} icon={<Icon className="fas fa-trophy fa-fw" />} />
                     <BottomNavigationAction className={clsx(classes.menuItem)} disableRipple disableTouchRipple value="arboretum" label={t.__("Arboretum")} icon={<Icon className="fas fa-leaf fa-fw" />} />
                     <BottomNavigationAction className={clsx(classes.menuItem)} disableRipple disableTouchRipple value="statements" label={t.__("Relevés")} icon={<EditLocation />} />
-                    <BottomNavigationAction className={clsx(classes.menuItem)} disableRipple disableTouchRipple value="folia" label={t.__("Folia")} icon={<Search />} />
                 </BottomNavigation>
             </>
         )

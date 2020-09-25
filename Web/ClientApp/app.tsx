@@ -12,6 +12,23 @@ import routes from './routes-config';
 import { AuthenticationApi } from "./services/authentication-service";
 import { ObservationsApi } from "./services/observation";
 import { SpeciesApi } from "./services/species-service";
+import * as signalR from "@microsoft/signalr";
+import 'react-toastify/scss/main.scss';
+import { UserModel } from "./services/generated/user-model";
+import { toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+
+
+const notify = () => toast.success(' Wow so easy!', {
+    position: toast.POSITION.BOTTOM_CENTER,
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+});
+
 
 interface AppProps {
     theme?: string;
@@ -24,6 +41,7 @@ class AppState {
     }
 
     context: IAppContext = null;
+    user: UserModel;
 }
 
 class App extends BaseComponent<AppProps, AppState>{
@@ -45,6 +63,7 @@ class App extends BaseComponent<AppProps, AppState>{
 
         ObservationsApi.loadObservations();
         SpeciesApi.loadSpecies();
+        await this.refreshAuth();
     }
 
     async removeContextUpdateListener(listener: (newContext: IAppContext, oldContext: IAppContext) => Promise<void>) {
@@ -70,6 +89,35 @@ class App extends BaseComponent<AppProps, AppState>{
         for (const listener of this.contextUpdateListeners) {
             await listener(context, oldContext);
         }
+    }
+
+    async refreshAuth() {
+        const currentUser = await AuthenticationApi.getCurrentUser();
+        await this.setState({ user: currentUser });
+               
+
+        if (currentUser) {
+
+            var hubConnection = new signalR.HubConnectionBuilder()
+                .withUrl("/notifyhub")
+                .build();
+
+
+            hubConnection.on("ReceivedNotif", function (userName : string, notifContent : string) {
+                var message = "test";
+                console.log(notifContent);
+
+            });
+
+            try {
+                await hubConnection.start();
+            }
+            catch (err) {
+                console.error(err);
+            };
+
+        }
+
     }
 
     appHistory: BrowserHistory;
@@ -99,6 +147,7 @@ class App extends BaseComponent<AppProps, AppState>{
                 </AppContext.Provider>
             </MuiThemeProvider>
         )
+
     }
 }
 
@@ -110,3 +159,4 @@ if (navigator.serviceWorker) {
     console.log("REGISTER sw");
     navigator.serviceWorker.register("/sw.js").then((r) => console.log("REGISTER SUCCESS",r)).catch(err => console.error(err));
 }
+
