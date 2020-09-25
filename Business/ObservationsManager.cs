@@ -45,13 +45,13 @@ namespace Business
         public async Task<IEnumerable<Observation>> GetUserVerifyObservations(string userId)
         {
             return await this.DataContext.Observations.Find(obs => obs.History[0] != null && obs.History[0].UserId != userId &&
-            (obs.UserId == userId || obs.History != null && obs.History.Skip(1).Any(x => x.UserId == userId))).ToListAsync();
+            (obs.UserId == userId || obs.History != null && obs.History.Any(x => x.UserId == userId))).ToListAsync();
         }
 
         public async Task<IEnumerable<Observation>> GetUserIdentifyObservations(string userId)
         {
             return await this.DataContext.Observations.Find(obs => obs.IsIdentified && obs.History[0] != null && obs.History[0].UserId != userId &&
-            (obs.UserId == userId || obs.History != null && obs.History.Skip(1).Any(x => x.UserId == userId))).ToListAsync();
+            (obs.UserId == userId || obs.History != null && obs.History.Any(x => x.UserId == userId))).ToListAsync();
         }
 
         public async Task<Observation> GetUserObservationbyId(string observationId)
@@ -105,7 +105,7 @@ namespace Business
                 var validator = await MissionValidator.GetValidatorFromActivity(this.ServiceProvider, user);
                 await validator.UpdateActivityProgression();
 
-                
+                await this.UserNotify.SendNotif(user.OsmId, "Coucou");
 
             }
             catch
@@ -117,8 +117,8 @@ namespace Business
 
 
 
-            
 
+            
 
             return newObservation;
         }
@@ -149,6 +149,7 @@ namespace Business
 
             await this.UsersManager.AddExplorationPoints(observation.UserId, pointHistory);
             await this.UsersManager.AddTitles(observation.UserId);
+            await this.UserNotify.SendNotif(User.Identity.Name, "Coucou");
         }
 
         public async Task CalculateKnowledegePoints(Observation newObservation)

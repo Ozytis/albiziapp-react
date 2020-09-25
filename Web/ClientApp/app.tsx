@@ -15,19 +15,11 @@ import { SpeciesApi } from "./services/species-service";
 import * as signalR from "@microsoft/signalr";
 import 'react-toastify/scss/main.scss';
 import { UserModel } from "./services/generated/user-model";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
 
-const notify = () => toast.success(' Wow so easy!', {
-    position: toast.POSITION.BOTTOM_CENTER,
-    autoClose: 5000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-});
+
 
 
 interface AppProps {
@@ -57,6 +49,7 @@ class App extends BaseComponent<AppProps, AppState>{
         }));
 
         this.appHistory = createBrowserHistory();
+
     }
 
     async componentDidMount() {
@@ -93,6 +86,8 @@ class App extends BaseComponent<AppProps, AppState>{
 
     async refreshAuth() {
         const currentUser = await AuthenticationApi.getCurrentUser();
+        
+        
         await this.setState({ user: currentUser });
                
 
@@ -103,10 +98,34 @@ class App extends BaseComponent<AppProps, AppState>{
                 .build();
 
 
-            hubConnection.on("ReceivedNotif", function (userName : string, notifContent : string) {
-                var message = "test";
-                console.log(notifContent);
+            hubConnection.on("ReceivedNotif", function (notifContent: string) {
 
+                const notify = () => toast.success(notifContent, {
+                    position: toast.POSITION.BOTTOM_CENTER,
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                });
+
+                console.log(notify);
+
+                const element =
+                    <div onLoad={notify}>
+                    <ToastContainer position="bottom-center"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover />
+                        </div>;
+                ReactDOM.render(element, document.getElementById('toast'));
+                notify();
             });
 
             try {
@@ -136,16 +155,18 @@ class App extends BaseComponent<AppProps, AppState>{
             <MuiThemeProvider
                 theme={Themes[props.theme || "main"]}
             >
+                
                 <AppContext.Provider value={context}>
                     <BrowserRouter ref={router => this.router = router} >
                         <Authorization>
                             <Layout>
-
+                                
                             </Layout>
                         </Authorization>
                     </BrowserRouter>
                 </AppContext.Provider>
             </MuiThemeProvider>
+           
         )
 
     }

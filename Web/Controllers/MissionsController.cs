@@ -14,15 +14,15 @@ namespace Web.Controllers
     [Route("api/[controller]")]
     public class MissionsController : ControllerBase
     {
-        public MissionsController(MissionsManager missionsManager, NotifyHub notifyHub)
+        public MissionsController(MissionsManager missionsManager/*,NotifyHub notifyHub*/)
         {
             this.MissionsManager = missionsManager;
-            this.NotifyHub = notifyHub;
+            //this.NotifyHub = notifyHub;
         }
 
         public MissionsManager MissionsManager { get; }
 
-        public NotifyHub NotifyHub { get; }
+        //public NotifyHub NotifyHub { get; }
 
         [HttpPost]
         [HandleBusinessException, ValidateModel]

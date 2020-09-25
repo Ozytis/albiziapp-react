@@ -45,7 +45,7 @@ namespace Web.Controllers
         [HttpGet("toto")]
         public async void Toto()
         {
-            await this.UserNotify.SendNotif(this.User.Identity.Name, "Coucou");
+            await this.UserNotify.SendNotif(User.Identity.Name, "Coucou");
         }
     }
 }
