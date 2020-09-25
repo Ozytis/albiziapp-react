@@ -149,7 +149,7 @@ namespace Business
 
             await this.UsersManager.AddExplorationPoints(observation.UserId, pointHistory);
             await this.UsersManager.AddTitles(observation.UserId);
-            await this.UserNotify.SendNotif(User.Identity.Name, "Coucou");
+
         }
 
         public async Task CalculateKnowledegePoints(Observation newObservation)
