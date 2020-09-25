@@ -1,5 +1,5 @@
-import { Box, createStyles, List, ListItem, ListItemIcon, ListItemText, MenuItem, Select, Tab, Tabs, Theme, WithStyles, withStyles, Popper, Fade, ClickAwayListener, Button } from "@material-ui/core";
-import { InfoRounded, ChevronRight } from "@material-ui/icons";
+import { Box, createStyles, List, ListItem, ListItemIcon, ListItemText, MenuItem, Select, Tab, Tabs, Theme, WithStyles, withStyles, Popper, Fade, ClickAwayListener } from "@material-ui/core";
+import { InfoRounded, ChevronRight, Height } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -26,6 +26,17 @@ const styles = (theme: Theme) => createStyles({
         padding: theme.spacing(1),
         backgroundColor: theme.palette.background.paper,
     },
+    tabs: {
+        position: "fixed",
+        backgroundColor: theme.palette.background.paper,
+        height: "4vh",
+        width: '100%',
+        zIndex:999
+    },
+    tabList: {
+        paddingTop: "48px",
+        paddingBottom: "48px",
+    }
 });
 
 interface DeterminationKeyPageProps extends RouteComponentProps, IPropsWithAppContext, WithStyles<typeof styles> {
@@ -48,7 +59,6 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
     }
 
     async componentDidMount() {
-       
         const [species, keys] = await Promise.all([
             SpeciesApi.getAllSpecies(),
             SpeciesApi.getAllFloraKeys()
@@ -67,14 +77,11 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
         });
     }
 
-        
     async updateFilter(keyId: string, value: string) {
         const filters = this.state.filters;
         filters[keyId] = value;
         await this.setState({ filters: filters });
     }
-
-    
 
     render() {
 
@@ -98,19 +105,18 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
         return (
             <Box className={clsx(classes.root)}>
 
-                <Tabs                    
+                <Tabs
+                    className={clsx(classes.tabs)}
                     value={this.state.currentTab}
                     onChange={(_, val) => this.setState({ currentTab: val })}
-                    
                 >
                     <Tab value="filters" label={t.__("Critères")} />
-                    <Tab value="results" label={t.__("Résultats ({0})", filteredSpecies && filteredSpecies.length) } 
-                    />
+                    <Tab value="results" label={t.__("Résultats ({0})", filteredSpecies && filteredSpecies.length)} />
                 </Tabs>
 
                 {
                     this.state.currentTab === "filters" && keys &&
-                    <List>
+                    <List className={clsx(classes.tabList)}>
                         {
                             keys.map(key => {
                                 return (
@@ -169,7 +175,7 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
 
                 {
                     this.state.currentTab === "results" && filteredSpecies &&
-                    <List>
+                    <List className={clsx(classes.tabList)}>
                         {
                             filteredSpecies.map(species => (
                                 <ListItem key={species.id}>
@@ -186,11 +192,7 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
                         }
                     </List>
                 }
-
-               
-                    
             </Box >
-
         )
     }
 }

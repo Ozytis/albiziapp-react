@@ -21,13 +21,23 @@ const styles = (theme: Theme) => createStyles({
         width: "33vh",
         height: "25vh",
         backgroundRepeat: "no-repeat",
-        backgroundSize : "contain"
+        backgroundSize: "contain"
     },
     label: {
         margin: theme.spacing(1),
     },
     cameraIcon: {
         color: theme.palette.common.black
+    },
+    dialogChoiceModal: {
+        height: '15vh'
+    },
+    dialogChoice: {
+        display: "flex",
+        flexDirection: "column",
+    },
+    dialogChoiceButton: {
+        marginBottom: "10px"
     }
 })
 
@@ -50,12 +60,12 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
     constructor(props: PhotoFormItemProps) {
         super(props, "photo-form-item", new PhotoFormItemState());
     }
-    
+
     async takeSnapShot() {
         await this.setState({ showSnapShot: true });
         const context = this.videoCanvas.getContext("2d");
 
-        var w, h, ratio : number;
+        var w, h, ratio: number;
         ratio = this.video.videoWidth / this.video.videoHeight;
         w = this.video.videoWidth - 100;
         h = parseInt(w as any / ratio as any, 10);
@@ -76,7 +86,7 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
         else {
             await this.setState({ showCamera: true, showSnapShot: false });
 
-            const mediaConfig = { video: true };            
+            const mediaConfig = { video: true };
             try {
                 // Put video listeners into place
                 if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -85,7 +95,7 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
                     // video.src = window.URL.createObjectURL(stream);
                     this.video.srcObject = this.videoStream;
                     this.video.play();
-                  
+
 
                 }
             } catch (e) {
@@ -146,7 +156,7 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
                     }
                     {
                         <div className="photo-form-item-button text-center m-2" onClick={() => this.openModale()}>
-                            <Icon className={clsx("fas fa-camera",this.props.classes.cameraIcon)} />
+                            <Icon className={clsx("fas fa-camera", this.props.classes.cameraIcon)} />
                             <input type="file" accept="image/*"
                                 capture="camera" ref={input => this.control = input} onChange={(e) => this.onFileSelected(e.target.files)}
                                 className={clsx(this.props.classes.input)}
@@ -185,21 +195,21 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
                             </>
                         }
 
-                        <DialogActions>
-
-                            <div className="text-center">
+                        <DialogActions className={clsx(this.props.classes.dialogChoiceModal)}>
+                            <div className={clsx(this.props.classes.dialogChoice, "text-center")}>
                                 {
                                     !this.state.showCamera && !this.state.showSnapShot &&
-                                    <button className="button button-primary button-block mb-1 mt-1"
+                                    <Button color="primary" className={clsx(this.props.classes.dialogChoiceButton, "button button-primary button-block mt-1")} variant="contained"
                                         onClick={() => this.takePicture("camera")}>
                                         Prendre une photo
-                                    </button>
+                                    </Button>
                                 }
 
-                                <button className="button button-primary  button-block mb-1"
+
+                                <Button color="secondary" variant="contained" className="button button-primary  button-block mb-1"
                                     onClick={() => this.takePicture("library")}>
                                     Choisir une photo existante
-                            </button>
+                            </Button>
                             </div>
                         </DialogActions>
                     </Dialog>
