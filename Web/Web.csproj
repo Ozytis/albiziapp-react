@@ -36,10 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-<<<<<<< HEAD
-=======
     <ProjectReference Include="..\Common\Common.csproj" />
->>>>>>> c6bab790d985329b8ad632e32d81b215cc066229
     <ProjectReference Include="..\Api\Api.csproj" />
     <ProjectReference Include="..\Business\Business.csproj" />
     <ProjectReference Include="..\Entities\Entities.csproj" />
