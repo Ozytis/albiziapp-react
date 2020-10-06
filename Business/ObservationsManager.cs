@@ -163,10 +163,10 @@ namespace Business
 
         public async Task CalculateKnowledegePoints(Observation newObservation)
         {
-            Observation compareObservation = (Observation)newObservation.History.LastOrDefault();
+            BaseObservation compareObservation = newObservation.History.LastOrDefault();
             var pointHistory = new List<PointHistory>();
             var currentDate = DateTime.UtcNow;
-            if (compareObservation.IsIdentified)
+            if (newObservation.IsIdentified)
             {
                 if (newObservation.Genus == compareObservation.Genus)
                 {
@@ -182,7 +182,7 @@ namespace Business
             }
             else
             {
-                if (compareObservation.History != null && compareObservation.History.Count == 1)
+                if (newObservation.History != null && newObservation.History.Count == 1)
                 {
                     if (newObservation.Genus == compareObservation.Genus)
                     {
@@ -202,7 +202,7 @@ namespace Business
                 }
                 else
                 {
-                    if (compareObservation.History != null && compareObservation.History.Count > 1)
+                    if (newObservation.History != null && newObservation.History.Count > 1)
                     {                
                         var pointHistoryP0 = new List<PointHistory>();
                         var pointHistoryPb = new List<PointHistory>();
@@ -212,7 +212,7 @@ namespace Business
                         // compareObservation = Pb
                         // compareHistory = P0
                         // newObservation = Pn
-                        foreach (var compareHistory in compareObservation.History)
+                        foreach (var compareHistory in newObservation.History)
                         {
 
                             if (newObservation.Genus == compareHistory.Genus)
@@ -304,7 +304,7 @@ namespace Business
                 existingObservation.AuthorName = user?.Name;
                 existingObservation.Confident = editObservation.Confident;
                 existingObservation.UpdateDate = DateTime.UtcNow;
-                if (pictures.Length > 0)
+                if (pictures?.Length > 0)
                 {
                     if (existingObservation.Pictures == null)
                     {
@@ -364,6 +364,9 @@ namespace Business
             {
                 observation.Validations.Add(new ObservationValidation { OsmId = currentUserId, ValidationDate = DateTime.UtcNow });
                 await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == observation.Id, observation);
+
+                //on reprend le fonctionnement de l'edition d'une observation, pour refaire le processus de validation des points...
+                await this.EditObservationAsync(observation, null, currentUserId);
             }
         }
 

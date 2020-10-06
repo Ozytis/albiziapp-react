@@ -23,7 +23,8 @@ namespace Web.Mappings
                 UserId = observation.UserId,
                 IsIdentified = observation.IsIdentified,
                 AuthorName = observation.AuthorName,
-                Validations = observation.Validations?.Select(x => x.OsmId).ToArray()
+                Validations = observation.Validations?.Select(x => x.OsmId).ToArray(),
+                HistoryEditor = observation.History?.Select(x => x.UserId).ToArray()
             };
         }
     }
