@@ -113,8 +113,6 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
 
     async enableConfirmButton() {
         if (this.state.observation.historyEditor != null) {
-            console.log(this.state.observation);
-            console.log(AuthenticationApi.user.osmId);
             var displayConfirmButton = this.state.observation.historyEditor.findIndex(x => x == AuthenticationApi.user.osmId);
             await this.setState({ displayConfirmButton: (displayConfirmButton == -1 || this.state.observation.userId != AuthenticationApi.user.osmId ) });
         } else {
