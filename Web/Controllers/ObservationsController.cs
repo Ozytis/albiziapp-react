@@ -49,6 +49,7 @@ namespace Web.Controllers
         [HandleBusinessException, ValidateModel]
         public async Task CreateObservationAysnc([FromBody] ObservationCreationModel model)
         {
+
             await this.ObservationsManager.CreateObservationAsync(
                 new Observation
                 {

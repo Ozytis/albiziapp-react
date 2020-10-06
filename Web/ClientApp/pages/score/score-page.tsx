@@ -42,6 +42,8 @@ class ScorePageComponent extends BaseComponent<ScorePageProps, ScorePageState>{
     async componentDidMount() {
         const [titles, trophies, userScore] = await Promise.all([TitlesApi.getTitles(), TrophiesApi.getTrophies(), AuthenticationApi.getUserScore()]);
         this.setState({ titles: titles, trophies: trophies, score: userScore });
+
+
     }
 
     async goTo(path: string) {

@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using Entities.Enums;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Entities
@@ -28,6 +29,8 @@ namespace Entities
         public string[] Trophies { get; set; }
 
         public string[] Titles { get; set; }
+
+        public UserRole? Role { get; set; }
 
     }
 }

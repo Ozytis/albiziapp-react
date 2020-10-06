@@ -73,7 +73,8 @@ namespace Business
                 pointsList.AddRange(points);
                 user.ExplorationPointsHistory = pointsList.ToArray();
             }
-           
+            await this.UserNotify.SendNotif(userId, "Vous avez gagné "+ points.Sum(p => p.Point)+" point(s)");
+
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
         }
 
@@ -97,6 +98,7 @@ namespace Business
                 pointsList.AddRange(points);
                 user.KnowledgePointsHistory = pointsList.ToArray(); 
             }
+            await this.UserNotify.SendNotif(userId, "Vous avez gagné " + points.Sum(p => p.Point) + " point(s)");
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
         }
 
@@ -118,9 +120,12 @@ namespace Business
                 {
                     var titlesToAdd = titles.Where(t => !user.Titles.Any(ut => ut == t.Id)).Select(t => t.Id).ToList();
                     user.Titles = user.Titles.Concat(titlesToAdd).ToArray();
+                    
+            await this.UserNotify.SendNotif(userId, "Vous avez debloqué un nouveau titre !");
                 }
                 await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
             }
+
         }
 
         public async Task AddTrophies(string userId)
@@ -142,8 +147,12 @@ namespace Business
                     var trophiesToAdd = trophies.Where(t => !user.Trophies.Any(ut => ut == t.Id)).Select(t => t.Id).ToList();
                     user.Trophies = user.Trophies.Concat(trophiesToAdd).ToArray();
                 }
+
                 await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
             }
+
+
+            await this.UserNotify.SendNotif(userId, "Vous avez debloqué un nouveau trophée !");
 
         }
 

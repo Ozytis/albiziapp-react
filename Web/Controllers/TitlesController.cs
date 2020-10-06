@@ -42,10 +42,6 @@ namespace Web.Controllers
         {
             return (await this.TitlesManager.GetAllTitlesAsync()).Select(x => new TitleModel { Id = x.Id, Name = x.Name }).ToArray();
         }
-        [HttpGet("toto")]
-        public async void Toto()
-        {
-            await this.UserNotify.SendNotif(User.Identity.Name, "Coucou");
-        }
+        
     }
 }

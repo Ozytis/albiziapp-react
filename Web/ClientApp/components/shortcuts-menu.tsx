@@ -17,7 +17,6 @@ const styles = (theme: Theme) => createStyles({
         bottom: 0,
         left: 0,
         width: "100vw",
-        overflowX: "scroll",
         justifyContent: "flex-start",
         "& .MuiIcon-root": {
             width: "auto"

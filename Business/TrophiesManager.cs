@@ -1,4 +1,5 @@
-﻿using Entities;
+﻿using Common;
+using Entities;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -9,9 +10,12 @@ namespace Business
 {
     public class TrophiesManager : BaseManager
     {
-        public TrophiesManager(DataContext dataContext) : base(dataContext)
+
+        public IUserNotify UserNotify { get; }
+        public TrophiesManager(DataContext dataContext, IUserNotify userNotify) : base(dataContext)
         {
 
+            this.UserNotify = userNotify;
         }
 
         public async Task CreateTrophyAsync(Trophy trophy)

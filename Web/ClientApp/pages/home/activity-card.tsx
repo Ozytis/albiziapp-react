@@ -51,7 +51,7 @@ class ActivityCardComponent extends BaseComponent<ActivityCardProps, ActivityCar
         const { activity, classes, completion, active } = this.props;
 
         const ActivityIcon = this.getIcon();
-        console.log(activity);
+       // console.log(activity);
         return (
             <Card className={clsx(classes.card, !active && classes.disabledCard)} variant="elevation" raised={active}>
                 <CardContent>

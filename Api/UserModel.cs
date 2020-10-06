@@ -7,5 +7,6 @@
         public string Name { get; set; }
 
         public string OsmId { get; set; }
+
     }
 }

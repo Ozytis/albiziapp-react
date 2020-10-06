@@ -50,11 +50,9 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
     render() {
 
         const { classes } = this.props;
-
         return (
             <Box>
                 <Box>
-                    <button onClick={notify}>Notify !</button>
                     <ToastContainer                        
                         position="bottom-center"
                         autoClose={5000}

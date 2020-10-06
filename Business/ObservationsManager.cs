@@ -95,6 +95,16 @@ namespace Business
                     newObservation.Pictures.Add(await this.FileManager.SaveDataUrlAsFileAsync("observations", picture));
                 }
 
+                if(user.Role.HasValue && user.Role.Value.HasFlag( Entities.Enums.UserRole.EXPERT))
+                {
+
+                    newObservation.IsIdentified = true;
+
+                }
+
+
+
+
                 await this.DataContext.Observations.InsertOneAsync(newObservation);
 
                 await this.AddExplorationPointsForNewObservation(newObservation);
@@ -105,7 +115,6 @@ namespace Business
                 var validator = await MissionValidator.GetValidatorFromActivity(this.ServiceProvider, user);
                 await validator.UpdateActivityProgression();
 
-                await this.UserNotify.SendNotif(user.OsmId, "Coucou");
 
             }
             catch

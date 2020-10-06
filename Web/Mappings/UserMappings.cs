@@ -16,7 +16,7 @@ namespace Web.Mappings
                 OsmId = user.OsmId
             };
         }
-
+        
         public static MissionUserModel ToMissionUserModel(this User user)
         {
             var model = new MissionUserModel();

@@ -17,7 +17,7 @@ export class SpeciesCreationModel {
     floraKeyValues: string[] = null;
 
     validate() {
-        let errors: string[] = [];
+        const errors: string[] = [];
 
         return errors;
     }

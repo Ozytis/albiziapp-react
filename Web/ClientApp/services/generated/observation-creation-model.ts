@@ -13,7 +13,7 @@ export class ObservationCreationModel {
     longitude: number = null;
 
     validate() {
-        let errors: string[] = [];
+        const errors: string[] = [];
 
         return errors;
     }
