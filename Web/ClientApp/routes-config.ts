@@ -15,6 +15,9 @@ import { ExplorationPointsPageConfig } from "./pages/score/exploration-points-pa
 import { KnowledgePointsPageConfig } from "./pages/score/knowledge-points-page-config";
 import { TrophyPageConfig } from "./pages/score/trophy-page-config";
 import { TitlePageConfig } from "./pages/score/title-page-config";
+import { UsersPageConfig } from "./pages/user/users-page-config";
+import { UserPageConfig } from "./pages/user/user-page-config";
+import { EditUserPageConfig } from "./pages/user/edit-user-page-config";
 
 const routesConfig = [
     HomePageConfig,
@@ -32,7 +35,12 @@ const routesConfig = [
     ExplorationPointsPageConfig,
     KnowledgePointsPageConfig,
     TrophyPageConfig,
-    TitlePageConfig
+    TitlePageConfig,
+    UsersPageConfig,
+    UserPageConfig,
+    EditUserPageConfig
+
+
 ]
 
 class RouteUtils {

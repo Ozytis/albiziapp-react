@@ -7,10 +7,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using Ozytis.Common.Core.Utilities;
 using Ozytis.Common.Core.Web.WebApi;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Web.Mappings;
@@ -64,7 +66,7 @@ namespace Web.Controllers
                 new CookieOptions { Path = this.Url.Content("~/") });
 
             await this.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
-            if(user != null)
+            if (user != null)
             {
                 await this.UsersManager.StartFirstMission(model.OsmId);
             }
@@ -88,6 +90,43 @@ namespace Web.Controllers
             var user = await this.UsersManager.SelectAsync(this.User.Identity.Name);
 
             return user?.ToUserScoreModel();
+        }
+
+
+        [HttpGet("userAdmin")]
+        [Authorize]
+        public async Task<bool> IsUserAdminAsync()
+        {
+            var user = await this.UsersManager.SelectAsync(this.User.Identity.Name);
+
+            return this.UsersManager.IsUserAdmin(user);
+        }
+
+        [HttpGet("allUsers")]
+        public async Task<IEnumerable<UserModel>> GetAllUsersAsync()
+        {
+            IEnumerable<User> users = await this.UsersManager.GetAllUsers();
+            return users.Select(u => u.ToUserApiModel());
+        }
+
+        [HttpGet("{userId}")]
+        public async Task<UserModel> GetAllUsersAsync(string userId)
+        {
+            var user = await this.UsersManager.SelectAsync(userId);
+            return user.ToUserApiModel();
+        }
+
+        [HttpPut]
+        [HandleBusinessException, ValidateModel]
+        public async Task EditUserAysnc([FromBody] UserEditionModel model)
+        {
+            await this.UsersManager.EditUserAsync(
+                new User
+                {
+                    OsmId = model.OsmId,
+                    Name = model.Name,
+                    Role= (Entities.Enums.UserRole?)model.Role
+                });
         }
     }
 }

@@ -8,5 +8,7 @@
 
         public string OsmId { get; set; }
 
+        public int? Role { get; set; }
+
     }
 }

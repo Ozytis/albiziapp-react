@@ -10,7 +10,7 @@ namespace Business
 {
     public class UsersManager : BaseManager
     {
-        public UsersManager(DataContext dataContext, TitlesManager titlesManager, MissionsManager missionsManager,TrophiesManager trophiesManager, IUserNotify userNotify) : base(dataContext)
+        public UsersManager(DataContext dataContext, TitlesManager titlesManager, MissionsManager missionsManager, TrophiesManager trophiesManager, IUserNotify userNotify) : base(dataContext)
         {
             this.TitlesManager = titlesManager;
             this.MissionsManager = missionsManager;
@@ -61,7 +61,7 @@ namespace Business
             {
                 return;
             }
-            
+
             user.ExplorationPoints += points.Sum(p => p.Point);
             if (user.ExplorationPointsHistory == null)
             {
@@ -73,13 +73,13 @@ namespace Business
                 pointsList.AddRange(points);
                 user.ExplorationPointsHistory = pointsList.ToArray();
             }
-            await this.UserNotify.SendNotif(userId, "Vous avez gagné "+ points.Sum(p => p.Point)+" point(s)");
+            await this.UserNotify.SendNotif(userId, "Vous avez gagné " + points.Sum(p => p.Point) + " point(s)");
 
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
         }
 
 
-        public async Task AddKnowledegePoints(string userId, List<PointHistory>  points)
+        public async Task AddKnowledegePoints(string userId, List<PointHistory> points)
         {
             var user = await this.SelectAsync(userId);
             if (user == null)
@@ -88,7 +88,7 @@ namespace Business
             }
 
             user.KnowledgePoints += points.Sum(p => p.Point);
-            if(user.KnowledgePointsHistory == null)
+            if (user.KnowledgePointsHistory == null)
             {
                 user.KnowledgePointsHistory = points.ToArray();
             }
@@ -96,7 +96,7 @@ namespace Business
             {
                 var pointsList = user.KnowledgePointsHistory.ToList();
                 pointsList.AddRange(points);
-                user.KnowledgePointsHistory = pointsList.ToArray(); 
+                user.KnowledgePointsHistory = pointsList.ToArray();
             }
             await this.UserNotify.SendNotif(userId, "Vous avez gagné " + points.Sum(p => p.Point) + " point(s)");
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
@@ -120,8 +120,8 @@ namespace Business
                 {
                     var titlesToAdd = titles.Where(t => !user.Titles.Any(ut => ut == t.Id)).Select(t => t.Id).ToList();
                     user.Titles = user.Titles.Concat(titlesToAdd).ToArray();
-                    
-            await this.UserNotify.SendNotif(userId, "Vous avez debloqué un nouveau titre !");
+
+                    await this.UserNotify.SendNotif(userId, "Vous avez debloqué un nouveau titre !");
                 }
                 await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
             }
@@ -229,7 +229,7 @@ namespace Business
                 var nextMission = missions.FirstOrDefault(x => x.Order > mission.Order);
                 if (nextMission != null)
                 {
-                    user.MissionProgress = new MissionProgress { MissionId = nextMission.Id, ActivityId = nextMission.Activities.OrderBy(x => x.Order).FirstOrDefault()?.Id,StartDate = DateTime.UtcNow };
+                    user.MissionProgress = new MissionProgress { MissionId = nextMission.Id, ActivityId = nextMission.Activities.OrderBy(x => x.Order).FirstOrDefault()?.Id, StartDate = DateTime.UtcNow };
                 }
                 else
                 {
@@ -266,11 +266,52 @@ namespace Business
             var nextMission = missions.FirstOrDefault();
             if (nextMission != null)
             {
-                user.MissionProgress = new MissionProgress { MissionId = nextMission.Id, ActivityId = nextMission.Activities.OrderBy(x => x.Order).FirstOrDefault()?.Id,StartDate = DateTime.UtcNow };
+                user.MissionProgress = new MissionProgress { MissionId = nextMission.Id, ActivityId = nextMission.Activities.OrderBy(x => x.Order).FirstOrDefault()?.Id, StartDate = DateTime.UtcNow };
             }
 
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
 
+        }
+
+
+
+        public bool IsUserAdmin(User user)
+        {
+            if (user.Role.HasValue && user.Role.Value.HasFlag(Entities.Enums.UserRole.ADMINISTRATOR))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+        public async Task<IEnumerable<User>> GetAllUsers()
+        {
+            return await this.DataContext.Users.Find(_ => true).ToListAsync();
+        }
+
+        public async Task<User> EditUserAsync(User user)
+        {
+            using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
+            var oldUser = await this.SelectAsync(user.OsmId);
+            try
+            {
+                session.StartTransaction();
+
+                oldUser.OsmId = user.OsmId;
+                oldUser.Name = user.Name;
+                oldUser.Role = user.Role;
+                await this.DataContext.Users.FindOneAndReplaceAsync(u => u.OsmId == oldUser.OsmId, oldUser);
+            }
+            catch
+            {
+                await session.AbortTransactionAsync();
+                throw;
+            }
+
+            return oldUser;
         }
     }
 }

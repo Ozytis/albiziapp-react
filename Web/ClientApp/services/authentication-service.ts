@@ -4,6 +4,7 @@ import { UserModel } from "./generated/user-model";
 import { UserLoginModel } from "./generated/user-login-model";
 import { MissionUserModel } from "./generated/mission-user-model";
 import { UserScoreModel } from "./generated/user-score-model";
+import { UserEditionModel } from "./generated/user-edition-model";
 
 class AuthenticationService extends BaseService {
 
@@ -116,6 +117,24 @@ class AuthenticationService extends BaseService {
         });
     }
 
+    async isUserAdmin() {
+
+        const isAdmin = await this.get<boolean>(`users/userAdmin`);
+
+        return isAdmin;
+
+    }
+    async getAllUsers() {
+        return await this.get<UserModel[]>(`users/allUsers`);
+    }
+
+    async getUser(userId: string) {
+        return await this.get<UserModel>(`users/${userId}`)
+    }
+    async editUser(user: UserEditionModel) {
+        const result = await this.put<UserEditionModel>(`users`, user);
+        return result;
+    }
 }
 
 export const AuthenticationApi = new AuthenticationService();

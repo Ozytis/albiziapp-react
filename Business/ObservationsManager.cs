@@ -376,5 +376,6 @@ namespace Business
             var serializeObservation = JsonSerializer.Serialize<BaseObservation>(observation);
             return JsonSerializer.Deserialize<BaseObservation>(serializeObservation);
         }
+
     }
 }
