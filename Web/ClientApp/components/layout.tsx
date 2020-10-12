@@ -9,6 +9,7 @@ import { t } from "../services/translation-service";
 import { IPropsWithAppContext, withAppContext } from "./app-context";
 import { BaseComponent } from "./base-component";
 import { ShortcutsMenu } from "./shortcuts-menu";
+import PWAPrompt from 'react-ios-pwa-prompt'
 
 const styles = (theme: Theme) => createStyles({
     menu: {
@@ -37,14 +38,27 @@ class LayoutState {
 }
 
 class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
+
+
+
     constructor(props: LayoutProps) {
         super(props, "layout", new LayoutState());
+
     }
 
     async componentDidMount() {
         this.props.history.listen((data) => this.onRouteChanged(data as unknown as any));
         this.props.appContext.addContextUpdateListener(() => this.onContextChanged());
         this.onRouteChanged(this.props.location);
+
+
+        //if (this.PWA.isInstallPromptSupported && this.PWA.isStandalone) {
+        //    const didInstall = await this.PWA.promptInstall()
+        //    if (didInstall) {
+        //        // User accepted PWA install
+        //        console.log("didInstall", didInstall);
+        //    }
+        //}
     }
 
     async componentWillUnmount() {
@@ -90,17 +104,18 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
         this.props.history.push({
             pathname: route
         });
-        
+
         await this.props.appContext.updateContext("menuIsOpen", false);
     }
 
     render() {
 
         const { classes, appContext } = this.props;
-        const routes = this.props.appContext.routes.map(route => route.routes).reduce((a, b) => a.concat(b), []);        
+        const routes = this.props.appContext.routes.map(route => route.routes).reduce((a, b) => a.concat(b), []);
 
         return (
             <div className={classes.root}>
+                <PWAPrompt />
                 <AppBar position="sticky">
                     <Toolbar>
                         <IconButton

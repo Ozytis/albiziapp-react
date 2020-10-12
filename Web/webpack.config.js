@@ -3,7 +3,7 @@ const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 
-module.exports = (env, { mode = 'development' }) => {
+module.exports = (env, { mode = 'production' }) => {
 
     const config = {
         context: __dirname,

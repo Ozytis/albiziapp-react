@@ -97,24 +97,17 @@ namespace Business
 
                 if(user.Role.HasValue && user.Role.Value.HasFlag( Entities.Enums.UserRole.EXPERT))
                 {
-
                     newObservation.IsIdentified = true;
-
                 }
-
-
 
 
                 await this.DataContext.Observations.InsertOneAsync(newObservation);
 
                 await this.AddExplorationPointsForNewObservation(newObservation);
-
-
-               
+                                              
 
                 var validator = await MissionValidator.GetValidatorFromActivity(this.ServiceProvider, user);
                 await validator.UpdateActivityProgression();
-
 
             }
             catch
