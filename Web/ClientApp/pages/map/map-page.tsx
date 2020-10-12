@@ -15,6 +15,7 @@ import { MissionsApi } from "../../services/missions-service";
 import { ActivityModel } from "../../services/generated/activity-model";
 import { MissionProgressionModel } from "../../services/generated/mission-progression-model";
 import { ErrorSummary } from "../../components/error-summary";
+import {NearMe } from "@material-ui/icons";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -23,7 +24,6 @@ const styles = (theme: Theme) => createStyles({
         maxWidth: "100vw",
         minWidth: "100vw",
     },
-
     map: {
         height: "calc(100vh - 180px)",
         width: "100vw",
@@ -157,19 +157,34 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             return "orange";
         }        
     }
+
     getOppacity(observation: ObservationModel) {
         
         return AuthenticationApi.user.osmId === observation.userId ? 0.5 : 0;
     }
+
     goToUserLocation() {
 
-        this.state.mapRef.current.leafletElement.panTo([this.state.userPosition.coords.latitude, this.state.userPosition.coords.longitude]);
+        this.state.mapRef.current.leafletElement.setView([this.state.userPosition.coords.latitude, this.state.userPosition.coords.longitude], 18);
     }
+
+
     render() {
         
         const { classes } = this.props;
 
         const position = this.state.userPosition && { lat: this.state.userPosition.coords.latitude, lng: this.state.userPosition.coords.longitude };
+
+        const style = {
+            position: "absolute",
+            top: "9%",
+            right: "3%",
+            padding: "10px",
+            zIndex: 400,
+            backgroundColor: "#f4f4f4",
+            color: "black",
+            textAlign: "center",
+        };
        
         return (
             <Box className={clsx(classes.root)}>
@@ -212,9 +227,9 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                     
                 }
                 {
-                   // <Button onClick={() => this.goToUserLocation()} >
-                 //{t.__("Ma position")}
-               // </Button>
+                    <Button style={style} onClick={() => this.goToUserLocation()} >
+                        <NearMe />
+               </Button>
 
                 }
                 {
