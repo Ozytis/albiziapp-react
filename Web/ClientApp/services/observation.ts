@@ -148,6 +148,11 @@ class ObservationsService extends BaseService {
             })
             .sort((s1, s2) => s1.species.speciesName.localeCompare(s2.species.speciesName));
     }
+
+    async notifError(userId: string, error: string) {
+        const result = await this.post(`observations/errorNotif/${userId}/${error}`, null);
+        return result;
+    }
 }
 
 export const ObservationsApi = new ObservationsService();

@@ -7,6 +7,7 @@ namespace Common
     {
         public Task<Task> SendNotif(string username, string notifContent);
 
+        public Task<Task> SendErrorNotif(string username, string notifContent);
 
     }
 }

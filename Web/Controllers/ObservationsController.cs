@@ -109,5 +109,12 @@ namespace Web.Controllers
         {
             await this.ObservationsManager.VaidateObservationAsync(observationId, this.User.Identity.Name);
         }
+
+        [HttpPost("errorNotif/{userId}/{error}")]
+        [HandleBusinessException, ValidateModel]
+        public void NotifyError(string userId, string error)
+        {
+            this.UserNotify.SendErrorNotif(userId, error);
+        }
     }
 }

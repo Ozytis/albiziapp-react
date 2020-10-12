@@ -1,7 +1,7 @@
-import { Box, createStyles, Icon, Theme, WithStyles, withStyles, Button } from "@material-ui/core";
+import { Box, createStyles, Icon, Theme, WithStyles, withStyles, Button, Dialog, DialogActions } from "@material-ui/core";
 import clsx from "clsx";
 import { LatLng } from "leaflet";
-import React from "react";
+import React, { createRef, Component } from "react";
 import { Circle, Map, Marker, TileLayer } from "react-leaflet";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
@@ -14,6 +14,7 @@ import { t } from "../../services/translation-service";
 import { MissionsApi } from "../../services/missions-service";
 import { ActivityModel } from "../../services/generated/activity-model";
 import { MissionProgressionModel } from "../../services/generated/mission-progression-model";
+import { ErrorSummary } from "../../components/error-summary";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -52,7 +53,9 @@ class MapPageState {
     userPosition: Position = null;
     observations: ObservationModel[];
     currentActivity: ActivityModel;
-    missionProgression: MissionProgressionModel;
+    missionProgression: MissionProgressionModel; 
+    zoomLevel: number = 0;
+    mapRef = createRef<Map>();
 }
 
 class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
@@ -119,15 +122,23 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
     async onMapClicked(e: { latlng: LatLng }) {
 
-        if (!await Confirm(t.__("Voulez vous réaliser un nouveau relevé ?"))) {
+        const zoomLvl = this.state.mapRef.current.leafletElement.getZoom();
+
+        if (zoomLvl >= 15) {
+            if (!await Confirm(t.__("Voulez vous réaliser un nouveau relevé ?"))) {
+                return;
+            }
+
+            await ObservationsApi.setNextObservationCoordinates(e.latlng);
+
+            this.props.history.push({
+                pathname: "new-observation"
+            });
+        }
+        else {
+            await ObservationsApi.notifError(AuthenticationApi.getCurrentUser().osmId, "Le niveau de zoom est trop bas pour créer un nouveau relevé");
             return;
         }
-
-        await ObservationsApi.setNextObservationCoordinates(e.latlng);
-
-        this.props.history.push({
-            pathname: "new-observation"
-        });
     }
 
     getTilesUrl() {
@@ -140,25 +151,36 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
     getColor(observation: ObservationModel) {
         if (observation.isIdentified) {
-            return "blue";
+            return "lime";
         }
-        return AuthenticationApi.user.osmId === observation.userId ? "red" : "lime";
+        else {
+            return "orange";
+        }        
     }
+    getOppacity(observation: ObservationModel) {
+        
+        return AuthenticationApi.user.osmId === observation.userId ? 0.5 : 0;
+    }
+    goToUserLocation() {
 
+        this.state.mapRef.current.leafletElement.panTo([this.state.userPosition.coords.latitude, this.state.userPosition.coords.longitude]);
+    }
     render() {
-
+        
         const { classes } = this.props;
 
         const position = this.state.userPosition && { lat: this.state.userPosition.coords.latitude, lng: this.state.userPosition.coords.longitude };
-
+       
         return (
             <Box className={clsx(classes.root)}>
                 {
                     this.state.userPosition &&
-                    <Map
+                    <Map            
+                        ref={this.state.mapRef}
                         className={clsx(classes.map)}
                         center={position}
-                        zoom={22}
+                        zoom={18}
+                        minZoom={5}                        
                         onclick={(e) => this.onMapClicked(e)}
                     >
                         <TileLayer
@@ -172,12 +194,14 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
                         {
                             this.state.observations && this.state.observations.map((observation) => {
+                                console.log(this.getOppacity(observation));
                                 return (
                                     <Circle
                                         key={observation.id}
+                                        fillOpacity={this.getOppacity(observation)}
                                         center={{ lat: observation.latitude, lng: observation.longitude }}
                                         radius={6}
-                                        color={this.getColor(observation)}
+                                        color={this.getColor(observation)}                                        
                                         onclick={() => this.props.history.push({ pathname: `/observation/${observation.id}` })}
                                     />
                                 )
@@ -185,7 +209,19 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         }
 
                     </Map>
+                    
+                }
+                {
+                   // <Button onClick={() => this.goToUserLocation()} >
+                 //{t.__("Ma position")}
+               // </Button>
 
+                }
+                {
+                    !this.state.userPosition &&
+                    <Box className={clsx(classes.loading)}>
+                        <Icon className="fas fa-sync fa-spin fa-fw" /> {t.__("Chargement...")}
+                    </Box>
                 }
                 {this.state.currentActivity != null &&
                     <Box className={clsx(classes.missionBox)}>{this.state.currentActivity.instructions.long}
@@ -194,12 +230,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         }
                     </Box>
                 }
-                {
-                    !this.state.userPosition &&
-                    <Box className={clsx(classes.loading)}>
-                        <Icon className="fas fa-sync fa-spin fa-fw" /> {t.__("Chargement...")}
-                    </Box>
-                }
+               
             </Box>
         )
     }

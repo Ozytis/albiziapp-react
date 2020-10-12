@@ -41,7 +41,7 @@ class HomePageComponent extends BaseComponent<HomePageProps, HomePageState>{
     constructor(props: HomePageProps) {
         super(props, "HomePage", new HomePageState());
     }
-
+  
 
     render() {
 
@@ -49,8 +49,6 @@ class HomePageComponent extends BaseComponent<HomePageProps, HomePageState>{
 
         return (
             <Container fixed className={clsx(classes.root)}>
-
-
 
                 <ActivitiesTab />
 

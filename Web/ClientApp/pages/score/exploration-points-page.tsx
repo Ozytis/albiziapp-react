@@ -75,8 +75,7 @@ class ExplorationPointsPageComponent extends BaseComponent<ExplorationPointsPage
                             </ListItemSecondaryAction>
                         }
                     </ListItem>
-                </List>
-                <Box maxHeight={10}>
+                </List>                
                     <List>
                         <ListItem className={clsx(classes.headerItem)}>
                             <ListItemText primary={__("Points acquis")} />
@@ -91,8 +90,7 @@ class ExplorationPointsPageComponent extends BaseComponent<ExplorationPointsPage
                             </ListItem>
                         ))}
 
-                    </List>
-                </Box>
+                    </List>               
                 <List>
                     <ListItem className={clsx(classes.headerItem)}>
                         <ListItemText primary={__("Comment obtenir des points?")} />

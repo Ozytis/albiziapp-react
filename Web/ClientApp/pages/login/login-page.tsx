@@ -44,7 +44,7 @@ class LoginPageComponent extends BaseComponent<LoginPageProps, LoginPageState>{
 
     async connect() {
         await AuthenticationApi.login();
-        this.props.history.push("/");
+        this.props.history.push("/map");
     }
 
     render() {

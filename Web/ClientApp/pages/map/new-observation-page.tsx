@@ -120,10 +120,17 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         model.genus = genus.genus;
         await this.setState({ model: model, commonGenus: genus.commonGenus });
     }
-
-    async updateCommon(common: string) {
+    async updateGenus(genusName: string) {
         const model = this.state.model;
-        const species = this.state.species.find(g => g.commonSpeciesName === common);
+        const genus = this.state.genus.find(g => g.genus === genusName);
+        model.genus = genus.genus;
+
+        await this.setState({ model: model, commonGenus: genus.commonGenus });
+    }
+
+    async updateCommonSpecies(commonSpecies: string) {
+        const model = this.state.model;
+        const species = this.state.species.find(g => g.commonSpeciesName === commonSpecies);
         model.species = species.speciesName;
         
         await this.setState({ model: model, commonName: species.commonSpeciesName });
@@ -137,13 +144,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         await this.setState({ model: model, commonName: species.commonSpeciesName });
     }
 
-    async updateGenus(genusName: string) {
-        const model = this.state.model;
-        const genus = this.state.genus.find(g => g.genus === genusName);
-        model.genus = genus.genus;
-
-        await this.setState({ model: model, commonGenus: genus.commonGenus });
-    }
+    
 
     async process() {
 
@@ -218,7 +219,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
 
                 <FormControl className={clsx(classes.formControl)}>
                     <Autocomplete
-                        id="commonGenusSelect"
+                        id="GenusSelect"
                         options={genus.sort((g1, g2) => g1.genus.localeCompare(g2.genus))}
                         getOptionLabel={(option: TreeGenusModel) => option.genus}
                         renderInput={(params) => <TextField {...params} label="Latin" variant="outlined" />}
@@ -234,11 +235,11 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                 <FormControl className={clsx(classes.formControl)}>
 
                     <Autocomplete
-                        id="commonGenusSelect"
+                        id="commonSpeciesSelect"
                         options={species.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName))}
                         getOptionLabel={(option: SpeciesModel) => option.commonSpeciesName}
                         renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}                        
-                        onChange={(e, v) => this.updateCommon((v as any).commonSpeciesName)}
+                        onChange={(e, v) => this.updateCommonSpecies((v as any).commonSpeciesName)}
                     />
 
                 </FormControl>
@@ -246,9 +247,9 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                 <FormControl className={clsx(classes.formControl)}>
 
                     <Autocomplete
-                        id="commonGenusSelect"
+                        id="SpeciesSelect"
                         options={species.sort((s1, s2) => s1.speciesName.localeCompare(s2.speciesName))}
-                        getOptionLabel={(option: SpeciesModel) => option.commonSpeciesName}
+                        getOptionLabel={(option: SpeciesModel) => option.speciesName}
                         renderInput={(params) => <TextField {...params} label="Latine" variant="outlined" />}                        
                         onChange={(e, v) => this.updateSpecies((v as any).speciesName)}
                     />

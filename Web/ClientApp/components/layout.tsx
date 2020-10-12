@@ -1,5 +1,5 @@
 import { AppBar, createStyles, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Theme, Toolbar, Typography, withStyles, WithStyles } from "@material-ui/core";
-import { AccountTree, Book, Eco, ExitToApp, Search, SupervisorAccount } from "@material-ui/icons";
+import { AccountTree, Book, Eco, ExitToApp, Search, SupervisorAccount, VerticalAlignBottom } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -36,6 +36,8 @@ interface LayoutProps extends IPropsWithAppContext, RouteComponentProps, WithSty
 class LayoutState {
     title = "";
     isUserAdmin = false;
+    isUserConnected = false;
+    user: UserModel;
 }
 
 class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
@@ -48,9 +50,9 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
         this.props.appContext.addContextUpdateListener(() => this.onContextChanged());
         this.onRouteChanged(this.props.location);
         const isUserAdmin = await AuthenticationApi.isUserAdmin();
-        console.log(isUserAdmin);
-        this.setState({ isUserAdmin: isUserAdmin });
-
+        const user = await AuthenticationApi.getCurrentUser();        
+        this.setState({ isUserAdmin: isUserAdmin, user: user });
+        this.isConnected();
     }
 
     async componentWillUnmount() {
@@ -78,6 +80,7 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
 
     async onContextChanged() {
 
+        this.isConnected();
         console.log("onContextChanged");
 
         if (this.props.appContext.title && this.props.appContext.title.length > 0 && this.state.title !== this.props.appContext.title) {
@@ -90,6 +93,7 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
         this.props.appContext.updateContext("isConnected", false);
         this.props.appContext.updateContext("menuIsOpen", false);
         this.props.history.push("/login");
+        await this.setState({ isUserConnected: false })
     }
 
     async goTo(route: string) {
@@ -98,6 +102,17 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
         });
         
         await this.props.appContext.updateContext("menuIsOpen", false);
+    }
+
+    async isConnected() {
+        const user = await AuthenticationApi.getCurrentUser();        
+        if (user) {
+            await this.setState({isUserConnected : true})
+        }
+        else {
+            await this.setState({ isUserConnected: false })
+        }
+
     }
 
     render() {
@@ -119,63 +134,73 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                             <Eco />
                         </IconButton>
                         <Typography variant="h6" className={classes.title}>
-                            {this.state.title ? t.__(this.state.title) : "Albiziapp"}
+                            {this.state.title ? t.__(this.state.title) : "Albiziapp"}                            
                         </Typography>
+                        
 
                     </Toolbar>
                 </AppBar>
-                <Drawer
-                    anchor={"left"}
-                    open={this.props.appContext.menuIsOpen}
-                    onClose={() => this.props.appContext.updateContext("menuIsOpen", false)}
-                    className={classes.menu}>
-                    <Toolbar>
+                {this.state.isUserConnected &&
+                    <Drawer
+                        anchor={"left"}
+                        open={this.props.appContext.menuIsOpen}
+                        onClose={() => this.props.appContext.updateContext("menuIsOpen", false)}
+                        className={classes.menu}>
+                        <Toolbar>
 
-                        <Eco className={clsx("mr-4")} />
+                            <Eco className={clsx("mr-4")} />
 
-                        <Typography variant="h6" className={classes.title}>
+                            <Typography variant="h6" className={classes.title}>
                             Albiziapp
-                        </Typography>
+                        </Typography>                        
 
-                    </Toolbar>
+                    </Toolbar>                    
                     <List >
-                        <ListItem button onClick={() => this.goTo("/species")}>
-                            <ListItemIcon>
-                                <Book />
-                            </ListItemIcon>
-                            <ListItemText primary={t.__("Flore")} />
+                        {this.state.user &&
+                            <ListItem style={{marginTop : "-12%"}}>
+                                {this.state.user.name}
                         </ListItem>
-                        <ListItem button onClick={() => this.goTo("/folia")}>
-                            <ListItemIcon>
-                                <Search />
-                            </ListItemIcon>
-                            <ListItemText primary={t.__("Folia")} />
-                        </ListItem>
-                        <ListItem button onClick={() => this.goTo("/determination-key")}>
-                            <ListItemIcon>
-                                <AccountTree />
-                            </ListItemIcon>
-                            <ListItemText primary={t.__("Clé de détermination")} />
-                        </ListItem>
-                        {this.state.isUserAdmin &&
-                            <ListItem button onClick={() => this.goTo("/users")}>
-                                <ListItemIcon>
-                                    <SupervisorAccount />
-                                </ListItemIcon>
-                                <ListItemText primary={t.__("Gestion des utilisateurs")} />
-                            </ListItem>
                         }
-                        <ListItem button onClick={() => this.logOut()}>
-                            <ListItemIcon>
-                                <ExitToApp />
-                            </ListItemIcon>
-                            <ListItemText primary={t.__("Me déconnecter")} />
-                        </ListItem>
-                    </List>
-
+                            <ListItem button onClick={() => this.goTo("/species")}>
+                                <ListItemIcon>
+                                    <Book />
+                                </ListItemIcon>
+                                <ListItemText primary={t.__("Flore")} />
+                            </ListItem>
+                            <ListItem button onClick={() => this.goTo("/folia")}>
+                                <ListItemIcon>
+                                    <Search />
+                                </ListItemIcon>
+                                <ListItemText primary={t.__("Folia")} />
+                            </ListItem>
+                            <ListItem button onClick={() => this.goTo("/determination-key")}>
+                                <ListItemIcon>
+                                    <AccountTree />
+                                </ListItemIcon>
+                                <ListItemText primary={t.__("Clé de détermination")} />
+                            </ListItem>
+                            {this.state.isUserAdmin &&
+                                <ListItem button onClick={() => this.goTo("/users")}>
+                                    <ListItemIcon>
+                                        <SupervisorAccount />
+                                    </ListItemIcon>
+                                    <ListItemText primary={t.__("Gestion des utilisateurs")} />
+                                </ListItem>
+                            }
+                            <ListItem button onClick={() => this.logOut()}>
+                                <ListItemIcon>
+                                    <ExitToApp />
+                                </ListItemIcon>
+                                <ListItemText primary={t.__("Me déconnecter")} />
+                        </ListItem>                      
+                    </List>   
                 </Drawer>
+                }
+                
                 {renderRoutes(routes)}
-                <ShortcutsMenu />
+                {this.state.isUserConnected &&
+                    <ShortcutsMenu />
+                }
             </div>
         )
     }

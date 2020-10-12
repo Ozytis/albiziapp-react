@@ -50,6 +50,7 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
     render() {
 
         const { classes } = this.props;
+        const { species } = this.state;
         return (
             <Box>
                 <Box>
@@ -67,9 +68,9 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
                 </Box>
                  <Box className={clsx(classes.root)}>
                 {
-                    this.state.species && this.state.species.map(arboretum => {
+                    species && species.map(arboretum => {
                         return (
-                            <ArboretumCard key={arboretum.species.telaBotanicaTaxon} species={arboretum.species} nbOfViews={arboretum.nbOfViews} />
+                            <ArboretumCard key={arboretum.species.id} species={arboretum.species} nbOfViews={arboretum.nbOfViews} />
                         )
                     })
                 }
