@@ -10,6 +10,7 @@ import { IPropsWithAppContext, withAppContext } from "./app-context";
 import { BaseComponent } from "./base-component";
 import { ShortcutsMenu } from "./shortcuts-menu";
 import { UserModel } from "../services/generated/user-model";
+import PWAPrompt from 'react-ios-pwa-prompt'
 
 const styles = (theme: Theme) => createStyles({
     menu: {
@@ -41,8 +42,12 @@ class LayoutState {
 }
 
 class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
+
+
+
     constructor(props: LayoutProps) {
         super(props, "layout", new LayoutState());
+
     }
 
     async componentDidMount() {
@@ -100,7 +105,7 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
         this.props.history.push({
             pathname: route
         });
-        
+
         await this.props.appContext.updateContext("menuIsOpen", false);
     }
 
@@ -117,9 +122,10 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
 
     render() {
         const { classes, appContext } = this.props;
-        const routes = this.props.appContext.routes.map(route => route.routes).reduce((a, b) => a.concat(b), []); 
+        const routes = this.props.appContext.routes.map(route => route.routes).reduce((a, b) => a.concat(b), []);
         return (
             <div className={classes.root}>
+                <PWAPrompt />
                 <AppBar position="sticky">
                     <Toolbar>
                         <IconButton
