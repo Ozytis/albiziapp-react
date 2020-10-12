@@ -1,9 +1,8 @@
 ﻿namespace Api
 {
-    public class UserModel
+    [GenerateClass]
+    public class UserEditionModel
     {
-        public string Id { get; set; }
-
         public string Name { get; set; }
 
         public string OsmId { get; set; }

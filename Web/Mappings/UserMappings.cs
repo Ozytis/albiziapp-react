@@ -13,7 +13,8 @@ namespace Web.Mappings
             {
                 Id = user.Id,
                 Name = user.Name,
-                OsmId = user.OsmId
+                OsmId = user.OsmId,
+                Role = (int?)user.Role
             };
         }
         

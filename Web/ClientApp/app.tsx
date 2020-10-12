@@ -110,8 +110,6 @@ class App extends BaseComponent<AppProps, AppState>{
                     progress: undefined,
                 });
 
-                console.log(notify);
-
                 const element =
                     <div onLoad={notify}>
                     <ToastContainer position="bottom-center"

@@ -1,5 +1,5 @@
 import { AppBar, createStyles, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Theme, Toolbar, Typography, withStyles, WithStyles } from "@material-ui/core";
-import { AccountTree, Book, Eco, ExitToApp, Search } from "@material-ui/icons";
+import { AccountTree, Book, Eco, ExitToApp, Search, SupervisorAccount } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -9,6 +9,7 @@ import { t } from "../services/translation-service";
 import { IPropsWithAppContext, withAppContext } from "./app-context";
 import { BaseComponent } from "./base-component";
 import { ShortcutsMenu } from "./shortcuts-menu";
+import { UserModel } from "../services/generated/user-model";
 import PWAPrompt from 'react-ios-pwa-prompt'
 
 const styles = (theme: Theme) => createStyles({
@@ -35,6 +36,7 @@ interface LayoutProps extends IPropsWithAppContext, RouteComponentProps, WithSty
 
 class LayoutState {
     title = "";
+    isUserAdmin = false;
 }
 
 class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
@@ -50,15 +52,10 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
         this.props.history.listen((data) => this.onRouteChanged(data as unknown as any));
         this.props.appContext.addContextUpdateListener(() => this.onContextChanged());
         this.onRouteChanged(this.props.location);
+        const isUserAdmin = await AuthenticationApi.isUserAdmin();
+        console.log(isUserAdmin);
+        this.setState({ isUserAdmin: isUserAdmin });
 
-
-        //if (this.PWA.isInstallPromptSupported && this.PWA.isStandalone) {
-        //    const didInstall = await this.PWA.promptInstall()
-        //    if (didInstall) {
-        //        // User accepted PWA install
-        //        console.log("didInstall", didInstall);
-        //    }
-        //}
     }
 
     async componentWillUnmount() {
@@ -109,9 +106,7 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
     }
 
     render() {
-
         const { classes, appContext } = this.props;
-        const routes = this.props.appContext.routes.map(route => route.routes).reduce((a, b) => a.concat(b), []);
 
         return (
             <div className={classes.root}>
@@ -168,6 +163,14 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                             </ListItemIcon>
                             <ListItemText primary={t.__("Clé de détermination")} />
                         </ListItem>
+                        {this.state.isUserAdmin &&
+                            <ListItem button onClick={() => this.goTo("/users")}>
+                                <ListItemIcon>
+                                    <SupervisorAccount />
+                                </ListItemIcon>
+                                <ListItemText primary={t.__("Gestion des utilisateurs")} />
+                            </ListItem>
+                        }
                         <ListItem button onClick={() => this.logOut()}>
                             <ListItemIcon>
                                 <ExitToApp />

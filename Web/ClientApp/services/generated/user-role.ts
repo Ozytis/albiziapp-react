@@ -4,9 +4,8 @@
 // </auto-generated>
 //----------------------
 
-export interface UserModel {
-    id: string;
-    name: string;
-    osmId: string;
-    role: number;
+export enum UserRole{
+    none = 0,
+    expert = 1,
+    administrator = 2,
 }
