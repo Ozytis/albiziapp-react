@@ -175,16 +175,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
         const position = this.state.userPosition && { lat: this.state.userPosition.coords.latitude, lng: this.state.userPosition.coords.longitude };
 
-        const style = {
-            position: "absolute",
-            top: "9%",
-            right: "3%",
-            padding: "10px",
-            zIndex: 400,
-            backgroundColor: "#f4f4f4",
-            color: "black",
-            textAlign: "center",
-        };
+        
        
         return (
             <Box className={clsx(classes.root)}>
@@ -227,7 +218,17 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                     
                 }
                 {
-                    <Button style={style} onClick={() => this.goToUserLocation()} >
+                    <Button style={{
+                        position: "absolute",
+                        top: "9%",
+                        right: "3%",
+                        padding: "10px",
+                        zIndex: 400,
+                        backgroundColor: "#f4f4f4",
+                        color: "black",
+                        textAlign: "center",
+                    }}
+                        onClick={() => this.goToUserLocation()} >
                         <NearMe />
                </Button>
 
