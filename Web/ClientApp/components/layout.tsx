@@ -107,7 +107,7 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
 
     render() {
         const { classes, appContext } = this.props;
-
+        const routes = this.props.appContext.routes.map(route => route.routes).reduce((a, b) => a.concat(b), []);
         return (
             <div className={classes.root}>
                 <PWAPrompt />
