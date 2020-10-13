@@ -2,7 +2,7 @@ import { Box, createStyles, Icon, Theme, WithStyles, withStyles, Button, Dialog,
 import clsx from "clsx";
 import { LatLng } from "leaflet";
 import React, { createRef, Component } from "react";
-import { Circle, Map, Marker, TileLayer } from "react-leaflet";
+import { Circle, Map, Marker, TileLayer, LayerGroup } from "react-leaflet";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
 import { BaseComponent } from "../../components/base-component";
@@ -14,8 +14,8 @@ import { t } from "../../services/translation-service";
 import { MissionsApi } from "../../services/missions-service";
 import { ActivityModel } from "../../services/generated/activity-model";
 import { MissionProgressionModel } from "../../services/generated/mission-progression-model";
-import { ErrorSummary } from "../../components/error-summary";
 import {NearMe } from "@material-ui/icons";
+import { MapPosition } from "../../components/mapPosition";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -65,6 +65,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
     async componentDidMount() {
 
+        console.log(this.state.mapRef);
         navigator.geolocation.getCurrentPosition(async (position) => {
 
             await this.setState({
@@ -93,11 +94,28 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                 missionProgression: userMissions.missionProgression
             });
         }
+
+        await this.setPosition();
+    }
+
+    async setPosition() {
+
+        var lastPos: MapPosition = JSON.parse(localStorage.getItem("mapPosition"));
+        var now = new Date();
+        now = new Date(now.getTime() - 30 * 60000);
+        var date = new Date(lastPos.Date as any);
+        if (this.state.mapRef.current != null) {
+            if (date >= now) {
+                await this.state.mapRef.current.leafletElement.setView([lastPos.Latitude, lastPos.Longitude], lastPos.Zoom);
+            }
+            else {
+                await this.state.mapRef.current.leafletElement.panTo([this.state.userPosition.coords.latitude, this.state.userPosition.coords.longitude]);
+            }
+        }
     }
 
     async loadObservations() {
         const observations = await ObservationsApi.getObservations();
-        console.log("observations found", observations && observations.length);
 
         if (!this.unmounted) {
             await this.setState({ observations: observations });
@@ -158,6 +176,12 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         }        
     }
 
+    async setLastPosition(lat: number, lng: number, zoom : number){
+
+        var now = new Date();
+        localStorage.setItem("mapPosition", JSON.stringify({ Latitude: lat, Longitude: lng, Zoom: zoom, Date: now} as MapPosition))
+    }
+
     getOppacity(observation: ObservationModel) {
         
         return AuthenticationApi.user.osmId === observation.userId ? 0.5 : 0;
@@ -174,20 +198,21 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         const { classes } = this.props;
 
         const position = this.state.userPosition && { lat: this.state.userPosition.coords.latitude, lng: this.state.userPosition.coords.longitude };
+        console.log(this.state.mapRef);
 
-        
-       
         return (
             <Box className={clsx(classes.root)}>
                 {
-                    this.state.userPosition &&
+                    this.state.userPosition && this.state.mapRef &&
+                   
                     <Map            
                         ref={this.state.mapRef}
                         className={clsx(classes.map)}
                         center={position}
                         zoom={18}
-                        minZoom={5}                        
+                        minZoom={5}
                         onclick={(e) => this.onMapClicked(e)}
+                        onmoveend={() => this.setLastPosition(this.state.mapRef.current.leafletElement.getCenter().lat, this.state.mapRef.current.leafletElement.getCenter().lng, this.state.mapRef.current.leafletElement.getZoom() )}
                     >
                         <TileLayer
                             url={this.getTilesUrl()}
@@ -200,7 +225,6 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
                         {
                             this.state.observations && this.state.observations.map((observation) => {
-                                console.log(this.getOppacity(observation));
                                 return (
                                     <Circle
                                         key={observation.id}

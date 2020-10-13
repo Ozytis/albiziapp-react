@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientApp\components\mapPosition.ts" />
     <None Remove="ClientApp\pages\score\exploration-points-page.tsx" />
     <None Remove="ClientApp\pages\score\knowledge-points-page.tsx" />
     <None Remove="ClientApp\pages\score\title-page.tsx" />
@@ -62,6 +63,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\components\mapPosition.ts" />
     <TypeScriptCompile Include="ClientApp\pages\score\title-page.tsx">
       <SubType>Code</SubType>
     </TypeScriptCompile>

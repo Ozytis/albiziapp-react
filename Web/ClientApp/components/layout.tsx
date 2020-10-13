@@ -66,7 +66,7 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
 
     async onRouteChanged(data: { pathname: string }) {
 
-        console.log("route changed", data);
+        //console.log("route changed", data);
 
         const reactRoutes = this.props.appContext.routes.map(route => route.routes).reduce((a, b) => a.concat(b), [])
         const matched = matchRoutes(reactRoutes, data.pathname)[0];
@@ -74,10 +74,10 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
         if (matched) {
             const config = this.props.appContext.routes.find(route => route.routes.some(r => r.path === matched.route.path));
 
-            console.log("config", config, matched, this.props.appContext.title);
+            //console.log("config", config, matched, this.props.appContext.title);
 
             if (this.props.appContext.updateContext && this.state.title !== config.settings.title) {
-                console.log("updating title", config.settings.title);
+                //console.log("updating title", config.settings.title);
                 await this.props.appContext.updateContext("title", config.settings.title);
             }
         }
@@ -86,7 +86,7 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
     async onContextChanged() {
 
         this.isConnected();
-        console.log("onContextChanged");
+       // console.log("onContextChanged");
 
         if (this.props.appContext.title && this.props.appContext.title.length > 0 && this.state.title !== this.props.appContext.title) {
             await this.setState({ title: this.props.appContext.title });

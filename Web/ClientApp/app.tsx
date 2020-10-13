@@ -62,7 +62,7 @@ class App extends BaseComponent<AppProps, AppState>{
     async removeContextUpdateListener(listener: (newContext: IAppContext, oldContext: IAppContext) => Promise<void>) {
         const index = this.contextUpdateListeners.indexOf(listener);
 
-        console.log("removing context listener", index);
+        //console.log("removing context listener", index);
 
         if (index > -1) {
             this.contextUpdateListeners.splice(index, 1);
@@ -191,7 +191,7 @@ class App extends BaseComponent<AppProps, AppState>{
         const props = this.props;
         const { context } = this.state;
 
-        console.log("routes", routes);
+        //console.log("routes", routes);
 
         return (
             <MuiThemeProvider
@@ -219,7 +219,7 @@ AuthenticationApi.refreshUser().then(() => {
 });
 
 if (navigator.serviceWorker) {
-    console.log("REGISTER sw");
+    //console.log("REGISTER sw");
     navigator.serviceWorker.register("/sw.js").then((r) => console.log("REGISTER SUCCESS",r)).catch(err => console.error(err));
 }
 
