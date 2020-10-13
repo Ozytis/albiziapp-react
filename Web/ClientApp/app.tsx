@@ -219,7 +219,6 @@ AuthenticationApi.refreshUser().then(() => {
 });
 
 if (navigator.serviceWorker) {
-    console.log("REGISTER sw");
-    navigator.serviceWorker.register("/sw.js").then((r) => console.log("REGISTER SUCCESS",r)).catch(err => console.error(err));
+    navigator.serviceWorker.register("/sw.js").then((r) => { }).catch(err => console.error(err));
 }
 
