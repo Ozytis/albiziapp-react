@@ -1,8 +1,8 @@
-import { Box, Button, createStyles, FormControl, Grid, InputLabel, MenuItem, Select, Switch, Theme, Typography, WithStyles, withStyles, TextField } from "@material-ui/core";
-import { Undo } from "@material-ui/icons";
+import { Box, Button, createStyles, FormControl, Grid, InputLabel, MenuItem, Select, Switch, Theme, Typography, WithStyles, withStyles, TextField, Modal, IconButton } from "@material-ui/core";
+import { Undo, Router,Close } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
-import { RouteComponentProps, withRouter } from "react-router";
+import { RouteComponentProps, withRouter, Route } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
 import { BaseComponent } from "../../components/base-component";
 import { Confirm } from "../../components/confirm";
@@ -17,6 +17,9 @@ import { ObservationsApi } from "../../services/observation";
 import { SpeciesApi } from "../../services/species-service";
 import { t } from "../../services/translation-service";
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { SpeciesPage } from "../species/species-page";
+import { SpeciesInfoPage } from "../species/species-info-page";
+import { SpeciesInfoComponent } from "../species/species-info-component";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -43,7 +46,19 @@ const styles = (theme: Theme) => createStyles({
     },
     label: {
         margin: theme.spacing(1)
-    }
+    },
+    modal: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    closeButton: {
+        position: 'absolute',
+        right: theme.spacing(2),
+        top: theme.spacing(7),
+        color: theme.palette.primary.contrastText,
+        zIndex:9999
+    },
 });
 
 interface NewObservationPageProps extends RouteComponentProps, IPropsWithAppContext, WithStyles<typeof styles> {
@@ -65,6 +80,7 @@ class NewObservationPageState {
     genus: TreeGenusModel[];
     commonGenus = "";
     commonName = "";
+    showModalSpecied = false;
 }
 
 class NewObservationPageComponent extends BaseComponent<NewObservationPageProps, NewObservationPageState>{
@@ -80,6 +96,12 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         }
 
         AuthenticationApi.refreshUser();
+
+        var tmpModel = JSON.parse(localStorage.getItem("tmp-observation")) as any;
+        if (tmpModel != null) {
+            await this.setState({ model: tmpModel });
+            localStorage.removeItem("tmp-observation");
+        }
 
         this.listener = SpeciesApi.registerSpeciesListener(() => this.refreshSpecies());
 
@@ -132,7 +154,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         const model = this.state.model;
         const species = this.state.species.find(g => g.commonSpeciesName === commonSpecies);
         model.species = species.speciesName;
-        
+
         await this.setState({ model: model, commonName: species.commonSpeciesName });
     }
 
@@ -144,7 +166,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         await this.setState({ model: model, commonName: species.commonSpeciesName });
     }
 
-    
+
 
     async process() {
 
@@ -169,6 +191,16 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                 pathname: "/map"
             })
         }
+    }
+
+    findSpeciesTelaBotanicaTaxon() {
+        var s = this.state.species.find(x => x.speciesName == this.state.model.species);
+        return s?.telaBotanicaTaxon;
+    }
+
+    async goToSpeciesPage() {
+        await this.setState({ showModalSpecied: true });
+
     }
 
     render() {
@@ -197,106 +229,127 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         }
 
         return (
-            <Box className={clsx(classes.root)}>
+            <>
+                <Box className={clsx(classes.root)}>
 
-                <ErrorSummary errors={this.state.errors} />
+                    <ErrorSummary errors={this.state.errors} />
 
-                <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                    {t.__("Genre")}
-                </Typography>
+                    <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                        {t.__("Genre")}
+                    </Typography>
 
-                <FormControl className={clsx(classes.formControl)}>
+                    <FormControl className={clsx(classes.formControl)}>
 
-                    <Autocomplete
-                        id="commonGenusSelect"
-                        options={genus.sort((g1, g2) => g1.commonGenus.localeCompare(g2.commonGenus))}
-                        getOptionLabel={(option: TreeGenusModel) => option.commonGenus}
-                        renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}
-                        onChange={(e, v) => this.updateCommonGenus((v as any).commonGenus)}
-                    />
+                        <Autocomplete
+                            id="commonGenusSelect"
+                            options={genus.sort((g1, g2) => g1.commonGenus.localeCompare(g2.commonGenus))}
+                            getOptionLabel={(option: TreeGenusModel) => option.commonGenus}
+                            renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}
+                            onChange={(e, v) => this.updateCommonGenus((v as any).commonGenus)}
+                        />
 
-                </FormControl>
+                    </FormControl>
 
-                <FormControl className={clsx(classes.formControl)}>
-                    <Autocomplete
-                        id="GenusSelect"
-                        options={genus.sort((g1, g2) => g1.genus.localeCompare(g2.genus))}
-                        getOptionLabel={(option: TreeGenusModel) => option.genus}
-                        renderInput={(params) => <TextField {...params} label="Latin" variant="outlined" />}
-                        onChange={(e, v) => this.updateGenus((v as any).genus)}
-                    />
+                    <FormControl className={clsx(classes.formControl)}>
+                        <Autocomplete
+                            id="GenusSelect"
+                            options={genus.sort((g1, g2) => g1.genus.localeCompare(g2.genus))}
+                            getOptionLabel={(option: TreeGenusModel) => option.genus}
+                            renderInput={(params) => <TextField {...params} label="Latin" variant="outlined" />}
+                            onChange={(e, v) => this.updateGenus((v as any).genus)}
+                        />
 
-                </FormControl>
+                    </FormControl>
 
-                <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                    {t.__("Espèce")}
-                </Typography>
+                    <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                        {t.__("Espèce")}
+                    </Typography>
 
-                <FormControl className={clsx(classes.formControl)}>
+                    <FormControl className={clsx(classes.formControl)}>
 
-                    <Autocomplete
-                        id="commonSpeciesSelect"
-                        options={species.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName))}
-                        getOptionLabel={(option: SpeciesModel) => option.commonSpeciesName}
-                        renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}                        
-                        onChange={(e, v) => this.updateCommonSpecies((v as any).commonSpeciesName)}
-                    />
+                        <Autocomplete
+                            id="commonSpeciesSelect"
+                            options={species.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName))}
+                            getOptionLabel={(option: SpeciesModel) => option.commonSpeciesName}
+                            renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}
+                            onChange={(e, v) => this.updateCommonSpecies((v as any).commonSpeciesName)}
+                        />
 
-                </FormControl>
+                    </FormControl>
 
-                <FormControl className={clsx(classes.formControl)}>
+                    <FormControl className={clsx(classes.formControl)}>
 
-                    <Autocomplete
-                        id="SpeciesSelect"
-                        options={species.sort((s1, s2) => s1.speciesName.localeCompare(s2.speciesName))}
-                        getOptionLabel={(option: SpeciesModel) => option.speciesName}
-                        renderInput={(params) => <TextField {...params} label="Latine" variant="outlined" />}                        
-                        onChange={(e, v) => this.updateSpecies((v as any).speciesName)}
-                    />
-                </FormControl>
+                        <Autocomplete
+                            id="SpeciesSelect"
+                            options={species.sort((s1, s2) => s1.speciesName.localeCompare(s2.speciesName))}
+                            getOptionLabel={(option: SpeciesModel) => option.speciesName}
+                            renderInput={(params) => <TextField {...params} label="Latine" variant="outlined" />}
+                            onChange={(e, v) => this.updateSpecies((v as any).speciesName)}
+                        />
+                        {(this.state.model.species != null && this.state.model.species.length > 0) &&
+                            <a style={{ color: 'black' }} onClick={() => { this.goToSpeciesPage(); }}>Voir la fiche de l'espèce </a>
+                        }
+                    </FormControl>
 
 
-                <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                    {t.__("Confiance")}
-                </Typography>
+                    <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                        {t.__("Confiance")}
+                    </Typography>
 
-                <Typography component="div">
-                    <Grid component="label" container alignItems="center" spacing={1}>
-                        <Grid item>
-                            <InputLabel className={clsx(classes.label)}>{t.__("Peu confiant")}</InputLabel>
+                    <Typography component="div">
+                        <Grid component="label" container alignItems="center" spacing={1}>
+                            <Grid item>
+                                <InputLabel className={clsx(classes.label)}>{t.__("Peu confiant")}</InputLabel>
+                            </Grid>
+                            <Grid item>
+                                <Switch
+                                    checked={model.isConfident}
+                                    onChange={(val) => this.updateModel("isConfident", val.target.checked)}
+                                />
+                            </Grid>
+                            <Grid item>
+                                <InputLabel className={clsx(classes.label)}>
+                                    {t.__("Confiant")}
+                                </InputLabel>
+                            </Grid>
                         </Grid>
-                        <Grid item>
-                            <Switch
-                                checked={model.isConfident}
-                                onChange={(val) => this.updateModel("isConfident", val.target.checked)}
-                            />
-                        </Grid>
-                        <Grid item>
-                            <InputLabel className={clsx(classes.label)}>
-                                {t.__("Confiant")}
-                            </InputLabel>
-                        </Grid>
-                    </Grid>
-                </Typography>
+                    </Typography>
 
-                <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                    {t.__("Photographie")}
-                </Typography>
+                    <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                        {t.__("Photographie")}
+                    </Typography>
 
-                <PhotoFormItem label={t.__("Prendre une photo")} value={model.image} onChange={val => this.updateModel("image", val)} />
+                    <PhotoFormItem label={t.__("Prendre une photo")} value={model.image} onChange={val => this.updateModel("image", val)} />
 
-                <Button color="secondary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.process()}>
-                    <Loader loading={this.state.isProcessing} usualIcon="check" />
-                    {t.__("Valider")}
-                </Button>
+                    <Button color="secondary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.process()}>
+                        <Loader loading={this.state.isProcessing} usualIcon="check" />
+                        {t.__("Valider")}
+                    </Button>
 
-                <Button color="default" variant="text" className={clsx(classes.buttons)} onClick={() => this.cancelCreation()} fullWidth>
-                    <Undo />
-                    {t.__("Annuler")}
-                </Button>
+                    <Button color="default" variant="text" className={clsx(classes.buttons)} onClick={() => this.cancelCreation()} fullWidth>
+                        <Undo />
+                        {t.__("Annuler")}
+                    </Button>
+
+                </Box>
+                <Modal
+                    disableAutoFocus
+                    className={clsx(classes.modal)}
+                    open={this.state.showModalSpecied}
+                    onClose={() => { this.setState({ showModalSpecied: false }) }}
+                >
+                    <>
+                        <IconButton aria-label="Close" className={classes.closeButton} onClick={() => { this.setState({ showModalSpecied: false }) }}>
+                            <Close />
+                        </IconButton>
+                        {this.state.model.species != null && this.state.model.species.length > 0 &&
+                            <SpeciesInfoComponent speciesId={this.findSpeciesTelaBotanicaTaxon()} classes={null} />
+                        }
+                    </>
 
 
-            </Box>
+                </Modal>
+            </>
         )
     }
 }

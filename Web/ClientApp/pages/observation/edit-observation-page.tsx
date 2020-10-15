@@ -1,5 +1,5 @@
-import { Box, Button, createStyles, FormControl, Grid, InputLabel, MenuItem, Select, Switch, Theme, Typography, WithStyles, withStyles, TextField } from "@material-ui/core";
-import { Undo } from "@material-ui/icons";
+import { Box, Button, createStyles, FormControl, Grid, InputLabel, MenuItem, Select, Switch, Theme, Typography, WithStyles, withStyles, TextField, Modal, IconButton } from "@material-ui/core";
+import { Undo, Close } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -18,6 +18,7 @@ import { SpeciesApi } from "../../services/species-service";
 import { t } from "../../services/translation-service";
 import { ObservationEditionModel } from "../../services/generated/observation-edition-model";
 import Autocomplete from "@material-ui/lab/Autocomplete";
+import { SpeciesInfoComponent } from "../species/species-info-component";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -45,7 +46,19 @@ const styles = (theme: Theme) => createStyles({
     },
     label: {
         margin: theme.spacing(1)
-    }
+    },
+    modal: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    closeButton: {
+        position: 'absolute',
+        right: theme.spacing(2),
+        top: theme.spacing(7),
+        color: theme.palette.primary.contrastText,
+        zIndex: 9999
+    },
 });
 
 interface EditObservationPageProps extends RouteComponentProps, IPropsWithAppContext, WithStyles<typeof styles> {
@@ -71,6 +84,7 @@ class EditObservationPageState {
     speciesName: SpeciesModel;
     speciesCommonName: SpeciesModel;
     loaded: boolean;
+    showModalSpecied = false;
 }
 
 class EditObservationPageComponent extends BaseComponent<EditObservationPageProps, EditObservationPageState>{
@@ -197,6 +211,16 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
         }
     }
 
+
+    findSpeciesTelaBotanicaTaxon() {
+        var s = this.state.speciesData.find(x => x.speciesName == this.state.model.species);
+        return s?.telaBotanicaTaxon;
+    }
+
+    async goToSpeciesPage() {
+        await this.setState({ showModalSpecied: true });
+    }
+
     render() {
 
         const { classes } = this.props;
@@ -223,6 +247,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
 
 
         return (
+            <>
             <Box className={clsx(classes.root)}>
 
                 <ErrorSummary errors={this.state.errors} />
@@ -280,7 +305,10 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                                 renderInput={(params) => <TextField {...params} label="Latine" variant="outlined" />}                                
                                 onChange={(e, v) => this.updateSpecies((v as any).speciesName)}
                                 value={this.state.speciesName}
-                            />
+                        />
+                        {(this.state.model.species != null && this.state.model.species.length > 0) &&
+                            <a style={{ color: 'black' }} onClick={() => { this.goToSpeciesPage(); }}>Voir la fiche de l'espèce </a>
+                        }
                         </FormControl>
 
 
@@ -324,8 +352,23 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                     {t.__("Annuler")}
                 </Button>
 
-
             </Box>
+            <Modal
+                disableAutoFocus
+                className={clsx(classes.modal)}
+                open={this.state.showModalSpecied}
+                onClose={() => { this.setState({ showModalSpecied: false }) }}
+            >
+                <>
+                    <IconButton aria-label="Close" className={classes.closeButton} onClick={() => { this.setState({ showModalSpecied: false }) }}>
+                        <Close />
+                    </IconButton>
+                    {this.state.model.species != null && this.state.model.species.length > 0 &&
+                        <SpeciesInfoComponent speciesId={this.findSpeciesTelaBotanicaTaxon()} classes={null} />
+                    }
+                </>
+            </Modal>
+            </>
         )
     }
 }
