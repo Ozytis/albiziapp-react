@@ -159,32 +159,38 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
     async updateCommonGenus(commonGenus: string) {
         const model = this.state.model;
         const genus = this.state.genusData.find(g => g.commonGenus === commonGenus);
-        model.genus = genus.genus;
-        console.log(genus)
-        await this.setState({ model: model, commonGenus: genus });
+        if (genus != null) {
+            model.genus = genus.genus;
+            await this.setState({ model: model, commonGenus: genus });
+        }
     }
 
     async updateCommon(common: string) {
         const model = this.state.model;
         const species = this.state.speciesData.find(g => g.commonSpeciesName === common);
-        model.species = species.speciesName;
-        await this.setState({ model: model, speciesCommonName: species });
+        if (species != null) {
+            model.species = species.speciesName;
+            await this.setState({ model: model, speciesCommonName: species });
+        }
     }
 
     async updateSpecies(speciesName: string) {
         const model = this.state.model;
         const species = this.state.speciesData.find(g => g.speciesName === speciesName);
-        model.species = species.speciesName;
+        if (species != null) {
+            model.species = species.speciesName;
 
-        await this.setState({ model: model, speciesName: species });
+            await this.setState({ model: model, speciesName: species });
+        }
     }
 
     async updateGenus(genusName: string) {
         const model = this.state.model;
         const genus = this.state.genusData.find(g => g.genus === genusName);
-        model.genus = genus.genus;
-
-        await this.setState({ model: model, genus: genus });
+        if (genus != null) {
+            model.genus = genus.genus;
+            await this.setState({ model: model, genus: genus });
+        }
     }
 
     async process() {
