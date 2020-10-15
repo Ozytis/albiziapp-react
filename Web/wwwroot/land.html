@@ -4,8 +4,11 @@
         <script>
             if (opener != undefined) {
                 opener.authComplete(window.location.href);
+                window.close();
+            } else {
+                document.location.href = "/";
             }
-            window.close();
+           
         </script>
     </body>
 </html>

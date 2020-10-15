@@ -42,9 +42,6 @@ class AuthorizationComponent extends BaseComponent<AuthorizationProps, Authoriza
 
         const matched = matchRoutes(reactRoutes, pathname)[0];
 
-        // console.log(JSON.stringify({ routes: state.routes, pathname: pathname }))
-
-        console.log("matched 2", matchRoutes(reactRoutes, pathname));
 
         if (!matched) {
 
@@ -54,11 +51,11 @@ class AuthorizationComponent extends BaseComponent<AuthorizationProps, Authoriza
             return state;
         }
 
-        console.log(matched);
+ 
 
         const appRoute = matched && props.appContext.routes.find(route => route.routes.some(r => r.path === matched.route.path));
 
-        console.log("approute", appRoute);
+
 
         if (appRoute.settings.authenticationRequired === false) {
             console.log("no auth required");
@@ -68,7 +65,6 @@ class AuthorizationComponent extends BaseComponent<AuthorizationProps, Authoriza
 
         const user = AuthenticationApi.getCurrentUser();
 
-        console.log("current user", user);
 
         if (!user) {
 
@@ -84,8 +80,6 @@ class AuthorizationComponent extends BaseComponent<AuthorizationProps, Authoriza
     }
 
     redirectRoute() {
-
-        console.log("redirecting");
 
         const { location, history } = this.props;
 
@@ -114,8 +108,7 @@ class AuthorizationComponent extends BaseComponent<AuthorizationProps, Authoriza
         }
     }
 
-    render() {
-        console.log("access granted", this.state.accessGranted, this.props.children);
+    render() {       
         return this.state.accessGranted ? <>{this.props.children}</> : null;
     }
 }

@@ -126,8 +126,7 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
 
     hideBackButton() {
         const routes = this.props.appContext.routes.map(route => route.routes).reduce((a, b) => a.concat(b), []);
-        const matched = matchRoutes(routes, this.props.location.pathname)[0];
-        console.log("HBB");
+        const matched = matchRoutes(routes, this.props.location.pathname)[0];  
         const routesConfig = [
             HomePageConfig,
             LoginPageConfig,
