@@ -50,29 +50,29 @@ export class ShortcutsMenuComponent extends BaseComponent<ShortcutsMenuProps, Sh
 
         switch (menu) {
             case "arboretum":
-                this.props.history.push({
+                this.props.history.replace({
                     pathname: "/arboretum"
                 });
                 break;
             case "map": {
-                this.props.history.push({
+                this.props.history.replace({
                     pathname: "/map"
                 });
             }
                 break;
             case "mission": {
-                this.props.history.push({
+                this.props.history.replace({
                     pathname: "/"
                 });
             }
                 break;
             case "score":
-                this.props.history.push({
+                this.props.history.replace({
                     pathname: "/score"
                 });
                 break;
             case "statements":
-                this.props.history.push({
+                this.props.history.replace({
                     pathname: "/observations"
                 });
                 break;

@@ -2,8 +2,13 @@
 <html><head></head>
     <body>
         <script>
-            opener.authComplete(window.location.href);
-            window.close();
+            if (opener != undefined) {
+                opener.authComplete(window.location.href);
+                window.close();
+            } else {
+                document.location.href = "/";
+            }
+           
         </script>
     </body>
 </html>

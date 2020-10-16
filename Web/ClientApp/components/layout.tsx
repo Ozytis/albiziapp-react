@@ -1,5 +1,5 @@
 import { AppBar, createStyles, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Theme, Toolbar, Typography, withStyles, WithStyles } from "@material-ui/core";
-import { AccountTree, Book, Eco, ExitToApp, Search, SupervisorAccount, VerticalAlignBottom } from "@material-ui/icons";
+import { AccountTree, Book, Eco, ExitToApp, Search, SupervisorAccount, VerticalAlignBottom, ArrowBack } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -11,6 +11,17 @@ import { BaseComponent } from "./base-component";
 import { ShortcutsMenu } from "./shortcuts-menu";
 import { UserModel } from "../services/generated/user-model";
 import PWAPrompt from 'react-ios-pwa-prompt'
+import HomePageConfig from "../pages/home/home-page-config";
+import { ScorePageConfig } from "../pages/score/score-page-config";
+import { SpeciesInfoPageConfig } from "../pages/species/species-info-page-config";
+import LoginPageConfig from "../pages/login/login-page-config";
+import { MapPageConfig } from "../pages/map/map-page-config";
+import { ArboretumPageConfig } from "../pages/arboretum/arboretum-page-config";
+import { DeterminationKeyPageConfig } from "../pages/determination-key/determination-key-page-config";
+import { TitlePageConfig } from "../pages/score/title-page-config";
+import { SpeciesPageConfig } from "../pages/species/species-page-config";
+import { ObservationsPageConfig } from "../pages/observation/observations-page-config";
+import { TrophyPageConfig } from "../pages/score/trophy-page-config";
 
 const styles = (theme: Theme) => createStyles({
     menu: {
@@ -44,7 +55,6 @@ class LayoutState {
 class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
 
 
-
     constructor(props: LayoutProps) {
         super(props, "layout", new LayoutState());
 
@@ -55,7 +65,7 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
         this.props.appContext.addContextUpdateListener(() => this.onContextChanged());
         this.onRouteChanged(this.props.location);
         const isUserAdmin = await AuthenticationApi.isUserAdmin();
-        const user = await AuthenticationApi.getCurrentUser();        
+        const user = await AuthenticationApi.getCurrentUser();
         this.setState({ isUserAdmin: isUserAdmin, user: user });
         this.isConnected();
     }
@@ -65,19 +75,13 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
     }
 
     async onRouteChanged(data: { pathname: string }) {
-
-        //console.log("route changed", data);
-
         const reactRoutes = this.props.appContext.routes.map(route => route.routes).reduce((a, b) => a.concat(b), [])
         const matched = matchRoutes(reactRoutes, data.pathname)[0];
 
         if (matched) {
             const config = this.props.appContext.routes.find(route => route.routes.some(r => r.path === matched.route.path));
 
-            //console.log("config", config, matched, this.props.appContext.title);
-
             if (this.props.appContext.updateContext && this.state.title !== config.settings.title) {
-                //console.log("updating title", config.settings.title);
                 await this.props.appContext.updateContext("title", config.settings.title);
             }
         }
@@ -86,7 +90,6 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
     async onContextChanged() {
 
         this.isConnected();
-       // console.log("onContextChanged");
 
         if (this.props.appContext.title && this.props.appContext.title.length > 0 && this.state.title !== this.props.appContext.title) {
             await this.setState({ title: this.props.appContext.title });
@@ -97,12 +100,13 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
         await AuthenticationApi.logOut();
         this.props.appContext.updateContext("isConnected", false);
         this.props.appContext.updateContext("menuIsOpen", false);
-        this.props.history.push("/login");
+
+        this.props.history.replace("/login");
         await this.setState({ isUserConnected: false })
     }
 
     async goTo(route: string) {
-        this.props.history.push({
+        this.props.history.replace({
             pathname: route
         });
 
@@ -110,14 +114,33 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
     }
 
     async isConnected() {
-        const user = await AuthenticationApi.getCurrentUser();        
+        const user = await AuthenticationApi.getCurrentUser();
         if (user) {
-            await this.setState({isUserConnected : true})
+            await this.setState({ isUserConnected: true })
         }
         else {
             await this.setState({ isUserConnected: false })
         }
 
+    }
+
+    hideBackButton() {
+        const routes = this.props.appContext.routes.map(route => route.routes).reduce((a, b) => a.concat(b), []);
+        const matched = matchRoutes(routes, this.props.location.pathname)[0];  
+        const routesConfig = [
+            HomePageConfig,
+            LoginPageConfig,
+            ScorePageConfig,
+            MapPageConfig,
+            SpeciesPageConfig,
+            ArboretumPageConfig,
+            ObservationsPageConfig,
+            DeterminationKeyPageConfig,
+        ]
+        if (matched) {
+            return routesConfig.find(route => route.routes.some(r => r.path === matched.route.path)) != null;
+        }
+        return true;
     }
 
     render() {
@@ -128,21 +151,37 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                 <PWAPrompt />
                 <AppBar position="sticky">
                     <Toolbar>
-                        <IconButton
-                            edge="start"
-                            className={classes.menuButton}
-                            color="inherit"
-                            aria-label="menu"
-                            disableFocusRipple
-                            disableRipple
-                            onClick={() => appContext.updateContext("menuIsOpen", !appContext.menuIsOpen)}
-                        >
-                            <Eco />
-                        </IconButton>
+                        {this.hideBackButton() &&
+                            <IconButton
+                                edge="start"
+                                className={classes.menuButton}
+                                color="inherit"
+                                aria-label="menu"
+                                disableFocusRipple
+                                disableRipple
+                                onClick={() => appContext.updateContext("menuIsOpen", !appContext.menuIsOpen)}
+                            >
+                                <Eco />
+                            </IconButton>
+                        }
+                        {!this.hideBackButton() &&
+
+                            <IconButton
+                                edge="start"
+                                className={classes.menuButton}
+                                color="inherit"
+                                aria-label="menu"
+                                disableFocusRipple
+                                disableRipple
+                                onClick={() => (this.props.history as any).goBack()}
+                            >
+                                <ArrowBack />
+                            </IconButton>
+                        }
                         <Typography variant="h6" className={classes.title}>
-                            {this.state.title ? t.__(this.state.title) : "Albiziapp"}                            
+                            {this.state.title ? t.__(this.state.title) : "Albiziapp"}
                         </Typography>
-                        
+
 
                     </Toolbar>
                 </AppBar>
@@ -157,16 +196,16 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                             <Eco className={clsx("mr-4")} />
 
                             <Typography variant="h6" className={classes.title}>
-                            Albiziapp
-                        </Typography>                        
+                                Albiziapp
+                        </Typography>
 
-                    </Toolbar>                    
-                    <List >
-                        {this.state.user &&
-                            <ListItem style={{marginTop : "-12%"}}>
-                                {this.state.user.name}
-                        </ListItem>
-                        }
+                        </Toolbar>
+                        <List >
+                            {this.state.user &&
+                                <ListItem style={{ marginTop: "-12%" }}>
+                                    {this.state.user.name}
+                                </ListItem>
+                            }
                             <ListItem button onClick={() => this.goTo("/species")}>
                                 <ListItemIcon>
                                     <Book />
@@ -198,11 +237,11 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                                     <ExitToApp />
                                 </ListItemIcon>
                                 <ListItemText primary={t.__("Me déconnecter")} />
-                        </ListItem>                      
-                    </List>   
-                </Drawer>
+                            </ListItem>
+                        </List>
+                    </Drawer>
                 }
-                
+
                 {renderRoutes(routes)}
                 {this.state.isUserConnected &&
                     <ShortcutsMenu />

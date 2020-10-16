@@ -14,7 +14,7 @@ import { t } from "../../services/translation-service";
 import { MissionsApi } from "../../services/missions-service";
 import { ActivityModel } from "../../services/generated/activity-model";
 import { MissionProgressionModel } from "../../services/generated/mission-progression-model";
-import {NearMe } from "@material-ui/icons";
+import { NearMe } from "@material-ui/icons";
 import { MapPosition } from "../../components/mapPosition";
 
 const styles = (theme: Theme) => createStyles({
@@ -53,7 +53,7 @@ class MapPageState {
     userPosition: Position = null;
     observations: ObservationModel[];
     currentActivity: ActivityModel;
-    missionProgression: MissionProgressionModel; 
+    missionProgression: MissionProgressionModel;
     zoomLevel: number = 0;
     mapRef = createRef<Map>();
 }
@@ -65,7 +65,12 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
     async componentDidMount() {
 
-        console.log(this.state.mapRef);
+        await this.setState({
+            userPosition: {
+                coords: ({ latitude: 48.085834, longitude: -0.757896 } as any)
+            } as any
+        });
+
         navigator.geolocation.getCurrentPosition(async (position) => {
 
             await this.setState({
@@ -77,6 +82,8 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                     userPosition: position
                 })
             });
+        }, async () => {
+                console.log("MAP ERROR");          
         });
 
         ObservationsApi.registerObservationsListener(() => this.loadObservations());
@@ -163,7 +170,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         if (document.location.host.indexOf("localhost") > -1) {
             return "//wxs.ign.fr/choisirgeoportail/geoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/jpeg&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}"
         } else {
-            return "//wxs.ign.fr/1zk8fc4pfkpf90fgudlyn643/geoportail/wmts?service=WMTS&request=GetTile&version=1.0.0&tilematrixset=PM&tilematrix={z}&tilecol={x}&tilerow={y}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&format=image/jpeg&style=normal";
+            return "//wxs.ign.fr/3urbr0dt1qgjytxdkbt6z3cq/geoportail/wmts?service=WMTS&request=GetTile&version=1.0.0&tilematrixset=PM&tilematrix={z}&tilecol={x}&tilerow={y}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&format=image/jpeg&style=normal";
         }
     }
 
@@ -173,17 +180,17 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         }
         else {
             return "orange";
-        }        
+        }
     }
 
-    async setLastPosition(lat: number, lng: number, zoom : number){
+    async setLastPosition(lat: number, lng: number, zoom: number) {
 
         var now = new Date();
-        localStorage.setItem("mapPosition", JSON.stringify({ Latitude: lat, Longitude: lng, Zoom: zoom, Date: now} as MapPosition))
+        localStorage.setItem("mapPosition", JSON.stringify({ Latitude: lat, Longitude: lng, Zoom: zoom, Date: now } as MapPosition))
     }
 
     getOppacity(observation: ObservationModel) {
-        
+
         return AuthenticationApi.user.osmId === observation.userId ? 0.5 : 0;
     }
 
@@ -194,25 +201,24 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
 
     render() {
-        
+
         const { classes } = this.props;
 
         const position = this.state.userPosition && { lat: this.state.userPosition.coords.latitude, lng: this.state.userPosition.coords.longitude };
-        console.log(this.state.mapRef);
 
         return (
             <Box className={clsx(classes.root)}>
                 {
                     this.state.userPosition && this.state.mapRef &&
-                   
-                    <Map            
+
+                    <Map
                         ref={this.state.mapRef}
                         className={clsx(classes.map)}
                         center={position}
                         zoom={18}
                         minZoom={5}
                         onclick={(e) => this.onMapClicked(e)}
-                        onmoveend={() => this.setLastPosition(this.state.mapRef.current.leafletElement.getCenter().lat, this.state.mapRef.current.leafletElement.getCenter().lng, this.state.mapRef.current.leafletElement.getZoom() )}
+                        onmoveend={() => this.setLastPosition(this.state.mapRef.current.leafletElement.getCenter().lat, this.state.mapRef.current.leafletElement.getCenter().lng, this.state.mapRef.current.leafletElement.getZoom())}
                     >
                         <TileLayer
                             url={this.getTilesUrl()}
@@ -231,7 +237,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                                         fillOpacity={this.getOppacity(observation)}
                                         center={{ lat: observation.latitude, lng: observation.longitude }}
                                         radius={6}
-                                        color={this.getColor(observation)}                                        
+                                        color={this.getColor(observation)}
                                         onclick={() => this.props.history.push({ pathname: `/observation/${observation.id}` })}
                                     />
                                 )
@@ -239,7 +245,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         }
 
                     </Map>
-                    
+
                 }
                 {
                     <Button style={{
@@ -254,7 +260,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         onClick={() => this.goToUserLocation()}
                     >
                         <NearMe />
-               </Button>
+                    </Button>
 
                 }
                 {
@@ -270,7 +276,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         }
                     </Box>
                 }
-               
+
             </Box>
         )
     }
