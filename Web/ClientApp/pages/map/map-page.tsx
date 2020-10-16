@@ -250,9 +250,9 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         zIndex: 400,
                         backgroundColor: "#f4f4f4",
                         color: "black",
-                        textAlign: "center",
-                    }}
-                        onClick={() => this.goToUserLocation()} >
+                        textAlign: "center"}}
+                        onClick={() => this.goToUserLocation()}
+                    >
                         <NearMe />
                </Button>
 
