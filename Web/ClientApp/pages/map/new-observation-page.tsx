@@ -139,11 +139,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
     async updateCommonGenus(commonGenus: string) {
         const model = this.state.model;
         const genus = this.state.genus.find(g => g.commonGenus === commonGenus);
-        model.genus = genus.genus;
-        var elem = document.getElementById("GenusSelect") as HTMLInputElement;
-        elem.value = model.genus;
-        console.log(elem.value);
-        console.log(elem);
+        model.genus = genus.genus;        
             await this.setState({ model: model, commonGenus: genus.commonGenus });
     }
     async updateGenus(genusName: string) {
@@ -251,7 +247,18 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                             renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}
                             onChange={(e, v) => this.updateCommonGenus((v as any).commonGenus)}
                         />
-                        </FormControl>
+                    </FormControl>
+
+                    <FormControl className={clsx(classes.formControl)}>
+                        <Autocomplete
+                            id="GenusSelect"
+                            options={genus.sort((g1, g2) => g1.genus.localeCompare(g2.genus))}
+                            getOptionLabel={(option: TreeGenusModel) => option.genus}
+                            renderInput={(params) => <TextField {...params} label="Latin" variant="outlined" />}
+                            onChange={(e, v) => this.updateGenus((v as any).genus)}
+                        />
+                        
+                    </FormControl>
 
                     <Typography variant="h6" className={clsx(classes.sectionHeading)}>
                         {t.__("Espèce")}
