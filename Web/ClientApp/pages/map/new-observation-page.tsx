@@ -133,8 +133,8 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
     async updateCommonGenus(commonGenus: string) {
         const model = this.state.model;
         const genus = this.state.genus.find(g => g.commonGenus === commonGenus);
-        model.genus = genus.genus;
-        await this.setState({ model: model, commonGenus: genus.commonGenus });
+        model.genus = genus.genus;        
+            await this.setState({ model: model, commonGenus: genus.commonGenus });
     }
     async updateGenus(genusName: string) {
         const model = this.state.model;
@@ -209,7 +209,8 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                 </Box>
             )
         }
-
+       
+        
 
 
         if (model.genus && model.genus.length > 0) {
@@ -232,7 +233,6 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                     </Typography>
 
                     <FormControl className={clsx(classes.formControl)}>
-
                         <Autocomplete
                             id="commonGenusSelect"
                             options={genus.sort((g1, g2) => g1.commonGenus.localeCompare(g2.commonGenus))}
@@ -240,7 +240,6 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                             renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}
                             onChange={(e, v) => this.updateCommonGenus((v as any).commonGenus)}
                         />
-
                     </FormControl>
 
                     <FormControl className={clsx(classes.formControl)}>
@@ -251,7 +250,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                             renderInput={(params) => <TextField {...params} label="Latin" variant="outlined" />}
                             onChange={(e, v) => this.updateGenus((v as any).genus)}
                         />
-
+                        
                     </FormControl>
 
                     <Typography variant="h6" className={clsx(classes.sectionHeading)}>
@@ -259,7 +258,6 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                     </Typography>
 
                     <FormControl className={clsx(classes.formControl)}>
-
                         <Autocomplete
                             id="commonSpeciesSelect"
                             options={species.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName))}
@@ -267,11 +265,9 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                             renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}
                             onChange={(e, v) => this.updateCommonSpecies((v as any).commonSpeciesName)}
                         />
-
                     </FormControl>
 
                     <FormControl className={clsx(classes.formControl)}>
-
                         <Autocomplete
                             id="SpeciesSelect"
                             options={species.sort((s1, s2) => s1.speciesName.localeCompare(s2.speciesName))}

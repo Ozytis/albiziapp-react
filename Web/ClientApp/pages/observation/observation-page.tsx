@@ -161,8 +161,14 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                     <ListItemText primary={t.__("Auteur du relevé")} secondary={observation.authorName} />
                                 </ListItem>
                                 <ListItem>
+                                    <ListItemText primary={t.__("Genre")} secondary={observation.genus || t.__("Non renseignée")} />
+                                </ListItem>
+                                <ListItem>
+                                    <ListItemText primary={t.__("Genre vernaculaire")} secondary={observation.commonGenus || t.__("Non renseigné")} />
+                                </ListItem>
+                                <ListItem>
                                     <ListItemText primary={t.__("Espèce")} secondary={observation.speciesName || t.__("Non renseignée")} />
-                                    {
+                                    {/*
                                         observation.telaBotanicaTaxon &&
                                         <ListItemIcon
                                             title={t.__("Espèce")}
@@ -170,17 +176,12 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                             onClick={() => this.goTo(`/specy/${observation.telaBotanicaTaxon}`)}
                                         >
                                             <Icon className="fas fa-eye" style={{ width: "1.25em" }} />
-                                        </ListItemIcon>
+                                        </ListItemIcon>*/
                                     }
                                 </ListItem>
+
                                 <ListItem>
                                     <ListItemText primary={t.__("Nom vernaculaire")} secondary={observation.commonSpeciesName || t.__("Non renseigné")} />
-                                </ListItem>
-                                <ListItem>
-                                    <ListItemText primary={t.__("Genre")} secondary={observation.genus || t.__("Non renseignée")} />
-                                </ListItem>
-                                <ListItem>
-                                    <ListItemText primary={t.__("Genre vernaculaire")} secondary={observation.commonGenus || t.__("Non renseigné")} />
                                 </ListItem>
                                 <ListItem>
                                     <ListItemText
@@ -190,11 +191,11 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                 </ListItem>
                             </List>
 
-                            <Typography variant="body2">
-                                <p className={clsx(classes.instructions)}>
-                                    {t.__("Vous pouvez modifier le relevé ou bien confirmer que les informations sont correctes")}
-                                </p>
-                            </Typography>
+                            
+                            <ListItem>
+                                <ListItemText primary={t.__("Vous pouvez modifier le relevé ou bien confirmer que les informations sont correctes")} />
+                            </ListItem>
+                            
                             <Box className={clsx(classes.buttonsDiv)}>
                                 <Button color="primary" variant="contained" startIcon={<Edit />} onClick={() => this.editObservation()}>
                                     {t.__("Modifier")}
@@ -205,11 +206,11 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                     </Button>
                                 }
                             </Box>
-                            <Typography variant="body2">
-                                <p className={clsx(classes.instructions)}>
-                                    {t.__("Si aucun arbre n'est présent, vous pouvez tagger ce relévé douteux")}
-                                </p>
-                            </Typography>
+                            
+                            <ListItem>
+                                <ListItemText primary={t.__("Si aucun arbre n'est présent, vous pouvez tagger ce relévé douteux")}/>
+                            </ListItem>
+                         
                             <Typography component="div">
                                 <Grid component="label" container alignItems="center" spacing={1} className={clsx(classes.switchGrid)}>
                                     <Grid item>
@@ -229,11 +230,10 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                     </Grid>
                                 </Grid>
                             </Typography>
-                            <Typography variant="body2">
-                                <p className={clsx(classes.instructions)}>
-                                    {t.__("Supprimer le relevé, cette opération est définitive")}
-                                </p>
-                            </Typography>
+                            <ListItem>
+                                <ListItemText primary={t.__("Supprimer le relevé, cette opération est définitive")}/>
+                            </ListItem>
+                  
                             <Box className={clsx(classes.buttonsDiv)}>
                                 <Button color="secondary" startIcon={<Delete />} fullWidth variant="contained" onClick={() => this.remove()}>
 
