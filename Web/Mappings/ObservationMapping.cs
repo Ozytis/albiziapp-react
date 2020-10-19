@@ -15,7 +15,7 @@ namespace Web.Mappings
                 Confident = observation.Confident,
                 Date = observation.Date,
                 Genus = observation.Genus,
-                HasPicture = observation.Pictures?.Any() ?? false,
+                Pictures = observation.Pictures.ToArray(),
                 Id = observation.Id,
                 Latitude = observation.Latitude,
                 Longitude = observation.Longitude,

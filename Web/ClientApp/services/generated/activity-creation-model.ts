@@ -14,13 +14,13 @@ export class ActivityCreationModel {
     type = 0;
 
     validate() {
-        const errors: string[] = [];
+        let errors: string[] = [];
 
         if (!this.instructions) {
             errors.push("Veuillez fournir les instructions de l'activité");
         }
 
-        if (undefined == this.type) {
+        if (!this.type) {
             errors.push("Veuillez fournir le type de l'activité");
         }
 

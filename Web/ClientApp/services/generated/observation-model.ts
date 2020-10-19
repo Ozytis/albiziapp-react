@@ -11,7 +11,7 @@ export interface ObservationModel {
     confident: boolean;
     date: string;
     genus: string;
-    hasPicture: boolean;
+    pictures: string[];
     id: string;
     latitude: number;
     longitude: number;

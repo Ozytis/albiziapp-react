@@ -14,7 +14,7 @@ namespace Api
 
         public string Genus { get; set; }
 
-        public bool HasPicture { get; set; }
+        public string[] Pictures { get; set; }
 
         public string Id { get; set; }
 

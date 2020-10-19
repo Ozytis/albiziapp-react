@@ -95,13 +95,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
             })
         }
 
-        AuthenticationApi.refreshUser();
-
-        var tmpModel = JSON.parse(localStorage.getItem("tmp-observation")) as any;
-        if (tmpModel != null) {
-            await this.setState({ model: tmpModel });
-            localStorage.removeItem("tmp-observation");
-        }
+        AuthenticationApi.refreshUser();    
 
         this.listener = SpeciesApi.registerSpeciesListener(() => this.refreshSpecies());
 
@@ -200,7 +194,6 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
 
     async goToSpeciesPage() {
         await this.setState({ showModalSpecied: true });
-
     }
 
     render() {
@@ -346,8 +339,6 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                             <SpeciesInfoComponent speciesId={this.findSpeciesTelaBotanicaTaxon()} classes={null} />
                         }
                     </>
-
-
                 </Modal>
             </>
         )
