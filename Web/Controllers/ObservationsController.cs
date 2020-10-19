@@ -2,6 +2,7 @@
 using Business;
 using Common;
 using Entities;
+using Entities.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Ozytis.Common.Core.Web.WebApi;
@@ -54,7 +55,7 @@ namespace Web.Controllers
                 new Observation
                 {
                     Genus = model.Genus,
-                    Confident = model.IsConfident,
+                    Confident = (Confident?) model.IsConfident,
                     Latitude = model.Latitude,
                     Longitude = model.Longitude,
                     SpeciesName = model.Species,
@@ -87,7 +88,7 @@ namespace Web.Controllers
                 {
                     Id = model.Id,
                     Genus = model.Genus,
-                    Confident = model.IsConfident,
+                    Confident = (Confident?) model.IsConfident,
                     Latitude = model.Latitude,
                     Longitude = model.Longitude,
                     SpeciesName = model.Species,

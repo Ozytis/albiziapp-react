@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Entities.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -22,7 +23,7 @@ namespace Entities
 
         public decimal Longitude { get; set; }
 
-        public bool Confident { get; set; }
+        public Confident? Confident { get; set; }
 
         public string TelaBotanicaTaxon { get; set; }     
 

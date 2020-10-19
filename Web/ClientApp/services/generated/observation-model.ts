@@ -8,7 +8,7 @@ import { string  } from "./string- ";
 export interface ObservationModel {
     commonGenus: string;
     commonSpeciesName: string;
-    confident: boolean;
+    confident: number;
     date: string;
     genus: string;
     pictures: string[];
