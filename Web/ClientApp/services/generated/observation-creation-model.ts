@@ -6,7 +6,7 @@
 
 export class ObservationCreationModel {
     genus = "";
-    isConfident = false;
+    isConfident: number = null;
     pictures: string[] = null;
     species = "";
     latitude: number = null;

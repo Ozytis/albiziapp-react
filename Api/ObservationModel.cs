@@ -8,7 +8,7 @@ namespace Api
 
         public string CommonSpeciesName { get; set; }
 
-        public bool Confident { get; set; }
+        public int? Confident { get; set; }
 
         public DateTime Date { get; set; }
 

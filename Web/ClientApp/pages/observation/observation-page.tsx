@@ -132,6 +132,15 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         });
     }
 
+    getConfidentLabel(confident: number) {
+        switch (confident) {
+            case 0: return t.__("Peu confiant");
+            case 1: return t.__("Moyennement confiant");
+            case 2: return t.__("Confiant");
+            default: return t.__("Non renseigné");
+        }
+    }
+
     render() {
 
         const { classes } = this.props;
@@ -218,8 +227,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                     <Grid item>
                                         <Switch
                                             title="Douteux"
-                                            checked={this.state.observation.confident}
-                                            onChange={(e, val) => void (0)}
+                                            onChange={(e, val) => { alert("TODO")}}
                                         />
                                     </Grid>
                                     <Grid item>
@@ -241,7 +249,6 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                             </Box>
                         </>
                     }
-
                     {
                         this.state.currentTab === "photo" &&
                         <>{observation.pictures.map((img, i) =>

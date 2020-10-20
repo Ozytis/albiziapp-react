@@ -1,6 +1,7 @@
 ﻿using Business.MissionValidation;
 using Common;
 using Entities;
+using Entities.Enums;
 using MongoDB.Bson.IO;
 using MongoDB.Driver;
 using Ozytis.Common.Core.Utilities;
@@ -186,7 +187,7 @@ namespace Business
                     {
                         pointHistory.Add(new PointHistory { Point = 2, Type = (int)KnowledgePoint.ValidateSameSpecies, Date = currentDate });
                     }
-                    if (newObservation.Confident)
+                    if (newObservation.Confident.HasValue && newObservation.Confident.Value == Confident.High)
                     {
                         pointHistory.Add(new PointHistory { Point = 2, Type = (int)KnowledgePoint.ObservationConfident, Date = currentDate });
                     }
@@ -221,7 +222,7 @@ namespace Business
                                 speciesPnToP0Isvalid = true;
                             }
 
-                            if (newObservation.Confident)
+                            if (newObservation.Confident.HasValue && newObservation.Confident.Value == Confident.High)
                             {
                                 pointHistoryP0.Add(new PointHistory { Point = 2, Type = (int)KnowledgePoint.ObservationConfident, Date = currentDate });                          
                             }
@@ -239,7 +240,7 @@ namespace Business
                         {
                             pointHistoryPb.Add(new PointHistory { Point = (!genusPnToP0Isvalid ? 2 : 1), Type = (int)KnowledgePoint.ValidateSameSpecies, Date = currentDate });
                         }
-                        if (newObservation.Confident)
+                        if (newObservation.Confident.HasValue && newObservation.Confident.Value == Confident.High)
                         {
                             pointHistoryPb.Add(new PointHistory { Point = 2, Type = (int)KnowledgePoint.ObservationConfident, Date = currentDate });
                         }

@@ -1,5 +1,5 @@
-import { Box, Button, createStyles, FormControl, Grid, InputLabel, MenuItem, Select, Switch, Theme, Typography, WithStyles, withStyles, TextField, Modal, IconButton } from "@material-ui/core";
-import { Undo, Router,Close } from "@material-ui/icons";
+import { Box, Button, createStyles, FormControl, Grid, InputLabel, MenuItem, Select, Switch, Theme, Typography, WithStyles, withStyles, TextField, Modal, IconButton, RadioGroup, FormControlLabel, Radio } from "@material-ui/core";
+import { Undo, Router, Close } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter, Route } from "react-router";
@@ -20,6 +20,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import { SpeciesPage } from "../species/species-page";
 import { SpeciesInfoPage } from "../species/species-info-page";
 import { SpeciesInfoComponent } from "../species/species-info-component";
+import { StringHelper } from "../../utils/string-helper";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -33,7 +34,7 @@ const styles = (theme: Theme) => createStyles({
         marginTop: theme.spacing(1),
         marginLeft: theme.spacing(1),
         marginRight: theme.spacing(1),
-        color: theme.palette.primary.light
+        color: theme.palette.primary.dark
     },
     formControl: {
         margin: theme.spacing(1),
@@ -44,8 +45,10 @@ const styles = (theme: Theme) => createStyles({
         marginTop: theme.spacing(2),
         color: theme.palette.common.white
     },
+
     label: {
-        margin: theme.spacing(1)
+        margin: theme.spacing(1),
+        color: theme.palette.primary.light
     },
     modal: {
         display: "flex",
@@ -57,7 +60,7 @@ const styles = (theme: Theme) => createStyles({
         right: theme.spacing(2),
         top: theme.spacing(7),
         color: theme.palette.primary.contrastText,
-        zIndex:9999
+        zIndex: 9999
     },
 });
 
@@ -95,7 +98,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
             })
         }
 
-        AuthenticationApi.refreshUser();    
+        AuthenticationApi.refreshUser();
 
         this.listener = SpeciesApi.registerSpeciesListener(() => this.refreshSpecies());
 
@@ -118,6 +121,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
     }
 
     async updateModel(propertyName: string, value: any) {
+        console.log(propertyName, value);
         const model = this.state.model;
         model[propertyName] = value;
         await this.setState({ model: model });
@@ -153,31 +157,52 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
     async updateCommonGenus(commonGenus: string) {
         const model = this.state.model;
         const genus = this.state.genus.find(g => g.commonGenus === commonGenus);
-        model.genus = genus.genus;        
+        if (genus != null) {
+            model.genus = genus.genus;
             await this.setState({ model: model, commonGenus: genus.commonGenus });
+        } else {
+            model.genus = null;
+            await this.setState({ model: model, commonGenus: null });
+        }
+        await this.clearConfident();
     }
     async updateGenus(genusName: string) {
         const model = this.state.model;
         const genus = this.state.genus.find(g => g.genus === genusName);
-        model.genus = genus.genus;
-
-        await this.setState({ model: model, commonGenus: genus.commonGenus });
+        if (genus != null) {
+            model.genus = genus.genus;
+            await this.setState({ model: model, commonGenus: genus.commonGenus });
+        } else {
+            model.genus = null;
+            await this.setState({ model: model, commonGenus: null });
+        }
+        await this.clearConfident();
     }
 
     async updateCommonSpecies(commonSpecies: string) {
         const model = this.state.model;
         const species = this.state.species.find(g => g.commonSpeciesName === commonSpecies);
-        model.species = species.speciesName;
-
-        await this.setState({ model: model, commonName: species.commonSpeciesName });
+        if (species != null) {
+            model.species = species.speciesName;
+            await this.setState({ model: model, commonName: species.commonSpeciesName });
+        } else {
+            model.species = null;
+            await this.setState({ model: model, commonName: null });
+        }
+        await this.clearConfident();
     }
 
     async updateSpecies(speciesName: string) {
         const model = this.state.model;
         const species = this.state.species.find(g => g.speciesName === speciesName);
-        model.species = species.speciesName;
-
-        await this.setState({ model: model, commonName: species.commonSpeciesName });
+        if (species != null) {
+            model.species = species.speciesName;
+            await this.setState({ model: model, commonName: species.commonSpeciesName });
+        } else {
+            model.species = null;
+            await this.setState({ model: model, commonName: null });
+        }       
+        await this.clearConfident();
     }
 
 
@@ -216,6 +241,19 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         await this.setState({ showModalSpecied: true });
     }
 
+    async clearConfident() {
+        if (!this.showConfident()) {
+            var model = this.state.model;
+            model.isConfident = null;
+            await this.setState({ model: model });
+        }
+    }
+
+    showConfident() {
+        var state = this.state;
+        return (!StringHelper.isNullOrEmpty(state.commonGenus) || !StringHelper.isNullOrEmpty(state.model.genus) || !StringHelper.isNullOrEmpty(state.commonName) || !StringHelper.isNullOrEmpty(state.model.species));
+    }
+
     render() {
 
         const { classes } = this.props;
@@ -229,9 +267,6 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                 </Box>
             )
         }
-       
-        
-
 
         if (model.genus && model.genus.length > 0) {
             species = species.filter(species => species.genus === model.genus);
@@ -241,7 +276,6 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
             let s = this.state.species.filter(g => g.speciesName === model.species).map(s => s.genus);
             genus = genus.filter(g => s.indexOf(g.genus) != -1);
         }
-
         return (
             <>
                 <Box className={clsx(classes.root)}>
@@ -258,7 +292,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                             options={genus.sort((g1, g2) => g1.commonGenus.localeCompare(g2.commonGenus))}
                             getOptionLabel={(option: TreeGenusModel) => option.commonGenus}
                             renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}
-                            onChange={(e, v) => this.updateCommonGenus((v as any).commonGenus)}
+                            onChange={(e, v) => this.updateCommonGenus((v as any)?.commonGenus)}
                         />
                     </FormControl>
 
@@ -268,9 +302,9 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                             options={genus.sort((g1, g2) => g1.genus.localeCompare(g2.genus))}
                             getOptionLabel={(option: TreeGenusModel) => option.genus}
                             renderInput={(params) => <TextField {...params} label="Latin" variant="outlined" />}
-                            onChange={(e, v) => this.updateGenus((v as any).genus)}
+                            onChange={(e, v) => this.updateGenus((v as any)?.genus)}
                         />
-                        
+
                     </FormControl>
 
                     <Typography variant="h6" className={clsx(classes.sectionHeading)}>
@@ -283,7 +317,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                             options={species.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName))}
                             getOptionLabel={(option: SpeciesModel) => option.commonSpeciesName}
                             renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}
-                            onChange={(e, v) => this.updateCommonSpecies((v as any).commonSpeciesName)}
+                            onChange={(e, v) => this.updateCommonSpecies((v as any)?.commonSpeciesName)}
                         />
                     </FormControl>
 
@@ -293,36 +327,26 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                             options={species.sort((s1, s2) => s1.speciesName.localeCompare(s2.speciesName))}
                             getOptionLabel={(option: SpeciesModel) => option.speciesName}
                             renderInput={(params) => <TextField {...params} label="Latine" variant="outlined" />}
-                            onChange={(e, v) => this.updateSpecies((v as any).speciesName)}
+                            onChange={(e, v) => this.updateSpecies((v as any)?.speciesName)}
                         />
                         {(this.state.model.species != null && this.state.model.species.length > 0) &&
                             <a style={{ color: 'black' }} onClick={() => { this.goToSpeciesPage(); }}>Voir la fiche de l'espèce </a>
                         }
                     </FormControl>
+                    {this.showConfident() &&
+                        <>
+                            <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                                {t.__("Confiance")}
+                            </Typography>
 
 
-                    <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                        {t.__("Confiance")}
-                    </Typography>
-
-                    <Typography component="div">
-                        <Grid component="label" container alignItems="center" spacing={1}>
-                            <Grid item>
-                                <InputLabel className={clsx(classes.label)}>{t.__("Peu confiant")}</InputLabel>
-                            </Grid>
-                            <Grid item>
-                                <Switch
-                                    checked={model.isConfident}
-                                    onChange={(val) => this.updateModel("isConfident", val.target.checked)}
-                                />
-                            </Grid>
-                            <Grid item>
-                                <InputLabel className={clsx(classes.label)}>
-                                    {t.__("Confiant")}
-                                </InputLabel>
-                            </Grid>
-                        </Grid>
-                    </Typography>
+                            <RadioGroup value={model.isConfident} onChange={(event) => { this.updateModel("isConfident", event.target.value) }} >
+                                <FormControlLabel value={0} control={<Radio checked={model.isConfident == 0} />} label={t.__("Peu confiant")} className={clsx(classes.label)} />
+                                <FormControlLabel value={1} control={<Radio checked={model.isConfident == 1} />} label={t.__("Moyennement confiant")} className={clsx(classes.label)} />
+                                <FormControlLabel value={2} control={<Radio checked={model.isConfident == 2} />} label={t.__("Confiant")} className={clsx(classes.label)} />
+                            </RadioGroup>
+                        </>
+                    }
 
                     <Typography variant="h6" className={clsx(classes.sectionHeading)}>
                         {t.__("Photographie")}

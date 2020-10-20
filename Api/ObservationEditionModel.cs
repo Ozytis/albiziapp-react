@@ -7,7 +7,7 @@
 
         public string Genus { get; set; }
 
-        public bool IsConfident { get; set; }
+        public int? IsConfident { get; set; }
 
         public string Image { get; set; }
 

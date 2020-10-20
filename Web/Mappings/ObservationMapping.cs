@@ -12,7 +12,7 @@ namespace Web.Mappings
             {
                 CommonGenus = observation.CommonGenus,
                 CommonSpeciesName = observation.CommonSpeciesName,
-                Confident = observation.Confident,
+                Confident = (int?)observation.Confident,
                 Date = observation.Date,
                 Genus = observation.Genus,
                 Pictures = observation.Pictures.ToArray(),
