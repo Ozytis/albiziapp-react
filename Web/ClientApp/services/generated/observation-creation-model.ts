@@ -7,13 +7,13 @@
 export class ObservationCreationModel {
     genus = "";
     isConfident: number = null;
-    image = "";
+    pictures: string[] = null;
     species = "";
     latitude: number = null;
     longitude: number = null;
 
     validate() {
-        let errors: string[] = [];
+        const errors: string[] = [];
 
         return errors;
     }

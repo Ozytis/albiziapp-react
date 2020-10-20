@@ -16,7 +16,7 @@ export class ObservationEditionModel {
     commonSpeciesName = "";
 
     validate() {
-        let errors: string[] = [];
+        const errors: string[] = [];
 
         return errors;
     }

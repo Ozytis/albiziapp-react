@@ -153,6 +153,7 @@ class ObservationsService extends BaseService {
         const result = await this.post(`observations/errorNotif/${userId}/${error}`, null);
         return result;
     }
-}
+
+   }
 
 export const ObservationsApi = new ObservationsService();

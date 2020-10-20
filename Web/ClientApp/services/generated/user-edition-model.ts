@@ -10,7 +10,7 @@ export class UserEditionModel {
     role: number = null;
 
     validate() {
-        let errors: string[] = [];
+        const errors: string[] = [];
 
         return errors;
     }
