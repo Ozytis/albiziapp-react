@@ -8,7 +8,7 @@ export class ObservationEditionModel {
     id = "";
     genus = "";
     isConfident: number = null;
-    image = "";
+    pictures: string[] = null;
     species = "";
     latitude: number = null;
     longitude: number = null;

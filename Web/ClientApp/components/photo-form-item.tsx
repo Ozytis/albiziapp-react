@@ -19,6 +19,7 @@ const styles = (theme: Theme) => createStyles({
     },
     photoContent: {
         margin: "0 auto",
+        marginTop: "8px",
         width: "33vh",
         height: "25vh",
         backgroundRepeat: "no-repeat",
@@ -39,7 +40,16 @@ const styles = (theme: Theme) => createStyles({
     },
     dialogChoiceButton: {
         marginBottom: "10px"
-    }
+    },
+    btn: {
+        minWidth : "0px",
+        marginLeft: "-15px",
+        marginTop: "-20px",
+        width: "20px",
+        height: "20px"
+
+        }
+
 })
 
 
@@ -160,8 +170,8 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
                     {
                         this.props.value && this.props.value.map((img, i) =>
                             <div key={"photoContent" + i} className={clsx("photo-content", this.props.classes.photoContent)} style={{ backgroundImage: `url("${img}")` }}>
-                                <Button variant="contained" color="default" onClick={() => this.props.onDelete(i)} >
-                                    <Close />
+                                <Button variant="contained" color="secondary" className={clsx(this.props.classes.btn)} onClick={() => this.props.onDelete(i)} >
+                                   <Close />
                                 </Button>
                             </div>
                             
