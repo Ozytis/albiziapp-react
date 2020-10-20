@@ -7,7 +7,7 @@
 
         public bool IsConfident { get; set; }
 
-        public string Image { get; set; }
+        public string[] Pictures { get; set; }
 
         public string Species { get; set; }
 

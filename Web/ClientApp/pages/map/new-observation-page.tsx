@@ -123,6 +123,26 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         await this.setState({ model: model });
     }
 
+    async addPicture(value: any) {
+        
+        const model = this.state.model;
+        if (model.pictures == null) {
+            model.pictures = [];
+        }
+        model.pictures.push(value);
+        await this.setState({ model: model });
+    }
+    async deletePicture(index: any) {
+
+        const model = this.state.model;
+        if (model.pictures == null) {
+           
+            return;
+        }
+        model.pictures.splice(index, 1);
+        await this.setState({ model: model });
+    }
+
     async cancelCreation() {
         ObservationsApi.setNextObservationCoordinates(null);
         await this.props.history.push({
@@ -308,7 +328,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                         {t.__("Photographie")}
                     </Typography>
 
-                    <PhotoFormItem label={t.__("Prendre une photo")} value={model.image} onChange={val => this.updateModel("image", val)} />
+                    <PhotoFormItem label={t.__("Prendre une photo")} value={model.pictures} onAdd={val => this.addPicture(val)} onDelete={index => this.deletePicture(index)} />
 
                     <Button color="secondary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.process()}>
                         <Loader loading={this.state.isProcessing} usualIcon="check" />

@@ -60,17 +60,19 @@ namespace Web.Controllers
                     SpeciesName = model.Species,
                     UserId = this.User.Identity.Name,
                 },
-                new[] { model.Image });
+                  model.Pictures );
         }
 
-        [HttpGet("picture/{observationId}")]
+        [HttpGet("picture/{observationId}/{index}")]
         [HandleBusinessException, ValidateModel]
-        public async Task<IActionResult> GetFirstObservationPicture(string observationId)
+        public async Task<IActionResult> GetFirstObservationPicture(string observationId, int index)
         {
+            
             var observation = await this.ObservationsManager.GetUserObservationbyId(observationId);
             if (observation.Pictures.Any())
             {
-                var picturePath = observation.Pictures.FirstOrDefault();
+                var picturePath = observation.Pictures.ElementAt(index);
+                
                 byte[] data = await this.FileManager.ReadFileAsync(picturePath);
                 return this.File(data, "image/" + Path.GetExtension(picturePath).Substring(0));
             }

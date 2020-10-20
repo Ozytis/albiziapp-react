@@ -136,7 +136,6 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
 
         const { classes } = this.props;
         const { observation } = this.state;
-
         if (!observation) {
             return <>Chargement</>;
         }
@@ -147,7 +146,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                     <Tabs value={this.state.currentTab} onChange={(_, index) => this.setState({ currentTab: index })} aria-label="simple tabs example">
                         <Tab label={t.__("Informations")} className={clsx(classes.tab)} value="infos" />
                         {
-                            observation.hasPicture &&
+                            observation.pictures &&
                             <Tab label={t.__("Photo")} className={clsx(classes.tab)} value="photo" />
                         }
 
@@ -245,8 +244,11 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
 
                     {
                         this.state.currentTab === "photo" &&
-                        <>
-                            <img src={`/api/observations/picture/${observation.id}`} style={{ maxWidth: "100vw" }} />
+                        <>{observation.pictures.map((img, i) =>
+                            <div style={{ margin: "0 auto" }} key={"photo" + i} >
+                                <img src={`/api/observations/picture/${observation.id}/${i}`} key={"photo" + i} style={{ maxWidth: "100vw", margin: "0 auto", marginTop: "3px" }} />
+                             </div>
+                                )}
                         </>
                     }
 

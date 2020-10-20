@@ -3,6 +3,7 @@ import clsx from "clsx";
 import React from "react";
 import { t } from "../services/translation-service";
 import { BaseComponent } from "./base-component";
+import { Close } from "@material-ui/icons";
 
 const styles = (theme: Theme) => createStyles({
     input: {
@@ -17,7 +18,7 @@ const styles = (theme: Theme) => createStyles({
         margin: theme.spacing(1),
     },
     photoContent: {
-        margin: `${theme.spacing(1)}px auto`,
+        margin: "0 auto",
         width: "33vh",
         height: "25vh",
         backgroundRepeat: "no-repeat",
@@ -45,8 +46,9 @@ const styles = (theme: Theme) => createStyles({
 interface PhotoFormItemProps extends WithStyles<typeof styles> {
     label: string;
     className?: string;
-    value: string;
-    onChange: (photoData: any) => Promise<any>;
+    value: string[];
+    onAdd: (photoData: any) => Promise<any>;
+    onDelete: (index: any) => Promise<any>;
 }
 
 class PhotoFormItemState {
@@ -54,11 +56,13 @@ class PhotoFormItemState {
     showSourceSelection = false;
     showCamera = false;
     showSnapShot = false;
+    listImage: string[];
 }
 
 class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoFormItemState>{
     constructor(props: PhotoFormItemProps) {
         super(props, "photo-form-item", new PhotoFormItemState());
+
     }
 
     async takeSnapShot() {
@@ -121,11 +125,12 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
 
             reader.onloadend = result => {
                 this.setState({ loading: false, showSourceSelection: false });
-                this.props.onChange((result.target as FileReader).result);
+                this.props.onAdd((result.target as FileReader).result);
             };
 
             reader.readAsDataURL(fileList[0]);
         });
+
     }
 
     control: HTMLInputElement;
@@ -137,11 +142,14 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
     }
 
     async keepSnapShot() {
-        await this.props.onChange(this.videoCanvas.toDataURL());
+        await this.props.onAdd(this.videoCanvas.toDataURL());
         await this.setState({ showCamera: false, showSnapShot: false, showSourceSelection: false });
     }
 
     render() {
+
+        console.log(this.props.value);
+
         return (
             <div className="photo-form-item">
                 <div className="photo-form-item-preview">
@@ -150,9 +158,14 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
 
                     </InputLabel>
                     {
-                        this.props.value && this.props.value.length > 1 &&
-                        <div className={clsx("photo-content", this.props.classes.photoContent)} style={{ backgroundImage: `url("${this.props.value}")` }}>
-                        </div>
+                        this.props.value && this.props.value.map((img, i) =>
+                            <div key={"photoContent" + i} className={clsx("photo-content", this.props.classes.photoContent)} style={{ backgroundImage: `url("${img}")` }}>
+                                <Button variant="contained" color="default" onClick={() => this.props.onDelete(i)} >
+                                    <Close />
+                                </Button>
+                            </div>
+                            
+                        )
                     }
                     {
                         <div className="photo-form-item-button text-center m-2" onClick={() => this.openModale()}>
