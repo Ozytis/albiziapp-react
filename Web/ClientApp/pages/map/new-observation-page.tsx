@@ -354,12 +354,12 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
 
                     <PhotoFormItem label={t.__("Prendre une photo")} value={model.pictures} onAdd={val => this.addPicture(val)} onDelete={index => this.deletePicture(index)} />
 
-                    <Button color="secondary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.process()}>
+                    <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.process()}>
                         <Loader loading={this.state.isProcessing} usualIcon="check" />
                         {t.__("Valider")}
                     </Button>
 
-                    <Button color="default" variant="text" className={clsx(classes.buttons)} onClick={() => this.cancelCreation()} fullWidth>
+                    <Button color="secondary" variant="contained" className={clsx(classes.buttons)} onClick={() => this.cancelCreation()} fullWidth>
                         <Undo />
                         {t.__("Annuler")}
                     </Button>

@@ -80,6 +80,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
     }
 
     async remove() {
+
         if (this.state.isDeleting || ! await Confirm(t.__("Etes-vous sûr de vouloir supprimer ce relevé ?"))) {
             return;
         }
@@ -237,16 +238,20 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                     </Grid>
                                 </Grid>
                             </Typography>
-                            <ListItem>
-                                <ListItemText primary={t.__("Supprimer le relevé, cette opération est définitive")}/>
-                            </ListItem>
-                  
-                            <Box className={clsx(classes.buttonsDiv)}>
-                                <Button color="secondary" startIcon={<Delete />} fullWidth variant="contained" onClick={() => this.remove()}>
 
-                                    {t.__("Supprimer")}
-                                </Button>
-                            </Box>
+                            {observation.historyEditor == null &&
+                                <>
+                                <ListItem>
+                                    <ListItemText primary={t.__("Supprimer le relevé, cette opération est définitive")} />
+                                </ListItem>
+                                <Box className={clsx(classes.buttonsDiv)}>
+                                    <Button color="secondary" startIcon={<Delete />} fullWidth variant="contained" onClick={() => this.remove()}>
+
+                                        {t.__("Supprimer")}
+                                    </Button>
+                                </Box>
+                                </>
+                            }
                         </>
                     }
                     {
