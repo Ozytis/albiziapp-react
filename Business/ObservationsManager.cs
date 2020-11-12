@@ -91,7 +91,7 @@ namespace Business
 
 
 
-                foreach (string picture in pictures.Where(p => !string.IsNullOrEmpty(p)))
+                foreach (string picture in pictures?.Where(p => !string.IsNullOrEmpty(p)))
                 {
                     newObservation.Pictures.Add(await this.FileManager.SaveDataUrlAsFileAsync("observations", picture));
                 }
