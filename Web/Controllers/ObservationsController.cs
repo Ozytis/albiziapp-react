@@ -96,7 +96,7 @@ namespace Web.Controllers
                     SpeciesName = model.Species,
                     UserId = this.User.Identity.Name,
                 },
-                new[] { model.Image }, this.User.Identity.Name);
+                 model.Pictures , this.User.Identity.Name);
         }
 
         [HttpDelete("{observationId}")]

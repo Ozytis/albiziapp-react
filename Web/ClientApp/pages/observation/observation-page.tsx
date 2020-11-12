@@ -1,5 +1,5 @@
 import { Box, Button, createStyles, Grid, Icon, InputLabel, List, ListItem, ListItemIcon, ListItemText, Switch, Tab, Tabs, Theme, Typography, WithStyles, withStyles } from "@material-ui/core";
-import { Check, Delete, Edit } from "@material-ui/icons";
+import { Check, Delete, Edit, NearMe } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -12,6 +12,7 @@ import { ObservationsApi } from "../../services/observation";
 import { SpeciesApi } from "../../services/species-service";
 import { t } from "../../services/translation-service";
 import { AuthenticationApi } from "../../services/authentication-service";
+import { MapPosition } from "../../components/mapPosition";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -80,6 +81,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
     }
 
     async remove() {
+
         if (this.state.isDeleting || ! await Confirm(t.__("Etes-vous sûr de vouloir supprimer ce relevé ?"))) {
             return;
         }
@@ -131,6 +133,11 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
             pathname: path
         });
     }
+    async updateLocalStorage() {
+        var now = new Date();
+        localStorage.setItem("mapPosition", JSON.stringify({ Latitude: this.state.observation.latitude, Longitude: this.state.observation.longitude, Zoom: 18, Date: now } as MapPosition));
+    }
+
 
     getConfidentLabel(confident: number) {
         switch (confident) {
@@ -198,7 +205,11 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                     />
                                 </ListItem>
                             </List>
-
+                            <Box className={clsx(classes.buttonsDiv)}>
+                                <Button color="primary" variant="contained" startIcon={<NearMe />} onClick={async () => { await this.updateLocalStorage(); this.goTo("/map") }}>
+                                    {t.__("Voir sur la map")}
+                                </Button>
+                            </Box>
                             
                             <ListItem>
                                 <ListItemText primary={t.__("Vous pouvez modifier le relevé ou bien confirmer que les informations sont correctes")} />
@@ -237,16 +248,21 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                     </Grid>
                                 </Grid>
                             </Typography>
-                            <ListItem>
-                                <ListItemText primary={t.__("Supprimer le relevé, cette opération est définitive")}/>
-                            </ListItem>
-                  
-                            <Box className={clsx(classes.buttonsDiv)}>
-                                <Button color="secondary" startIcon={<Delete />} fullWidth variant="contained" onClick={() => this.remove()}>
 
-                                    {t.__("Supprimer")}
-                                </Button>
-                            </Box>
+                            {observation.historyEditor == null &&
+                                <>
+                                <ListItem>
+                                    <ListItemText primary={t.__("Supprimer le relevé, cette opération est définitive")} />
+                                </ListItem>
+                                <Box className={clsx(classes.buttonsDiv)}>
+                                    <Button color="secondary" startIcon={<Delete />} fullWidth variant="contained" onClick={() => this.remove()}>
+
+                                        {t.__("Supprimer")}
+                                    </Button>
+                                </Box>
+                                </>
+                            }
+                            
                         </>
                     }
                     {

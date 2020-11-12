@@ -145,6 +145,7 @@ namespace Business
                 else
                 {
                     var trophiesToAdd = trophies.Where(t => !user.Trophies.Any(ut => ut == t.Id)).Select(t => t.Id).ToList();
+
                     user.Trophies = user.Trophies.Concat(trophiesToAdd).ToArray();
                 }
 

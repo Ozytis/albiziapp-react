@@ -16,6 +16,7 @@ import { ActivityModel } from "../../services/generated/activity-model";
 import { MissionProgressionModel } from "../../services/generated/mission-progression-model";
 import { NearMe } from "@material-ui/icons";
 import { MapPosition } from "../../components/mapPosition";
+import { last } from "lodash";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -65,12 +66,6 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
     async componentDidMount() {
 
-        await this.setState({
-            userPosition: {
-                coords: ({ latitude: 48.085834, longitude: -0.757896 } as any)
-            } as any
-        });
-
         navigator.geolocation.getCurrentPosition(async (position) => {
 
             await this.setState({
@@ -83,7 +78,12 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                 })
             });
         }, async () => {
-                console.log("MAP ERROR");          
+                console.log("MAP ERROR");  
+                await this.setState({
+                    userPosition: {
+                        coords: ({ latitude: 48.085834, longitude: -0.757896 } as any)
+                    } as any
+                });
         });
 
         ObservationsApi.registerObservationsListener(() => this.loadObservations());
@@ -114,8 +114,10 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         if (this.state.mapRef.current != null) {
             if (date >= now) {
                 await this.state.mapRef.current.leafletElement.setView([lastPos.Latitude, lastPos.Longitude], lastPos.Zoom);
+                console.log([lastPos.Latitude, lastPos.Longitude], lastPos.Zoom);
             }
             else {
+
                 await this.state.mapRef.current.leafletElement.panTo([this.state.userPosition.coords.latitude, this.state.userPosition.coords.longitude]);
             }
         }
@@ -187,6 +189,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
         var now = new Date();
         localStorage.setItem("mapPosition", JSON.stringify({ Latitude: lat, Longitude: lng, Zoom: zoom, Date: now } as MapPosition))
+        console.log(localStorage.getItem("mapPosition"));
     }
 
     getOppacity(observation: ObservationModel) {
