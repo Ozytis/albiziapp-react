@@ -179,6 +179,49 @@ class App extends BaseComponent<AppProps, AppState>{
 
         }
 
+        if (currentUser) {
+
+            var hubConnection = new signalR.HubConnectionBuilder()
+                .withUrl("/notifyhub")
+                .build();
+
+
+            hubConnection.on("InfoNotif", function (notifContent: string) {
+
+                const notify = () => toast.info(notifContent, {
+                    position: toast.POSITION.TOP_CENTER,
+                    autoClose: 7000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                });
+
+                const element =
+                    <div onLoad={notify}>
+                        <ToastContainer position="top-center"
+                            autoClose={5000}
+                            hideProgressBar={false}
+                            newestOnTop={false}
+                            closeOnClick
+                            rtl={false}
+                            pauseOnFocusLoss
+                            draggable
+                            pauseOnHover />
+                    </div>;
+                ReactDOM.render(element, document.getElementById('toastinfo'));
+                notify();
+            });
+
+            try {
+                await hubConnection.start();
+            }
+            catch (err) {
+                console.error(err);
+            };
+
+        }
     }
 
     appHistory: BrowserHistory;

@@ -119,5 +119,12 @@ namespace Web.Controllers
         {
             this.UserNotify.SendErrorNotif(userId, error);
         }
+
+        [HttpPost("infoNotif/{userId}/{error}")]
+        [HandleBusinessException, ValidateModel]
+        public void NotifyInfo(string userId, string error)
+        {
+            this.UserNotify.SendInfoNotif(userId, error);
+        }
     }
 }

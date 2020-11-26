@@ -11,6 +11,7 @@ import { UserScoreModel } from "../../services/generated/user-score-model";
 import { AuthenticationApi } from "../../services/authentication-service";
 import { TrophiesApi } from "../../services/trophies-service";
 import { Lock } from "@material-ui/icons";
+import { ObservationsApi } from "../../services/observation";
 
 // eslint-disable-next-line
 const styles = (theme: Theme) => createStyles({
@@ -74,21 +75,27 @@ class TrophyPageComponent extends BaseComponent<TrophyPageProps, TrophyPageState
         return this.state.score.trophiesId.find(t => t == trophyId) != null;
     }
 
+     howToUnlock(msg:string) {
+
+         ObservationsApi.notifInfo(AuthenticationApi.getCurrentUser().osmId, msg);
+
+    }
+
     render() {
         const { classes } = this.props;
         return (
             <Box className={clsx(classes.root)}>
 
 
-                {this.state.trophies != null && this.state.trophies.map((m) => (
+                {this.state.trophies != null && this.state.trophies.map((m, index) => (
 
-                    <Card className={clsx(classes.root)}>
+                    <Card className={clsx(classes.root)} key={index}>
                         <CardActionArea>
 
 
                             <CardMedia
-                                className={clsx(classes.slider, !this.trophiesIsUnlocked(m.id) ?  classes.locked : null)}
-                                image={`./img/trophy/${m.image}`}
+                                className={clsx(classes.slider, !this.trophiesIsUnlocked(m.id) ? classes.locked : null)}
+                                image={`./img/trophy/${m.image}`}                               
                             >
 
                             </CardMedia>

@@ -12,6 +12,7 @@ import { AuthenticationApi } from "../../services/authentication-service";
 import { TrophiesApi } from "../../services/trophies-service";
 import { Lock } from "@material-ui/icons";
 import { TitlesApi } from "../../services/titles-service";
+import { ObservationsApi } from "../../services/observation";
 
 // eslint-disable-next-line
 const styles = (theme: Theme) => createStyles({
@@ -66,6 +67,12 @@ class TitlePageComponent extends BaseComponent<TitlePageProps, TitlePageState>{
             return false;
         }
         return this.state.score.titlesId.find(t => t == titleId) != null;
+    }
+
+    howToUnlock(msg: string) {
+
+        ObservationsApi.notifInfo(AuthenticationApi.getCurrentUser().osmId, msg);
+
     }
 
     render() {

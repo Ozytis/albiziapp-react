@@ -92,5 +92,33 @@ namespace Web.Hubs
                 throw new Exception("ERROR");
             }
         }
+        public async Task<Task> SendInfoNotif(string userName, string notifContent)
+        {
+            HashSet<string> connections = ConnectionManager.GetConnections(userName);
+
+            try
+            {
+                if (connections != null && connections.Count > 0)
+                {
+                    foreach (var conn in connections)
+                    {
+
+                        try
+                        {
+                            await _context.Clients.Client(conn).SendAsync("InfoNotif", notifContent);
+                        }
+                        catch
+                        {
+                            throw new Exception("No connections found");
+                        }
+                    }
+                }
+                return Task.CompletedTask;
+            }
+            catch
+            {
+                throw new Exception("ERROR");
+            }
+        }
     }
 }
