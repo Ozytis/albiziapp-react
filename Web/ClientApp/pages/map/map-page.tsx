@@ -218,14 +218,18 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         ref={this.state.mapRef}
                         className={clsx(classes.map)}
                         center={position}
-                        zoom={18}
+                        zoom={21}
+                        zoomSnap={0.5}
                         minZoom={5}
+                        onzoomlevelschange={() => console.log(this.state.mapRef.current.leafletElement.getZoom())}
                         onclick={(e) => this.onMapClicked(e)}
                         onmoveend={() => this.setLastPosition(this.state.mapRef.current.leafletElement.getCenter().lat, this.state.mapRef.current.leafletElement.getCenter().lng, this.state.mapRef.current.leafletElement.getZoom())}
                     >
                         <TileLayer
                             url={this.getTilesUrl()}
                             attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
+                            maxNativeZoom={19}
+                            maxZoom={21}
                         />
 
                         <Marker

@@ -212,6 +212,11 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         if (this.state.isProcessing || !await Confirm(t.__("Etes vous sûr de vouloir valider ce relevé ?"))) {
             return;
         }
+        if (this.state.model.pictures.length == null) {
+
+            
+            return;
+        }
 
         await this.setState({ isProcessing: true, errors: [] });
 

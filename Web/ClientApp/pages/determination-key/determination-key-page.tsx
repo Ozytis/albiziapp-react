@@ -9,6 +9,8 @@ import { FloraKeyModel } from "../../services/generated/flora-key-model";
 import { SpeciesModel } from "../../services/generated/species-model";
 import { SpeciesApi } from "../../services/species-service";
 import { t } from "../../services/translation-service";
+import { filter } from "lodash";
+import { keys } from "@material-ui/core/styles/createBreakpoints";
 
 // eslint-disable-next-line
 const styles = (theme: Theme) => createStyles({
@@ -75,10 +77,15 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
             species: species,
             filters: filters
         });
+        console.log(keys[0].values);
     }
 
     async updateFilter(keyId: string, value: string) {
+
         const filters = this.state.filters;
+        console.log(filters);
+        console.log(keyId);
+        console.log(value);
         filters[keyId] = value;
         await this.setState({ filters: filters });
     }
@@ -90,18 +97,18 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
         const { keys, species, filters } = this.state;
 
         let filteredSpecies = species;
-
+        console.log(species);
         for (const filter in filters) {
 
             const value = filters[filter];
-
+            console.log(filter, value);
+            console.log(value.length);
             if (value && value.length > 1) {
-                filteredSpecies = species.filter(s => s.floraKeyValues && s.floraKeyValues.some(k => k === value));
+                filteredSpecies = filteredSpecies.filter(s => s.floraKeyValues && s.floraKeyValues.some(k => k === value));
             }
         }
 
-        // console.log("filtered", filteredSpecies);
-
+        console.log(filters);
         return (
             <Box className={clsx(classes.root)}>
 
