@@ -1,6 +1,6 @@
 import { Box, createStyles, Icon, Theme, WithStyles, withStyles, Button, Dialog, DialogActions } from "@material-ui/core";
 import clsx from "clsx";
-import { LatLng } from "leaflet";
+import L, { LatLng } from "leaflet";
 import React, { createRef, Component } from "react";
 import { Circle, Map, Marker, TileLayer, LayerGroup } from "react-leaflet";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -14,9 +14,9 @@ import { t } from "../../services/translation-service";
 import { MissionsApi } from "../../services/missions-service";
 import { ActivityModel } from "../../services/generated/activity-model";
 import { MissionProgressionModel } from "../../services/generated/mission-progression-model";
-import { NearMe } from "@material-ui/icons";
+import { NearMe, ZoomOutMapSharp, MapRounded} from "@material-ui/icons";
 import { MapPosition } from "../../components/mapPosition";
-import { last } from "lodash";
+import { last, map } from "lodash";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -57,6 +57,8 @@ class MapPageState {
     missionProgression: MissionProgressionModel;
     zoomLevel: number = 0;
     mapRef = createRef<Map>();
+    isLayerOn: boolean;
+    layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 }
 
 class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
@@ -163,7 +165,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             });
         }
         else {
-            await ObservationsApi.notifError(AuthenticationApi.getCurrentUser().osmId, "Le niveau de zoom est trop bas pour créer un nouveau relevé");
+            await ObservationsApi.notifError(AuthenticationApi.getCurrentUser().osmId, "Le niveau de zoom est trop haut pour créer un nouveau relevé");
             return;
         }
     }
@@ -202,6 +204,19 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         this.state.mapRef.current.leafletElement.setView([this.state.userPosition.coords.latitude, this.state.userPosition.coords.longitude], 18);
     }
 
+    changeLayer() {
+
+        if (!this.state.isLayerOn) {
+            this.state.mapRef.current.leafletElement.addLayer(this.state.layer);
+            this.setState({ isLayerOn: true });
+        }
+        else if (this.state.isLayerOn) {
+            this.state.mapRef.current.leafletElement.removeLayer(this.state.layer);
+            this.setState({ isLayerOn: false });
+        }
+
+    }
+
 
     render() {
 
@@ -221,15 +236,16 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         zoom={21}
                         zoomSnap={0.5}
                         minZoom={5}
-                        onzoomlevelschange={() => console.log(this.state.mapRef.current.leafletElement.getZoom())}
                         onclick={(e) => this.onMapClicked(e)}
                         onmoveend={() => this.setLastPosition(this.state.mapRef.current.leafletElement.getCenter().lat, this.state.mapRef.current.leafletElement.getCenter().lng, this.state.mapRef.current.leafletElement.getZoom())}
+                        setView
                     >
                         <TileLayer
                             url={this.getTilesUrl()}
                             attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
                             maxNativeZoom={19}
                             maxZoom={21}
+                            
                         />
 
                         <Marker
@@ -267,6 +283,23 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         onClick={() => this.goToUserLocation()}
                     >
                         <NearMe />
+                    </Button>
+
+                }
+                {
+                    <Button style={{
+                        position: "absolute",
+                        top: "16%",
+                        right: "3%",
+                        padding: "10px",
+                        zIndex: 400,
+                        backgroundColor: "#f4f4f4",
+                        color: "black",
+                        textAlign: "center"
+                    }}
+                        onClick={() => this.changeLayer()}
+                    >
+                        <MapRounded />
                     </Button>
 
                 }

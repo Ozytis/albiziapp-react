@@ -56,7 +56,6 @@ class AuthorizationComponent extends BaseComponent<AuthorizationProps, Authoriza
         const appRoute = matched && props.appContext.routes.find(route => route.routes.some(r => r.path === matched.route.path));
 
 
-
         if (appRoute.settings.authenticationRequired === false) {
             console.log("no auth required");
             state.accessGranted = true;
@@ -64,7 +63,6 @@ class AuthorizationComponent extends BaseComponent<AuthorizationProps, Authoriza
         }
 
         const user = AuthenticationApi.getCurrentUser();
-
 
         if (!user) {
 

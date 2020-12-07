@@ -212,12 +212,12 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                                 </ListItemIcon>
                                 <ListItemText primary={t.__("Flore")} />
                             </ListItem>
-                            <ListItem button onClick={() => this.goTo("/folia")}>
+                        {/*<ListItem button onClick={() => this.goTo("/folia")}>
                                 <ListItemIcon>
                                     <Search />
                                 </ListItemIcon>
                                 <ListItemText primary={t.__("Folia")} />
-                            </ListItem>
+                            </ListItem>*/}
                             <ListItem button onClick={() => this.goTo("/determination-key")}>
                                 <ListItemIcon>
                                     <AccountTree />

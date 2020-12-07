@@ -12,7 +12,7 @@ import { ObservationModel } from "../../services/generated/observation-model";
 // eslint-disable-next-line
 const styles = (theme: Theme) => createStyles({
     root: {
-
+        marginBottom: "15%",
     },
     card: {
         //color: theme.palette.common.white,

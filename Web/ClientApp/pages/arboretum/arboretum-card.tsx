@@ -65,6 +65,7 @@ class ArboretumCardComponent extends BaseComponent<ArboretumCardProps, Arboretum
         await this.setState({
             speciesInfo: info
         });
+        console.log(info);
     }
 
     endSwipe(e: React.TouchEvent<HTMLElement>): void {

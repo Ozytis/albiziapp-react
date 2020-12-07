@@ -14,7 +14,7 @@ import 'react-toastify/dist/ReactToastify.css';
 // eslint-disable-next-line
 const styles = (style: Theme) => createStyles({
     root: {
-
+        marginBottom: "15%",
     }
 });
 const notify = () => toast.success(' Wow so easy!', {
@@ -44,6 +44,7 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
 
         const species = await ObservationsApi.getUserArboretum(AuthenticationApi.user.osmId);
         await this.setState({ species: species });
+        console.log(species);
        
     }
 
@@ -73,7 +74,7 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
                             <ArboretumCard key={arboretum.species.id} species={arboretum.species} nbOfViews={arboretum.nbOfViews} />
                         )
                     })
-                }
+                    } 
                 </Box>
                
             </Box>

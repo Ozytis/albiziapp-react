@@ -162,12 +162,13 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
         const model = this.state.model;
         const genus = this.state.genusData.find(g => g.commonGenus === commonGenus);
         if (genus != null) {
-            model.genus = genus.genus;
+            model.commonGenus = genus.commonGenus;
             await this.setState({ model: model, commonGenus: genus });
         } else {
             model.genus = null;
             await this.setState({ model: model, commonGenus: null });
         }
+
         await this.clearConfident();
     }
 
@@ -181,6 +182,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
             model.species = null;
             await this.setState({ model: model, speciesCommonName: null });
         }
+
         await this.clearConfident();
     }
 
@@ -194,6 +196,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
             model.species = null;
             await this.setState({ model: model, speciesName: null });
         }
+
         await this.clearConfident();
     }
 
@@ -211,7 +214,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
     }
 
     async process() {
-
+        console.log(this.state.model);
         if (this.state.isProcessing || !await Confirm(t.__("Etes vous sûr de vouloir valider ce relevé ?"))) {
             return;
         }
@@ -320,7 +323,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                                     renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}
                                     getOptionSelected={(o, v) => o.commonGenus == v?.commonGenus}
                                     value={this.state.commonGenus}
-
+                                onChange={(e, v) => this.updateCommonGenus((v as any)?.commonGenus)}
                                 />
 
                             </FormControl>
@@ -355,7 +358,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                                 <Autocomplete
                                     id="speciesNameSelect"
                                     options={speciesData.sort((s1, s2) => s1.speciesName.localeCompare(s2.speciesName))}
-                                    getOptionLabel={(option: SpeciesModel) => option.commonSpeciesName}
+                                    getOptionLabel={(option: SpeciesModel) => option.speciesName}
                                     renderInput={(params) => <TextField {...params} label="Latine" variant="outlined" />}
                                     onChange={(e, v) => this.updateSpecies((v as any)?.speciesName)}
                                     value={this.state.speciesName}
