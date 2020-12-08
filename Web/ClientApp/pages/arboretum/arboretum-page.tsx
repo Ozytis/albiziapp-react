@@ -41,10 +41,11 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
     }
 
     async componentDidMount() {
-
+        console.log("AQUECOUCOU");
         const species = await ObservationsApi.getUserArboretum(AuthenticationApi.user.osmId);
-        await this.setState({ species: species });
+        console.log("WTF");
         console.log(species);
+        await this.setState({ species: species });
        
     }
 
@@ -52,6 +53,10 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
 
         const { classes } = this.props;
         const { species } = this.state;
+        console.log(species);
+
+       
+
         return (
             <Box>
                 <Box>
@@ -69,9 +74,9 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
                 </Box>
                  <Box className={clsx(classes.root)}>
                 {
-                    species && species.map(arboretum => {
-                        return (
-                            <ArboretumCard key={arboretum.species.id} species={arboretum.species} nbOfViews={arboretum.nbOfViews} />
+                        species && species.map(arboretum => {
+                            return (arboretum.species != null ?
+                            <ArboretumCard key={arboretum.species.id} species={arboretum.species} nbOfViews={arboretum.nbOfViews} /> : <></>
                         )
                     })
                     } 

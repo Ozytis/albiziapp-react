@@ -145,7 +145,7 @@ class ObservationsService extends BaseService {
                     species: species.find(s => s.speciesName === speciesName),
                     nbOfViews: observations.filter(o => o.speciesName === speciesName).length
                 }
-            })
+            }).filter(o => o.species != null)
             .sort((s1, s2) => s1.species.speciesName.localeCompare(s2.species.speciesName));
     }
 
