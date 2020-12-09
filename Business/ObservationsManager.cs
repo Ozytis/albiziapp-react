@@ -357,8 +357,9 @@ namespace Business
             if (!observation.Validations.Any(v => v.OsmId == currentUserId))
             {
                 observation.Validations.Add(new ObservationValidation { OsmId = currentUserId, ValidationDate = DateTime.UtcNow });
+                observation.IsIdentified = true;
                 await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == observation.Id, observation);
-
+                await this.UserNotify.SendNotif(currentUserId, "Le relevé a bien été confirmé");
                 //on reprend le fonctionnement de l'edition d'une observation, pour refaire le processus de validation des points...
                 await this.EditObservationAsync(observation, null, currentUserId);
             }

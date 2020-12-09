@@ -43,6 +43,12 @@ const styles = (theme: Theme) => createStyles({
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center"
+    },
+    imageClignote: {
+        animationDuration: ".8s",
+        animationName: "clignoter",
+        animationIterationCount: "infinite",
+        transition:"none"
     }
 });
 
@@ -190,8 +196,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
     async setLastPosition(lat: number, lng: number, zoom: number) {
 
         var now = new Date();
-        localStorage.setItem("mapPosition", JSON.stringify({ Latitude: lat, Longitude: lng, Zoom: zoom, Date: now } as MapPosition))
-        console.log(localStorage.getItem("mapPosition"));
+        localStorage.setItem("mapPosition", JSON.stringify({ Latitude: lat, Longitude: lng, Zoom: zoom, Date: now } as MapPosition));
     }
 
     getOppacity(observation: ObservationModel) {
@@ -261,6 +266,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                                         center={{ lat: observation.latitude, lng: observation.longitude }}
                                         radius={6}
                                         color={this.getColor(observation)}
+                                        className={clsx(classes.imageClignote)}
                                         onclick={() => this.props.history.push({ pathname: `/observation/${observation.id}` })}
                                     />
                                 )
