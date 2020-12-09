@@ -16,7 +16,7 @@ import { ObservationsApi } from "../../services/observation";
 // eslint-disable-next-line
 const styles = (theme: Theme) => createStyles({
     root: {
-
+        marginBottom: "15%",
     },
     card: {
         //color: theme.palette.common.white,
