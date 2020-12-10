@@ -13,6 +13,7 @@ import { SpeciesApi } from "../../services/species-service";
 import { t } from "../../services/translation-service";
 import { AuthenticationApi } from "../../services/authentication-service";
 import { MapPosition } from "../../components/mapPosition";
+import { forEach } from "lodash";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -22,7 +23,8 @@ const styles = (theme: Theme) => createStyles({
         minHeight: "calc(100vh - 120px)",
         maxHeight: "calc(100vh - 120px)",
         overflowY: "auto",
-        padding: "1vh 1vw 1vh 1vw"
+        padding: "1vh 1vw 1vh 1vw",
+        marginBottom : "15%"
     },
     tab: {
         //color: theme.palette.common.white,
@@ -61,6 +63,8 @@ class ObservationPageState {
     specyInfo: SpeciesInfoModel;
     isValidated: boolean = false;
     displayConfirmButton: boolean = true;
+    currentUser: string;
+    enableDeleteButton: boolean;
 }
 
 class ObservationPageComponent extends BaseComponent<ObservationPageProps, ObservationPageState>{
@@ -70,10 +74,12 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
 
     async componentDidMount() {
         const observation = await ObservationsApi.getObservation(this.props.match.params["observationid"]);
+        const currentUser = await AuthenticationApi.getCurrentUser();
         console.log(observation);
-        await this.setState({ observation: observation });
+        await this.setState({ observation: observation, currentUser:currentUser.osmId });
         await this.isValidated();
         await this.enableConfirmButton();
+        await this.isDeleteButtonEnable();
         if (observation.telaBotanicaTaxon) {
             const info = await SpeciesApi.getSpeciesInfo(observation.telaBotanicaTaxon);
             await this.setState({ specyInfo: info[0] });
@@ -122,6 +128,9 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         }
     }
 
+
+
+
     async validateObservation() {
         await this.setState({ isDeleting: true });
         const result = await ObservationsApi.ValidateObservation(this.state.observation);
@@ -148,14 +157,34 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         }
     }
 
+   
+    async isDeleteButtonEnable() {
+
+        const history = this.state.observation.historyEditor;
+        const currentUser = this.state.currentUser;
+        const historyFiltered = history.filter(h => h == currentUser);
+        if (historyFiltered.length == history.length) {
+            console.log("test 1");
+            if (currentUser == this.state.observation.userId) {
+                console.log("test 2");
+                await this.setState({ enableDeleteButton: true });
+            }
+            else {
+                await this.setState({ enableDeleteButton: false });
+            }
+        }
+        else {
+            await this.setState({ enableDeleteButton: false });
+        }
+    }
+
     render() {
 
         const { classes } = this.props;
-        const { observation } = this.state;
+        const { observation, enableDeleteButton } = this.state;
         if (!observation) {
             return <>Chargement</>;
         }
-
         return (
             <>
                 <Box className={clsx(classes.root)}>
@@ -249,17 +278,19 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                 </Grid>
                             </Typography>
 
-                            {observation.historyEditor == null &&
+                            {   enableDeleteButton && 
                                 <>
-                                <ListItem>
-                                    <ListItemText primary={t.__("Supprimer le relevé, cette opération est définitive")} />
-                                </ListItem>
-                                <Box className={clsx(classes.buttonsDiv)}>
-                                    <Button color="secondary" startIcon={<Delete />} fullWidth variant="contained" onClick={() => this.remove()}>
+                                
+                                    <ListItem>
+                                        <ListItemText primary={t.__("Supprimer le relevé, cette opération est définitive")} />
+                                    </ListItem>
+                                    <Box className={clsx(classes.buttonsDiv)}>
+                                        <Button color="secondary" variant="contained" startIcon={<Delete />} fullWidth onClick={() => this.remove()}>
 
-                                        {t.__("Supprimer")}
-                                    </Button>
-                                </Box>
+                                            {t.__("Supprimer")}
+                                        </Button>
+                                    </Box>
+                                  
                                 </>
                             }
                             
