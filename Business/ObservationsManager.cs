@@ -90,10 +90,12 @@ namespace Business
                 newObservation.AuthorName = user?.Name;
 
 
-
-                foreach (string picture in pictures?.Where(p => !string.IsNullOrEmpty(p)))
+                if (pictures != null)
                 {
-                    newObservation.Pictures.Add(await this.FileManager.SaveDataUrlAsFileAsync("observations", picture));
+                    foreach (string picture in pictures?.Where(p => !string.IsNullOrEmpty(p)))
+                    {
+                        newObservation.Pictures.Add(await this.FileManager.SaveDataUrlAsFileAsync("observations", picture));
+                    }
                 }
 
                 if(user.Role.HasValue && user.Role.Value.HasFlag( Entities.Enums.UserRole.EXPERT))

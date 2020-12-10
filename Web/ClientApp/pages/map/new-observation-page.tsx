@@ -21,6 +21,7 @@ import { SpeciesPage } from "../species/species-page";
 import { SpeciesInfoPage } from "../species/species-info-page";
 import { SpeciesInfoComponent } from "../species/species-info-component";
 import { StringHelper } from "../../utils/string-helper";
+import { MapPosition } from "../../components/mapPosition";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -212,11 +213,9 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         if (this.state.isProcessing || !await Confirm(t.__("Etes vous sûr de vouloir valider ce relevé ?"))) {
             return;
         }
-        if (this.state.model.pictures.length == null) {
 
-            
-            return;
-        }
+        var now = new Date();
+        localStorage.setItem("mapPosition", JSON.stringify({ Latitude: this.state.model.latitude, Longitude: this.state.model.longitude, Zoom:18 , Date: now } as MapPosition));
 
         await this.setState({ isProcessing: true, errors: [] });
 
