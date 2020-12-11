@@ -280,6 +280,11 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
             let s = this.state.species.filter(g => g.speciesName === model.species).map(s => s.genus);
             genus = genus.filter(g => s.indexOf(g.genus) != -1);
         }
+       
+        let commonGenus = [...genus];
+        commonGenus = commonGenus.sort((g1, g2) => g1.commonGenus.localeCompare(g2.commonGenus));
+        let commonSpecies = [...species];
+        commonSpecies = commonSpecies.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName));
         return (
             <>
                 <Box className={clsx(classes.root)}>
@@ -293,7 +298,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                     <FormControl className={clsx(classes.formControl)}>
                         <Autocomplete
                             id="commonGenusSelect"
-                            options={genus.sort((g1, g2) => g1.commonGenus.localeCompare(g2.commonGenus))}
+                            options={commonGenus}
                             getOptionLabel={(option: TreeGenusModel) => option.commonGenus}
                             renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}
                             onChange={(e, v) => this.updateCommonGenus((v as any)?.commonGenus)}
@@ -318,7 +323,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                     <FormControl className={clsx(classes.formControl)}>
                         <Autocomplete
                             id="commonSpeciesSelect"
-                            options={species.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName))}
+                            options={commonSpecies}
                             getOptionLabel={(option: SpeciesModel) => option.commonSpeciesName}
                             renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}
                             onChange={(e, v) => this.updateCommonSpecies((v as any)?.commonSpeciesName)}

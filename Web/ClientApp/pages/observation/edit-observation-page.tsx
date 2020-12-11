@@ -301,7 +301,10 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
             genusData = genusData.filter(g => s.indexOf(g.genus) != -1);
         }
 
-
+        let commonGenus = [...genusData];
+        commonGenus = commonGenus.sort((g1, g2) => g1.commonGenus.localeCompare(g2.commonGenus));
+        let commonSpecies = [...speciesData];
+        commonSpecies = commonSpecies.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName));
 
         return (
             <>
@@ -318,7 +321,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
 
                                 <Autocomplete
                                     id="commonGenusSelect"
-                                    options={genusData.sort((g1, g2) => g1.commonGenus.localeCompare(g2.commonGenus))}
+                                options={commonGenus}
                                     getOptionLabel={(option: TreeGenusModel) => option.commonGenus}
                                     renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}
                                     getOptionSelected={(o, v) => o.commonGenus == v?.commonGenus}
@@ -346,7 +349,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                             <FormControl className={clsx(classes.formControl)}>
                                 <Autocomplete
                                     id="speciesCommonNameSelect"
-                                    options={speciesData.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName))}
+                                options={commonSpecies}
                                     getOptionLabel={(option: SpeciesModel) => option.commonSpeciesName}
                                     renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}
                                     onChange={(e, v) => this.updateCommon((v as any)?.commonSpeciesName)}

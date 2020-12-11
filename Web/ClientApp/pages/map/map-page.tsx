@@ -14,7 +14,7 @@ import { t } from "../../services/translation-service";
 import { MissionsApi } from "../../services/missions-service";
 import { ActivityModel } from "../../services/generated/activity-model";
 import { MissionProgressionModel } from "../../services/generated/mission-progression-model";
-import { NearMe, ZoomOutMapSharp, MapRounded} from "@material-ui/icons";
+import { NearMe, ZoomOutMapSharp, MapRounded } from "@material-ui/icons";
 import { MapPosition } from "../../components/mapPosition";
 import { last, map } from "lodash";
 
@@ -48,7 +48,7 @@ const styles = (theme: Theme) => createStyles({
         animationDuration: ".8s",
         animationName: "clignoter",
         animationIterationCount: "infinite",
-        transition:"none"
+        transition: "none"
     }
 });
 
@@ -73,7 +73,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
     }
 
     async componentDidMount() {
-
+        console.log("CDM");
         navigator.geolocation.getCurrentPosition(async (position) => {
 
             await this.setState({
@@ -86,17 +86,17 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                 })
             });
         }, async () => {
-                console.log("MAP ERROR");  
-                await this.setState({
-                    userPosition: {
-                        coords: ({ latitude: 48.085834, longitude: -0.757896 } as any)
-                    } as any
-                });
+            console.log("MAP ERROR");
+            await this.setState({
+                userPosition: {
+                    coords: ({ latitude: 48.085834, longitude: -0.757896 } as any)
+                } as any
+            });
         });
 
         ObservationsApi.registerObservationsListener(() => this.loadObservations());
 
-        this.loadObservations();
+        await this.loadObservations();
 
         var missions = await MissionsApi.getMissions();
         var userMissions = await AuthenticationApi.getUserMission();
@@ -116,17 +116,23 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
     async setPosition() {
 
         var lastPos: MapPosition = JSON.parse(localStorage.getItem("mapPosition"));
+
         var now = new Date();
         now = new Date(now.getTime() - 30 * 60000);
-        var date = new Date(lastPos.Date as any);
-        if (this.state.mapRef.current != null) {
-            if (date >= now) {
-                await this.state.mapRef.current.leafletElement.setView([lastPos.Latitude, lastPos.Longitude], lastPos.Zoom);
-                console.log([lastPos.Latitude, lastPos.Longitude], lastPos.Zoom);
-            }
-            else {
 
+        if (this.state.mapRef.current != null) {
+            if (lastPos == null) {
                 await this.state.mapRef.current.leafletElement.panTo([this.state.userPosition.coords.latitude, this.state.userPosition.coords.longitude]);
+            } else {
+                var date = new Date(lastPos.Date as any);
+                if (date >= now) {
+                    await this.state.mapRef.current.leafletElement.setView([lastPos.Latitude, lastPos.Longitude], lastPos.Zoom);
+                    console.log([lastPos.Latitude, lastPos.Longitude], lastPos.Zoom);
+                }
+                else {
+
+                    await this.state.mapRef.current.leafletElement.panTo([this.state.userPosition.coords.latitude, this.state.userPosition.coords.longitude]);
+                }
             }
         }
     }
@@ -250,7 +256,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                             attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
                             maxNativeZoom={19}
                             maxZoom={21}
-                            
+
                         />
 
                         <Marker
@@ -285,7 +291,8 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         zIndex: 400,
                         backgroundColor: "#f4f4f4",
                         color: "black",
-                        textAlign: "center"}}
+                        textAlign: "center"
+                    }}
                         onClick={() => this.goToUserLocation()}
                     >
                         <NearMe />

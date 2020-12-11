@@ -53,9 +53,10 @@ class App extends BaseComponent<AppProps, AppState>{
     }
 
     async componentDidMount() {
-
-        ObservationsApi.loadObservations();
-        SpeciesApi.loadSpecies();
+        if (this.state.user) {
+            ObservationsApi.loadObservations();
+            SpeciesApi.loadSpecies();
+        }
         await this.refreshAuth();
     }
 
