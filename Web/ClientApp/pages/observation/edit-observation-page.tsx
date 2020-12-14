@@ -277,7 +277,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
         var state = this.state;
         return ( state.commonGenus != null || !StringHelper.isNullOrEmpty(state.model.genus) || state.speciesCommonName != null || !StringHelper.isNullOrEmpty(state.model.species));
     }
-
+ 
     render() {
 
         const { classes } = this.props;
@@ -294,6 +294,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
 
         if (model.genus && model.genus.length > 0) {
             speciesData = speciesData.filter(species => species.genus === model.genus);
+            genusData = genusData.filter(g => g.commonGenus == this.state.commonGenus?.commonGenus);
         }
 
         if (model.species && model.species.length > 0 && (model.genus == null || model.genus.length == 0)) {
@@ -320,7 +321,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                             <FormControl className={clsx(classes.formControl)}>
 
                                 <Autocomplete
-                                    id="commonGenusSelect"
+                                id="commonGenusSelect"                               
                                 options={commonGenus}
                                     getOptionLabel={(option: TreeGenusModel) => option.commonGenus}
                                     renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}

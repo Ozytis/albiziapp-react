@@ -52,12 +52,13 @@ class App extends BaseComponent<AppProps, AppState>{
 
     }
 
-    async componentDidMount() {
+    async componentDidMount() {     
+        await this.refreshAuth();
+        console.log(this.state.user)
         if (this.state.user) {
             ObservationsApi.loadObservations();
             SpeciesApi.loadSpecies();
         }
-        await this.refreshAuth();
     }
 
     async removeContextUpdateListener(listener: (newContext: IAppContext, oldContext: IAppContext) => Promise<void>) {
