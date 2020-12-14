@@ -163,7 +163,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         const history = this.state.observation.historyEditor;
         const currentUser = this.state.currentUser; 
 
-        if (history == undefined) {
+        if (history == undefined && currentUser == this.state.observation.userId) {
             await this.setState({ enableDeleteButton: true });
             return;
         }
