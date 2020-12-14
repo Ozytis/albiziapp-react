@@ -7,6 +7,8 @@ import { IPropsWithAppContext, withAppContext } from "../../components/app-conte
 import { BaseComponent } from "../../components/base-component";
 import { AuthenticationApi } from "../../services/authentication-service";
 import { t } from "../../services/translation-service";
+import { ObservationsApi } from "../../services/observation";
+import { SpeciesApi } from "../../services/species-service";
 
 // eslint-disable-next-line
 const styles = (theme: Theme) => createStyles({
@@ -44,6 +46,8 @@ class LoginPageComponent extends BaseComponent<LoginPageProps, LoginPageState>{
 
     async connect() {
         await AuthenticationApi.login();
+        ObservationsApi.loadObservations();
+        SpeciesApi.loadSpecies();
         this.props.history.replace("/map");
     }
 

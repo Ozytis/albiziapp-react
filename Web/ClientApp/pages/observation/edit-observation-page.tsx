@@ -277,7 +277,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
         var state = this.state;
         return ( state.commonGenus != null || !StringHelper.isNullOrEmpty(state.model.genus) || state.speciesCommonName != null || !StringHelper.isNullOrEmpty(state.model.species));
     }
-
+ 
     render() {
 
         const { classes } = this.props;
@@ -294,6 +294,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
 
         if (model.genus && model.genus.length > 0) {
             speciesData = speciesData.filter(species => species.genus === model.genus);
+            genusData = genusData.filter(g => g.commonGenus == this.state.commonGenus?.commonGenus);
         }
 
         if (model.species && model.species.length > 0 && (model.genus == null || model.genus.length == 0)) {
@@ -301,7 +302,10 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
             genusData = genusData.filter(g => s.indexOf(g.genus) != -1);
         }
 
-
+        let commonGenus = [...genusData];
+        commonGenus = commonGenus.sort((g1, g2) => g1.commonGenus.localeCompare(g2.commonGenus));
+        let commonSpecies = [...speciesData];
+        commonSpecies = commonSpecies.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName));
 
         return (
             <>
@@ -317,8 +321,8 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                             <FormControl className={clsx(classes.formControl)}>
 
                                 <Autocomplete
-                                    id="commonGenusSelect"
-                                    options={genusData.sort((g1, g2) => g1.commonGenus.localeCompare(g2.commonGenus))}
+                                id="commonGenusSelect"                               
+                                options={commonGenus}
                                     getOptionLabel={(option: TreeGenusModel) => option.commonGenus}
                                     renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}
                                     getOptionSelected={(o, v) => o.commonGenus == v?.commonGenus}
@@ -346,7 +350,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                             <FormControl className={clsx(classes.formControl)}>
                                 <Autocomplete
                                     id="speciesCommonNameSelect"
-                                    options={speciesData.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName))}
+                                options={commonSpecies}
                                     getOptionLabel={(option: SpeciesModel) => option.commonSpeciesName}
                                     renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}
                                     onChange={(e, v) => this.updateCommon((v as any)?.commonSpeciesName)}

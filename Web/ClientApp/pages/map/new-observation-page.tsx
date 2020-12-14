@@ -82,6 +82,8 @@ class NewObservationPageState {
     model = new ObservationCreationModel();
     species: SpeciesModel[];
     genus: TreeGenusModel[];
+    selectedGenus: TreeGenusModel;
+    selectedspecies: SpeciesModel;
     commonGenus = "";
     commonName = "";
     showModalSpecied = false;
@@ -160,10 +162,10 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         const genus = this.state.genus.find(g => g.commonGenus === commonGenus);
         if (genus != null) {
             model.genus = genus.genus;
-            await this.setState({ model: model, commonGenus: genus.commonGenus });
+            await this.setState({ model: model, selectedGenus: genus, commonGenus: genus.commonGenus });
         } else {
             model.genus = null;
-            await this.setState({ model: model, commonGenus: null });
+            await this.setState({ model: model, commonGenus: null, selectedGenus:null });
         }
         await this.clearConfident();
     }
@@ -172,10 +174,10 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         const genus = this.state.genus.find(g => g.genus === genusName);
         if (genus != null) {
             model.genus = genus.genus;
-            await this.setState({ model: model, commonGenus: genus.commonGenus });
+            await this.setState({ model: model, commonGenus: genus.commonGenus, selectedGenus: genus, });
         } else {
             model.genus = null;
-            await this.setState({ model: model, commonGenus: null });
+            await this.setState({ model: model, commonGenus: null, selectedGenus: null});
         }
         await this.clearConfident();
     }
@@ -257,7 +259,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         var state = this.state;
         return (!StringHelper.isNullOrEmpty(state.commonGenus) || !StringHelper.isNullOrEmpty(state.model.genus) || !StringHelper.isNullOrEmpty(state.commonName) || !StringHelper.isNullOrEmpty(state.model.species));
     }
-
+ 
     render() {
 
         const { classes } = this.props;
@@ -273,13 +275,19 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         }
 
         if (model.genus && model.genus.length > 0) {
-            species = species.filter(species => species.genus === model.genus);
+            species = species.filter(species => species.genus === model.genus);         
+            genus = genus.filter(g => g.commonGenus == this.state.commonGenus);            
         }
 
         if (model.species && model.species.length > 0 && (model.genus == null || model.genus.length == 0)) {
             let s = this.state.species.filter(g => g.speciesName === model.species).map(s => s.genus);
             genus = genus.filter(g => s.indexOf(g.genus) != -1);
         }
+       
+        let commonGenus = [...genus];
+        commonGenus = commonGenus.sort((g1, g2) => g1.commonGenus.localeCompare(g2.commonGenus));
+        let commonSpecies = [...species];
+        commonSpecies = commonSpecies.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName));
         return (
             <>
                 <Box className={clsx(classes.root)}>
@@ -293,9 +301,10 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                     <FormControl className={clsx(classes.formControl)}>
                         <Autocomplete
                             id="commonGenusSelect"
-                            options={genus.sort((g1, g2) => g1.commonGenus.localeCompare(g2.commonGenus))}
+                            options={commonGenus}
                             getOptionLabel={(option: TreeGenusModel) => option.commonGenus}
                             renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}
+                           
                             onChange={(e, v) => this.updateCommonGenus((v as any)?.commonGenus)}
                         />
                     </FormControl>
@@ -305,6 +314,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                             id="GenusSelect"
                             options={genus.sort((g1, g2) => g1.genus.localeCompare(g2.genus))}
                             getOptionLabel={(option: TreeGenusModel) => option.genus}
+                            
                             renderInput={(params) => <TextField {...params} label="Latin" variant="outlined" />}
                             onChange={(e, v) => this.updateGenus((v as any)?.genus)}
                         />
@@ -318,7 +328,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                     <FormControl className={clsx(classes.formControl)}>
                         <Autocomplete
                             id="commonSpeciesSelect"
-                            options={species.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName))}
+                            options={commonSpecies}
                             getOptionLabel={(option: SpeciesModel) => option.commonSpeciesName}
                             renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}
                             onChange={(e, v) => this.updateCommonSpecies((v as any)?.commonSpeciesName)}
