@@ -64,7 +64,10 @@ class MapPageState {
     zoomLevel: number = 0;
     mapRef = createRef<Map>();
     isLayerOn: boolean;
-    layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+    layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxNativeZoom: 19,
+        maxZoom : 21
+    });
 }
 
 class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
