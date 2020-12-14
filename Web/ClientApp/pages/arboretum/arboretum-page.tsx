@@ -10,6 +10,7 @@ import { ObservationsApi } from "../../services/observation";
 import { ArboretumCard } from "./arboretum-card";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { t } from "../../services/translation-service";
 
 // eslint-disable-next-line
 const styles = (style: Theme) => createStyles({
@@ -41,10 +42,7 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
     }
 
     async componentDidMount() {
-        console.log("AQUECOUCOU");
         const species = await ObservationsApi.getUserArboretum(AuthenticationApi.user.osmId);
-        console.log("WTF");
-        console.log(species);
         await this.setState({ species: species });
        
     }
@@ -53,9 +51,7 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
 
         const { classes } = this.props;
         const { species } = this.state;
-        console.log(species);
-
-       
+        
 
         return (
             <Box>
@@ -80,6 +76,15 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
                         )
                     })
                     } 
+                    <Box>
+                    {
+                        species && species.length ==0 &&
+
+                        t.__("Il vous faut faire au moins un releve avec un genre")
+                        
+                    }
+
+                    </Box>
                 </Box>
                
             </Box>

@@ -129,15 +129,15 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
                                 return (
                                     <ListItem key={key.id} className={clsx(classes.filter)}>
                                         <ListItemText
-                                            primary={key.frTitle}
-                                           
-                                            onClick={(e) => { this.setState({ currentPopperOpen: key.id, anchorEl: e.currentTarget }) }}
+                                            primary={key.frTitle}                                           
                                         />
                                         {(key.frSubTitle != null && key.frSubTitle.length > 0) &&
                                             <>
-                                                <ListItemIcon>
+                                            <ListItemIcon
+                                                onClick={(e) => { this.setState({ currentPopperOpen: key.id, anchorEl: e.currentTarget }) }}
+                                            >
                                                     <InfoRounded />
-                                                </ListItemIcon>
+                                                
 
                                             <Popper open={this.state.currentPopperOpen == key.id} anchorEl={this.state.anchorEl} transition >
                                                     {({ TransitionProps }) => (
@@ -148,7 +148,7 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
                                                         </Fade>
                                                     )}
                                                 </Popper>
-
+                                            </ListItemIcon>
                                             </>
                                         }
                                         <Select
