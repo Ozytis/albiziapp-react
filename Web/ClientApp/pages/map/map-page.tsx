@@ -16,7 +16,6 @@ import { ActivityModel } from "../../services/generated/activity-model";
 import { MissionProgressionModel } from "../../services/generated/mission-progression-model";
 import { NearMe, ZoomOutMapSharp, MapRounded } from "@material-ui/icons";
 import { MapPosition } from "../../components/mapPosition";
-import { last, map } from "lodash";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -100,7 +99,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         ObservationsApi.registerObservationsListener(() => this.loadObservations());
 
         await this.loadObservations();
-
+        
         var missions = await MissionsApi.getMissions();
         var userMissions = await AuthenticationApi.getUserMission();
         var currentMission = missions.find(m => m.id == userMissions.missionProgression.missionId);
