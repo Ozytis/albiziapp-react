@@ -45,13 +45,13 @@ namespace Business
 
         public async Task<IEnumerable<Observation>> GetUserVerifyObservations(string userId)
         {
-            return await this.DataContext.Observations.Find(obs => obs.History[0] != null && obs.History[0].UserId != userId &&
+            return await this.DataContext.Observations.Find(obs => obs.History.Count > 0 && obs.History[0].UserId != userId &&
             (obs.UserId == userId || obs.History != null && obs.History.Any(x => x.UserId == userId))).ToListAsync();
         }
 
         public async Task<IEnumerable<Observation>> GetUserIdentifyObservations(string userId)
         {
-            return await this.DataContext.Observations.Find(obs => obs.IsIdentified && obs.History[0] != null && obs.History[0].UserId != userId &&
+            return await this.DataContext.Observations.Find(obs => obs.IsIdentified && obs.History.Count > 0 && obs.History[0].UserId != userId &&
             (obs.UserId == userId || obs.History != null && obs.History.Any(x => x.UserId == userId))).ToListAsync();
         }
 
@@ -359,10 +359,12 @@ namespace Business
             if (!observation.Validations.Any(v => v.OsmId == currentUserId))
             {
                 observation.Validations.Add(new ObservationValidation { OsmId = currentUserId, ValidationDate = DateTime.UtcNow });
-                observation.IsIdentified = true;
+                //TODO changer cela
+                observation.IsIdentified = true;                
                 await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == observation.Id, observation);
                 await this.UserNotify.SendNotif(currentUserId, "Le relevé a bien été confirmé");
                 //on reprend le fonctionnement de l'edition d'une observation, pour refaire le processus de validation des points...
+                observation.UserId = currentUserId;
                 await this.EditObservationAsync(observation, null, currentUserId);
             }
         }
