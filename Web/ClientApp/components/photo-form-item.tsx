@@ -223,7 +223,7 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
                                 {
                                     !this.state.showCamera && !this.state.showSnapShot &&
                                     <Button color="primary" className={clsx(this.props.classes.dialogChoiceButton, "button button-primary button-block mt-1")} variant="contained"
-                                        onClick={() => this.takePicture("camera")}>
+                                        onClick={() => this.takePicture("library")}>
                                         Prendre une photo
                                     </Button>
                                 }
