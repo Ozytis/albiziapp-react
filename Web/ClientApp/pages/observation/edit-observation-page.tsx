@@ -70,10 +70,7 @@ interface EditObservationPageProps extends RouteComponentProps, IPropsWithAppCon
 class EditObservationPageState {
 
     constructor() {
-        const coordinates = ObservationsApi.getNextObservationCoordinates();
-        this.model.latitude = coordinates[0];
-        this.model.longitude = coordinates[1];
-    }
+           }
 
     isProcessing = false;
     errors: string[];
@@ -95,11 +92,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
     }
 
     async componentDidMount() {
-        if (!this.state.model.latitude) {
-            this.props.history.push({
-                pathname: "/map"
-            })
-        }
+   
         const observation = await ObservationsApi.getObservation(this.props.match.params["observationid"]);
         var model = new ObservationEditionModel();
         console.log(observation);
