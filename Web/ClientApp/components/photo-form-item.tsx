@@ -1,6 +1,7 @@
 import { Button, createStyles, Dialog, DialogActions, Icon, InputLabel, Theme, WithStyles, withStyles } from "@material-ui/core";
 import clsx from "clsx";
 import React from "react";
+import MobileDetect from "mobile-detect";
 import { t } from "../services/translation-service";
 import { BaseComponent } from "./base-component";
 import { Close } from "@material-ui/icons";
@@ -67,6 +68,7 @@ class PhotoFormItemState {
     showCamera = false;
     showSnapShot = false;
     listImage: string[];
+    md = new MobileDetect(window.navigator.userAgent);
 }
 
 class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoFormItemState>{
@@ -89,14 +91,17 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
         this.videoStream.getTracks().forEach(function (track) {
             track.stop();
         });
+        
         await this.setState({ showCamera: false });
     }
 
     async takePicture(sourceType: string) {
 
         if (sourceType === "library") {
+            this.controlPicker.click();
+        } else if (sourceType === "camera") {            
             this.control.click();
-        }
+        } 
         else {
             await this.setState({ showCamera: true, showSnapShot: false });
 
@@ -144,6 +149,7 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
     }
 
     control: HTMLInputElement;
+    controlPicker: HTMLInputElement;
     videoCanvas: HTMLCanvasElement;
     video: HTMLVideoElement;
     videoStream: MediaStream;
@@ -159,7 +165,7 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
     render() {
 
         console.log(this.props.value);
-
+        console.log(this.state.md.mobile());
         return (
             <div className="photo-form-item">
                 <div className="photo-form-item-preview">
@@ -221,18 +227,33 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
                         <DialogActions className={clsx(this.props.classes.dialogChoiceModal)}>
                             <div className={clsx(this.props.classes.dialogChoice, "text-center")}>
                                 {
-                                    !this.state.showCamera && !this.state.showSnapShot &&
+                                    !this.state.showCamera && !this.state.showSnapShot && this.state.md.mobile() &&
                                     <Button color="primary" className={clsx(this.props.classes.dialogChoiceButton, "button button-primary button-block mt-1")} variant="contained"
-                                        onClick={() => this.takePicture("library")}>
+                                        onClick={() => this.takePicture("camera")}>
                                         Prendre une photo
                                     </Button>
                                 }
+                                {this.state.md.mobile() &&
+                                    <>
+                                    <Button color="secondary" variant="contained" className="button button-primary  button-block mb-1"
+                                        onClick={() => this.takePicture("library")}>
+                                        Choisir une photo existante
+                                    </Button>
+                                    <div className="photo-form-item-button text-center m-2" >
 
-
-                                <Button color="secondary" variant="contained" className="button button-primary  button-block mb-1"
-                                    onClick={() => this.takePicture("library")}>
-                                    Choisir une photo existante
-                            </Button>
+                                        <input type="file" accept="image/*" ref={input => this.controlPicker = input} onChange={(e) => this.onFileSelected(e.target.files)}
+                                            className={clsx(this.props.classes.input)}
+                                        />
+                                    </div>
+                                    </>
+                                }
+                                {   !this.state.md.mobile() &&
+                                    <Button color="secondary" variant="contained" className="button button-primary  button-block mb-1"
+                                        onClick={() => this.takePicture("library")}>
+                                        Selectionner une photo
+                                    </Button>
+                                }
+                               
                             </div>
                         </DialogActions>
                     </Dialog>
