@@ -160,27 +160,52 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
 
     async updateCommonGenus(commonGenus: string) {
         const model = this.state.model;
-        const genus = this.state.genusData.find(g => g.commonGenus === commonGenus);
-        if (genus != null) {
-            model.commonGenus = genus.commonGenus;
-            await this.setState({ model: model, commonGenus: genus });
+        const genus = this.state.genusData.filter(g => g.commonGenus === commonGenus);
+        if (genus != null && genus.length > 0) {
+            model.commonGenus = genus[0].commonGenus;
+            await this.setState({ model: model, commonGenus: genus[0] });
+            if (genus.length == 1) {
+                await this.updateGenus(genus[0].genus);
+            }
         } else {
             model.genus = null;
-            await this.setState({ model: model, commonGenus: null });
+            model.species = null;
+            await this.setState({ model: model, commonGenus: null, genus: null, speciesCommonName: null, speciesName: null });
         }
 
         await this.clearConfident();
     }
 
+    async updateGenus(genusName: string) {
+        const model = this.state.model;
+        const genus = this.state.genusData.filter(g => g.genus === genusName);
+        if (genus != null && genus.length > 0) {
+            model.genus = genus[0].genus;
+            await this.setState({ model: model, genus: genus[0] });
+            const speciesCount = this.state.speciesData.filter(species => species.genus === model.genus);
+            if (speciesCount.length == 1) {
+                this.updateCommon(speciesCount[0].commonSpeciesName);
+            }
+        } else {
+            model.genus = null;
+            model.species = null;
+            await this.setState({ model: model, genus: null, speciesCommonName: null, speciesName: null });
+        }
+        await this.clearConfident();
+    }
+
     async updateCommon(common: string) {
         const model = this.state.model;
-        const species = this.state.speciesData.find(g => g.commonSpeciesName === common);
-        if (species != null) {
-            model.species = species.speciesName;
-            await this.setState({ model: model, speciesCommonName: species });
+        const species = this.state.speciesData.filter(g => g.commonSpeciesName === common);
+        if (species != null && species.length > 0) {
+            model.species = species[0].speciesName;
+            await this.setState({ model: model, speciesCommonName: species[0] });
+            if (species.length == 1) {
+                this.updateSpecies(species[0].speciesName);
+            }
         } else {
             model.species = null;
-            await this.setState({ model: model, speciesCommonName: null });
+            await this.setState({ model: model, speciesCommonName: null, speciesName: null });
         }
 
         await this.clearConfident();
@@ -200,21 +225,9 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
         await this.clearConfident();
     }
 
-    async updateGenus(genusName: string) {
-        const model = this.state.model;
-        const genus = this.state.genusData.find(g => g.genus === genusName);
-        if (genus != null) {
-            model.genus = genus.genus;
-            await this.setState({ model: model, genus: genus });
-        } else {
-            model.genus = null;
-            await this.setState({ model: model, genus: null });
-        }
-        await this.clearConfident();
-    }
+
 
     async process() {
-        console.log(this.state.model);
         if (this.state.isProcessing || !await Confirm(t.__("Etes vous sûr de vouloir valider ce relevé ?"))) {
             return;
         }
@@ -275,13 +288,13 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
 
     showConfident() {
         var state = this.state;
-        return ( state.commonGenus != null || !StringHelper.isNullOrEmpty(state.model.genus) || state.speciesCommonName != null || !StringHelper.isNullOrEmpty(state.model.species));
+        return (state.commonGenus != null || !StringHelper.isNullOrEmpty(state.model.genus) || state.speciesCommonName != null || !StringHelper.isNullOrEmpty(state.model.species));
     }
- 
+
     render() {
 
         const { classes } = this.props;
-        const { model } = this.state;
+        const { model, speciesCommonName } = this.state;
         let { speciesData, genusData } = this.state;
 
         if (!speciesData) {
@@ -300,6 +313,11 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
         if (model.species && model.species.length > 0 && (model.genus == null || model.genus.length == 0)) {
             let s = this.state.speciesData.filter(g => g.speciesName === model.species).map(s => s.genus);
             genusData = genusData.filter(g => s.indexOf(g.genus) != -1);
+        }
+        
+        if (speciesCommonName != null) {
+
+            speciesData = speciesData.filter(species => species.commonSpeciesName === speciesCommonName.commonSpeciesName);
         }
 
         let commonGenus = [...genusData];
@@ -321,13 +339,13 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                             <FormControl className={clsx(classes.formControl)}>
 
                                 <Autocomplete
-                                id="commonGenusSelect"                               
-                                options={commonGenus}
-                                    getOptionLabel={(option: TreeGenusModel) => option.commonGenus}
+                                    id="commonGenusSelect"
+                                    options={commonGenus}
+                                    getOptionLabel={(option: TreeGenusModel) => option?.commonGenus ?? ""}
                                     renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}
                                     getOptionSelected={(o, v) => o.commonGenus == v?.commonGenus}
-                                    value={this.state.commonGenus}
-                                onChange={(e, v) => this.updateCommonGenus((v as any)?.commonGenus)}
+                                    value={this.state.commonGenus || ""}
+                                    onChange={(e, v) => this.updateCommonGenus((v as any)?.commonGenus)}
                                 />
 
                             </FormControl>
@@ -336,9 +354,10 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                                 <Autocomplete
                                     id="genusSelect"
                                     options={genusData.sort((g1, g2) => g1.genus.localeCompare(g2.genus))}
-                                    getOptionLabel={(option: TreeGenusModel) => option.genus}
+                                    getOptionLabel={(option: TreeGenusModel) => option?.genus ?? ""}
                                     renderInput={(params) => <TextField {...params} label="Latin" variant="outlined" />}
-                                    value={this.state.genus}
+                                    value={this.state.genus || ""}
+                                    getOptionSelected={(o, v) => o.genus == v?.genus}
                                     onChange={(e, v) => this.updateGenus((v as any)?.genus)}
                                 />
                             </FormControl>
@@ -350,11 +369,12 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                             <FormControl className={clsx(classes.formControl)}>
                                 <Autocomplete
                                     id="speciesCommonNameSelect"
-                                options={commonSpecies}
-                                    getOptionLabel={(option: SpeciesModel) => option.commonSpeciesName}
+                                    options={commonSpecies}
+                                    getOptionLabel={(option: SpeciesModel) => option?.commonSpeciesName ?? ""}
                                     renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}
                                     onChange={(e, v) => this.updateCommon((v as any)?.commonSpeciesName)}
-                                    value={this.state.speciesCommonName}
+                                    getOptionSelected={(o, v) => o.commonSpeciesName == v?.commonSpeciesName}
+                                    value={this.state.speciesCommonName || ""}
                                 />
                             </FormControl>
 
@@ -362,10 +382,11 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                                 <Autocomplete
                                     id="speciesNameSelect"
                                     options={speciesData.sort((s1, s2) => s1.speciesName.localeCompare(s2.speciesName))}
-                                    getOptionLabel={(option: SpeciesModel) => option.speciesName}
+                                    getOptionLabel={(option: SpeciesModel) => option?.speciesName ?? ""}
                                     renderInput={(params) => <TextField {...params} label="Latine" variant="outlined" />}
                                     onChange={(e, v) => this.updateSpecies((v as any)?.speciesName)}
-                                    value={this.state.speciesName}
+                                    getOptionSelected={(o, v) => o.speciesName == v?.speciesName}
+                                    value={this.state.speciesName || ""}
                                 />
                                 {(this.state.model.species != null && this.state.model.species.length > 0) &&
                                     <a style={{ color: 'black' }} onClick={() => { this.goToSpeciesPage(); }}>Voir la fiche de l'espèce </a>
@@ -392,7 +413,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                                 {t.__("Photographie")}
                             </Typography>
 
-                        <PhotoFormItem label={t.__("Prendre une photo")} value={model.pictures} onAdd={val => this.addPicture(val)} onDelete={index => this.deletePicture(index)} />
+                            <PhotoFormItem label={t.__("Prendre une photo")} value={model.pictures} onAdd={val => this.addPicture(val)} onDelete={index => this.deletePicture(index)} />
                         </>
                     }
                     <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.process()}>
