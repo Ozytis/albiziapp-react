@@ -51,16 +51,7 @@ namespace Web.Controllers
         public async Task CreateObservationAysnc([FromBody] ObservationCreationModel model)
         {
 
-            await this.ObservationsManager.CreateObservationAsync(
-                new Observation
-                {
-                    Genus = model.Genus,
-                    Confident = (Confident?) model.IsConfident,
-                    Latitude = model.Latitude,
-                    Longitude = model.Longitude,
-                    SpeciesName = model.Species,
-                    UserId = this.User.Identity.Name,
-                },
+            await this.ObservationsManager.CreateObservationAsync( model.Species,model.Genus, this.User.Identity.Name,(Confident?)model.IsConfident,model.Latitude,model.Longitude,
                   model.Pictures );
         }
 
@@ -85,7 +76,7 @@ namespace Web.Controllers
         [HandleBusinessException, ValidateModel]
         public async Task EditObservationAysnc([FromBody] ObservationEditionModel model)
         {
-            await this.ObservationsManager.EditObservationAsync(
+          /*  await this.ObservationsManager.EditObservationAsync(
                 new Observation
                 {
                     Id = model.Id,
@@ -96,7 +87,7 @@ namespace Web.Controllers
                     SpeciesName = model.Species,
                     UserId = this.User.Identity.Name,
                 },
-                 model.Pictures , this.User.Identity.Name);
+                 model.Pictures , this.User.Identity.Name);*/
         }
 
         [HttpDelete("{observationId}")]

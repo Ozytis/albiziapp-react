@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using Entities.Enums;
+using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -29,6 +30,8 @@ namespace Entities
         public bool Validate { get; set; } 
 
         public int Order { get; set; }
+
+        public Confident? Confident { get; set; }
 
         public List<ObservationStatementConfirmation> ObservationStatementConfirmations { get; set; }
 

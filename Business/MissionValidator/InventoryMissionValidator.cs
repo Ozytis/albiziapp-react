@@ -29,7 +29,8 @@ namespace Business.MissionValidation
                     count = observations.Count();
                     if (isDifferentGenis)
                     {
-                        count = observations.Select(x => x.Genus).Distinct().Count();
+                        //TODO
+                        count = 0;//observations.Select(x => x.Genus).Distinct().Count();
                     }
 
                     if (count < endCondition.ActionCount.Value)
@@ -46,7 +47,8 @@ namespace Business.MissionValidation
                     count = observations.Count();
                     if (isDifferentGenis)
                     {
-                        count = observations.Select(x => x.Genus).Distinct().Count();
+                        //TODO
+                        count = 0;// observations.Select(x => x.Genus).Distinct().Count();
                     }
 
                     //todo check code existant mini requis

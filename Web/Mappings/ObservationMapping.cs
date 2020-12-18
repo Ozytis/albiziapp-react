@@ -10,16 +10,16 @@ namespace Web.Mappings
         {
             return new ObservationModel
             {
-                CommonGenus = observation.CommonGenus,
-                CommonSpeciesName = observation.CommonSpeciesName,
-                Confident = (int?)observation.Confident,
+                //CommonGenus = observation.CommonGenus,
+                //CommonSpeciesName = observation.CommonSpeciesName,
+                //Confident = (int?)observation.Confident,
                 Date = observation.Date,
-                Genus = observation.Genus,
+                //Genus = observation.Genus,
                 Pictures = observation.Pictures.ToArray(),
                 Id = observation.Id,
                 Latitude = observation.Latitude,
                 Longitude = observation.Longitude,
-                SpeciesName = observation.SpeciesName,
+                //SpeciesName = observation.SpeciesName,
                 UserId = observation.UserId,
                 IsIdentified = observation.IsIdentified,
                 AuthorName = observation.AuthorName,
