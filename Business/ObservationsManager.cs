@@ -1,7 +1,9 @@
-﻿using Business.MissionValidation;
+﻿using Business.Extensions;
+using Business.MissionValidation;
 using Common;
 using Entities;
 using Entities.Enums;
+using Microsoft.Extensions.Configuration;
 using MongoDB.Bson.IO;
 using MongoDB.Driver;
 using Ozytis.Common.Core.Utilities;
@@ -22,8 +24,10 @@ namespace Business
 
         public IUserNotify UserNotify { get; }
 
+        public IConfiguration Configuration;
+
         public ObservationsManager(DataContext dataContext, FileManager fileManager,
-            SpeciesManager speciesManager, UsersManager usersManager, IServiceProvider serviceProvider, IUserNotify userNotify)
+            SpeciesManager speciesManager, UsersManager usersManager, IServiceProvider serviceProvider, IUserNotify userNotify,IConfiguration configuration)
             : base(dataContext)
         {
             this.FileManager = fileManager;
@@ -31,6 +35,7 @@ namespace Business
             this.UsersManager = usersManager;
             this.ServiceProvider = serviceProvider;
             this.UserNotify = userNotify;
+            this.Configuration = configuration;
         }
 
         public async Task<IEnumerable<Observation>> GetAllObservations()
@@ -45,14 +50,16 @@ namespace Business
 
         public async Task<IEnumerable<Observation>> GetUserVerifyObservations(string userId)
         {
-            return await this.DataContext.Observations.Find(obs => obs.History.Count > 0 && obs.History[0].UserId != userId &&
-            (obs.UserId == userId || obs.History != null && obs.History.Any(x => x.UserId == userId))).ToListAsync();
+            //TODO ajouter code, pour statement confirmation...
+            return await this.DataContext.Observations.Find(obs => obs.ObservationStatements.Count > 0 && obs.ObservationStatements[0].UserId != userId &&
+            (obs.UserId == userId || obs.ObservationStatements != null && obs.ObservationStatements.Any(x => x.UserId == userId))).ToListAsync();
         }
 
         public async Task<IEnumerable<Observation>> GetUserIdentifyObservations(string userId)
         {
-            return await this.DataContext.Observations.Find(obs => obs.IsIdentified && obs.History.Count > 0 && obs.History[0].UserId != userId &&
-            (obs.UserId == userId || obs.History != null && obs.History.Any(x => x.UserId == userId))).ToListAsync();
+            //TODO ajouter code, pour statement confirmation...
+            return await this.DataContext.Observations.Find(obs => obs.IsIdentified && obs.ObservationStatements.Count > 0 && obs.ObservationStatements[0].UserId != userId &&
+            (obs.UserId == userId || obs.ObservationStatements != null && obs.ObservationStatements.Any(x => x.UserId == userId))).ToListAsync();
         }
 
         public async Task<Observation> GetUserObservationbyId(string observationId)
@@ -70,11 +77,20 @@ namespace Business
                 newObservation.Id = Guid.NewGuid().ToString("N");
                 newObservation.Pictures = new List<string>();
                 newObservation.Date = DateTime.UtcNow;
+
+                var statement = new ObservationStatement();
+                statement.Id = Guid.NewGuid().ToString("N");
+                User user = await this.UsersManager.SelectAsync(newObservation.UserId);
+                newObservation.AuthorName = user?.Name;
+                newObservation.ObservationStatements = new List<ObservationStatement>();
+
                 if (!string.IsNullOrEmpty(newObservation.Genus))
                 {
-                    newObservation.CommonGenus = (await this.SpeciesManager
+                    var s = (await this.SpeciesManager
                         .GetSpeciesByGenusAsync(newObservation.Genus))
-                        .FirstOrDefault()?.CommonGenus;
+                        .FirstOrDefault();
+                    statement.CommonGenus = s?.CommonGenus;
+                    statement.Genus = s?.Genus;
                 }
 
                 if (!string.IsNullOrEmpty(newObservation.SpeciesName))
@@ -82,12 +98,19 @@ namespace Business
                     Species species = await this.SpeciesManager
                        .GetSpeciesByNameAsync(newObservation.SpeciesName);
 
-                    newObservation.CommonSpeciesName = species?.CommonSpeciesName;
-                    newObservation.TelaBotanicaTaxon = species?.TelaBotanicaTaxon;
+                    statement.CommonSpeciesName = species?.CommonSpeciesName;
+                    statement.SpeciesName = species.SpeciesName;
+                    statement.TelaBotanicaTaxon = species?.TelaBotanicaTaxon;
+                    statement.Expertise = await this.CalculateUserExpertise(user.Id, newObservation.SpeciesName);
                 }
+                statement.TotalScore = statement.CalculateReliabilityStatement();
+                statement.Order = 1;
+                newObservation.ObservationStatements.Add(statement);
 
-                User user = await this.UsersManager.SelectAsync(newObservation.UserId);
-                newObservation.AuthorName = user?.Name;
+                //if(user.Role.HasValue && user.Role.Value.HasFlag( Entities.Enums.UserRole.EXPERT))
+                //{
+                //    newObservation.IsIdentified = true;
+                //}
 
 
                 if (pictures != null)
@@ -98,14 +121,8 @@ namespace Business
                     }
                 }
 
-                if(user.Role.HasValue && user.Role.Value.HasFlag( Entities.Enums.UserRole.EXPERT))
-                {
-                    newObservation.IsIdentified = true;
-                }
-
-
                 await this.DataContext.Observations.InsertOneAsync(newObservation);
-
+                //TODO VALidATE 
                 await this.AddExplorationPointsForNewObservation(newObservation);
                                               
 
@@ -118,15 +135,128 @@ namespace Business
                 await session.AbortTransactionAsync();
                 throw;
             }
-
-
-
-
-
-            
+                       
 
             return newObservation;
         }
+
+        public async Task ConfirmStatement(string observationId, string statementId,string userId)
+        {
+            var existingObservation = await this.GetUserObservationbyId(observationId);
+            if (existingObservation == null)
+            {
+                throw new BusinessException("Ce relevé n'existe pas");
+            }
+
+            var statement = existingObservation.ObservationStatements.FirstOrDefault(x => x.Id == statementId);
+            if(statement == null)
+            {
+                throw new BusinessException("Cette propostion n'existe pas");
+            }
+
+            if (existingObservation.ObservationStatements.Any(s => s.ObservationStatementConfirmations != null && s.ObservationStatementConfirmations.Any(c => c.UserId == userId)))
+            {
+                throw new BusinessException("Vous avez déjà validé une proposition pour ce relevé");
+            }
+
+            if(statement.ObservationStatementConfirmations == null)
+            {
+                statement.ObservationStatementConfirmations = new List<ObservationStatementConfirmation>();
+            }
+
+            var confirmation = new ObservationStatementConfirmation()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Date = DateTime.UtcNow,
+                UserId = userId,
+                Expertise = await this.CalculateUserExpertise(userId, existingObservation.SpeciesName)
+            };
+            statement.ObservationStatementConfirmations.Add(confirmation);
+            statement.TotalScore = statement.CalculateReliabilityStatement();
+            await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
+            //TODO voir calcul de points
+        }
+
+        public async Task AddStatement(string observationId,ObservationStatement newStatement)
+        {
+            var existingObservation = await this.GetUserObservationbyId(observationId);
+            if (existingObservation == null)
+            {
+                throw new BusinessException("Ce relevé n'existe pas");
+            }
+            
+            var statement = new ObservationStatement();
+            statement.Id = Guid.NewGuid().ToString("N");
+            User user = await this.UsersManager.SelectAsync(newStatement.UserId);
+            statement.UserId = user.Id;
+        
+
+            if (!string.IsNullOrEmpty(newStatement.Genus))
+            {
+                var s = (await this.SpeciesManager
+                    .GetSpeciesByGenusAsync(newStatement.Genus))
+                    .FirstOrDefault();
+                statement.CommonGenus = s?.CommonGenus;
+                statement.Genus = s?.Genus;
+            }
+
+            if (!string.IsNullOrEmpty(newStatement.SpeciesName))
+            {
+                Species species = await this.SpeciesManager
+                   .GetSpeciesByNameAsync(newStatement.SpeciesName);
+
+                statement.CommonSpeciesName = species?.CommonSpeciesName;
+                statement.SpeciesName = species.SpeciesName;
+                statement.TelaBotanicaTaxon = species?.TelaBotanicaTaxon;
+                statement.Expertise = await this.CalculateUserExpertise(user.Id, newStatement.SpeciesName);
+            }
+
+            if(existingObservation.ObservationStatements.Any(s => s.SpeciesName == statement.SpeciesName && s.Genus == statement.Genus))
+            {
+                throw new BusinessException("Une proposition identique existe déjà");
+            }
+            statement.TotalScore = statement.CalculateReliabilityStatement();
+            statement.Order = existingObservation.ObservationStatements.Count()+1;
+
+            statement.TotalScore = statement.CalculateReliabilityStatement();
+            existingObservation.ObservationStatements.Add(statement);
+            await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
+        }
+
+        public async Task CheckObservationIsIdentify(string observationId)
+        {
+            var existingObservation = await this.GetUserObservationbyId(observationId);
+            if (existingObservation == null)
+            {
+                throw new BusinessException("Ce relevé n'existe pas");
+            }
+            var minScore = int.Parse(this.Configuration["Reliability:MinimunScore"]);
+            var minPercent = int.Parse(this.Configuration["Reliability:MinimunPercent"]);
+            var totalStatementsScore = existingObservation.ObservationStatements.Sum(x => x.TotalScore);
+            ObservationStatement identifyStatement = null;
+            foreach(var s in existingObservation.ObservationStatements)
+            {
+               
+                if(s.TotalScore >= minScore)
+                {
+                    var percent = s.TotalScore *100 / totalStatementsScore ;
+                    if(percent >= minPercent)
+                    {
+                        //statement identify
+                        identifyStatement = s;
+                        break;
+                    }
+                }
+            }
+            if (identifyStatement != null)
+            {
+                existingObservation.IsIdentified = true;
+                existingObservation.StatementValidatedId = identifyStatement.Id;
+                await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
+            }
+        }
+
+
 
         public async Task AddExplorationPointsForNewObservation(Observation observation)
         {
@@ -159,7 +289,8 @@ namespace Business
 
         public async Task CalculateKnowledegePoints(Observation newObservation)
         {
-            BaseObservation compareObservation = newObservation.History.LastOrDefault();
+            //TODO recoder
+           /* BaseObservation compareObservation = newObservation.History.LastOrDefault();
             var pointHistory = new List<PointHistory>();
             var currentDate = DateTime.UtcNow;
             if (newObservation.IsIdentified)
@@ -252,10 +383,10 @@ namespace Business
                     }
 
                 }
-            }
+            }*/
         }
 
-
+        [Obsolete]
         public async Task<Observation> EditObservationAsync(Observation editObservation, string[] pictures, string currentUserId)
         {
             using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
@@ -268,15 +399,15 @@ namespace Business
             try
             {
                 session.StartTransaction();
-                if (existingObservation.History == null)
-                {
-                    existingObservation.History = new List<BaseObservation>();
-                }
-                //si ce n'est pas le même utilisateur alors on passe l'observation en historique
-                if (existingObservation.UserId != currentUserId)
-                {
-                    existingObservation.History.Add(this.CloneObservationToBaseObservation(existingObservation));
-                }
+                //if (existingObservation.History == null)
+                //{
+                //    existingObservation.History = new List<BaseObservation>();
+                //}
+                ////si ce n'est pas le même utilisateur alors on passe l'observation en historique
+                //if (existingObservation.UserId != currentUserId)
+                //{
+                //    existingObservation.History.Add(this.CloneObservationToBaseObservation(existingObservation));
+                //}
 
 
                 if (!string.IsNullOrEmpty(editObservation.Genus))
@@ -351,30 +482,19 @@ namespace Business
         {
             Observation observation = await this.DataContext.Observations.Find(o => o.Id == observationId).FirstOrDefaultAsync();
 
-            if (observation.Validations == null)
-            {
-                observation.Validations = new List<ObservationValidation>();
-            }
-
-            if (!observation.Validations.Any(v => v.OsmId == currentUserId))
-            {
-                observation.Validations.Add(new ObservationValidation { OsmId = currentUserId, ValidationDate = DateTime.UtcNow });
-                //TODO changer cela
-                observation.IsIdentified = true;                
-                await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == observation.Id, observation);
-                await this.UserNotify.SendNotif(currentUserId, "Le relevé a bien été confirmé");
-                //on reprend le fonctionnement de l'edition d'une observation, pour refaire le processus de validation des points...
-                observation.UserId = currentUserId;
-                await this.EditObservationAsync(observation, null, currentUserId);
-            }
+            //TODO VALIDATE VOIR SI on garde
         }
 
-
-        private BaseObservation CloneObservationToBaseObservation(Observation observation)
+        public async Task<int> CalculateUserExpertise(string userId,string speciesName)
         {
-            var serializeObservation = JsonSerializer.Serialize<BaseObservation>(observation);
-            return JsonSerializer.Deserialize<BaseObservation>(serializeObservation);
+            var count = await this.DataContext.Observations.Find(o => o.IsIdentified && o.SpeciesName == speciesName &&
+            o.ObservationStatements.Any(s => s.Id == o.StatementValidatedId && (s.UserId == userId || s.ObservationStatementConfirmations.Any(c => c.UserId == userId)))).CountDocumentsAsync();
+            var species = await this.SpeciesManager.GetSpeciesByNameAsync(speciesName);
+            var expertise = (count * species.Difficult * species.Rarity);
+            //TODO voir si on add +1 si besoin
+            return (int) Math.Min(expertise, 20);
         }
+      
                
     }
 }

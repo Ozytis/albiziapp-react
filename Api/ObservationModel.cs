@@ -32,8 +32,6 @@ namespace Api
 
         public bool IsIdentified { get; set; }
 
-        public string [] Validations { get; set; }
 
-        public string[] HistoryEditor { get; set; }
     }
 }
