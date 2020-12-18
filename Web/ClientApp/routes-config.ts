@@ -18,6 +18,7 @@ import { TitlePageConfig } from "./pages/score/title-page-config";
 import { UsersPageConfig } from "./pages/user/users-page-config";
 import { UserPageConfig } from "./pages/user/user-page-config";
 import { EditUserPageConfig } from "./pages/user/edit-user-page-config";
+import { HistoryPageConfig } from "./pages/observation/history-page-config";
 
 const routesConfig = [
     HomePageConfig,
@@ -38,7 +39,8 @@ const routesConfig = [
     TitlePageConfig,
     UsersPageConfig,
     UserPageConfig,
-    EditUserPageConfig
+    EditUserPageConfig,
+    HistoryPageConfig
 
 
 ]

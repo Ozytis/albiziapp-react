@@ -1,5 +1,5 @@
-import { Box, Button, createStyles, Grid, Icon, InputLabel, List, ListItem, ListItemIcon, ListItemText, Switch, Tab, Tabs, Theme, Typography, WithStyles, withStyles } from "@material-ui/core";
-import { Check, Delete, Edit, NearMe } from "@material-ui/icons";
+import { Box, Button, createStyles, Grid, Icon, InputLabel, List, ListItem, ListItemIcon, ListItemText, Switch, Tab, Tabs, Theme, Typography, WithStyles, withStyles, Radio, Paper } from "@material-ui/core";
+import { Check, Delete, Edit, NearMe, Cancel } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -49,7 +49,61 @@ const styles = (theme: Theme) => createStyles({
     },
     switchGrid: {
         padding: `0 ${theme.spacing(2)}px`
-    }
+    },
+    flex: {
+        display: "flex",    
+        justifyContent:"space-between"
+    },
+    bold: {
+        fontWeight: "bold"
+    },
+    alignRight: {
+        marginLeft:"50%",
+        right: "1px",
+    },
+    slider: {
+        position: "relative",
+        marginLeft: "auto",
+        marginRight: "auto",
+    },
+    slide: {
+        // position: "absolute",
+        top: 0,
+        //height: "100%",
+        backgroundColor: "#fff",
+        backgroundPosition: "center center",
+        backgroundSize: "contain",
+        backgroundRepeat: "no-repeat"
+    },
+    slideNav: {
+        justifyContent: "center",
+        display: "flex",
+        padding: theme.spacing(1),
+        "& > span ": {
+            marginRight: theme.spacing(1),
+            fontSize: "1rem"
+        },
+        "& .linkActive": {
+            color: theme.palette.secondary.main
+        }
+    },
+    center: {
+        marginLeft:"auto",
+        marginRight:"auto"
+    },
+    tabConfiance: {
+        width: "20%",
+        border: "solid 1px black",
+        textAlign : "center"
+    },
+    top: {
+        marginTop:"4%"
+    },
+    paper: {
+        padding: theme.spacing(2),
+        textAlign: 'center',
+        color: theme.palette.text.secondary,
+    },
 });
 
 interface ObservationPageProps extends RouteComponentProps, IPropsWithAppContext, WithStyles<typeof styles> {
@@ -58,13 +112,19 @@ interface ObservationPageProps extends RouteComponentProps, IPropsWithAppContext
 
 class ObservationPageState {
     observation: ObservationModel;
-    currentTab: "infos" | "photo" = "infos";
+    currentTab: "common" | "latin" = "common";
     isDeleting = false;
     specyInfo: SpeciesInfoModel;
     isValidated: boolean = false;
     displayConfirmButton: boolean = true;
     currentUser: string;
     enableDeleteButton: boolean;
+    isConfirmating: boolean = true;
+    currentPictureIndex = 0;
+    confidentLevel: string;
+    isLowConfident: boolean;
+    isMediumConfident: boolean;
+    isHighConfident: boolean;
 }
 
 class ObservationPageComponent extends BaseComponent<ObservationPageProps, ObservationPageState>{
@@ -75,7 +135,6 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
     async componentDidMount() {
         const observation = await ObservationsApi.getObservation(this.props.match.params["observationid"]);
         const currentUser = await AuthenticationApi.getCurrentUser();
-        console.log(observation);
         await this.setState({ observation: observation, currentUser:currentUser.osmId });
         await this.isValidated();
         await this.enableConfirmButton();
@@ -171,9 +230,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
 
 
         if (historyFiltered.length == history.length) {
-            console.log("test 1");
             if (currentUser == this.state.observation.userId) {
-                console.log("test 2");
                 await this.setState({ enableDeleteButton: true });
             }
             else {
@@ -184,7 +241,83 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
             await this.setState({ enableDeleteButton: false });
         }
     }
+    async showConfirmation() {
+        if (this.state.isConfirmating) {
 
+            await this.setState({ isConfirmating: false });
+        }
+    }
+
+    async hideConfirmation() {
+
+        if (!this.state.isConfirmating) {
+
+            await this.setState({ isConfirmating: true });
+        }
+    }
+    async updateConfident(level: string) {
+
+        if (level == "low") {
+            if (this.state.isLowConfident) {
+                await this.setState({ isLowConfident:false })
+            }
+            else if (!this.state.isLowConfident) {
+                await this.setState({ isLowConfident: true, isMediumConfident:false, isHighConfident:false })
+            }
+        }
+
+        if (level == "medium") {
+            if (this.state.isMediumConfident) {
+                await this.setState({ isMediumConfident: false })
+            }
+            else if (!this.state.isMediumConfident) {
+                await this.setState({ isMediumConfident: true, isLowConfident:false, isHighConfident:false })
+            }
+        }
+
+        if (level == "high") {
+            if (this.state.isHighConfident) {
+                await this.setState({ isHighConfident: false })
+            }
+            else if (!this.state.isHighConfident) {
+                await this.setState({ isHighConfident: true, isLowConfident: false, isMediumConfident:false })
+            }
+        }
+
+    }
+    endSwipe(e: React.TouchEvent<HTMLElement>): void {
+
+        if (!this.swipeStartLocation || !this.state.observation || !this.state.observation.pictures || this.state.observation.pictures.length < 2) {
+            return;
+        }
+
+        const touch = e.changedTouches[0];
+
+        const distance = touch.clientX - this.swipeStartLocation.x;
+        const absX = Math.abs(distance);
+
+        if (absX > 50) {
+
+            let index = this.state.currentPictureIndex;
+            index += distance < 0 ? 1 : -1;
+
+            if (index > 0) {
+                index = index % this.state.observation.pictures.length;
+            }
+            else if (index < 0) {
+                index = this.state.observation.pictures.length + index;
+            }
+
+            this.setState({ currentPictureIndex: index });
+        }
+    }
+
+    startSwipe(e: React.TouchEvent<HTMLElement>): void {
+        //e.preventDefault();
+        this.swipeStartLocation = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+
+    swipeStartLocation: { x: number; y: number } = null;
     render() {
 
         const { classes } = this.props;
@@ -195,124 +328,205 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         return (
             <>
                 <Box className={clsx(classes.root)}>
+                    <Box>
                     <Tabs value={this.state.currentTab} onChange={(_, index) => this.setState({ currentTab: index })} aria-label="simple tabs example">
-                        <Tab label={t.__("Informations")} className={clsx(classes.tab)} value="infos" />
+                        <Tab label={t.__("Commun")} className={clsx(classes.tab)} value="common" />
                         {
                             observation.pictures &&
-                            <Tab label={t.__("Photo")} className={clsx(classes.tab)} value="photo" />
+                            <Tab label={t.__("Latin")} className={clsx(classes.tab)} value="latin" />
+                            }
+                        </Tabs>
+                        <div className={clsx(classes.flex)}>
+                            <span className={clsx(classes.bold)}>
+                                Identification:(
+                                <span style={{ fontWeight: "normal", textDecoration: "underline" }} onClick={() => this.goTo(`/history/${observation.id}`)}>15</span>
+                                )
+                            </span>
+
+                            <span>
+                                <span className={clsx(classes.bold)}>Fiabilité:</span>
+                               15%
+                            </span>
+                        </div>
+                        
+                    {
+                        this.state.currentTab === "common" &&
+                            <> 
+                                <table style={{ marginTop: "3%" }}>
+                                    <thead>
+                                        <tr className={clsx(classes.bold)}>
+                                            <th style={{ width: "35%" }}></th>
+                                            <th style={{ width: "25%" }}>Genre</th>
+                                            <th style={{ width: "25%" }}>Espèce</th>
+                                            <th style={{ width: "5%" }}></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td className={clsx(classes.bold)}>Proposition initiale</td>
+                                            <td>{observation.commonGenus}</td>
+                                            <td>{observation.commonSpeciesName}</td>
+                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmation" value="1" /> </td>
+                                        </tr>
+                                        <tr>
+                                            <td className={clsx(classes.bold)}>Proposition de la communauté</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmation" value="2" /> </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </>
+                    }
+                    {
+                        this.state.currentTab === "latin" &&
+                            
+                            <>
+                                <table style={{ marginTop: "3%" }}>
+                                    <thead>
+                                        <tr className={clsx(classes.bold)}>
+                                            <th style={{ width: "35%" }}></th>
+                                            <th style={{ width: "25%" }}>Genre</th>
+                                            <th style={{ width: "25%" }}>Espèce</th>
+                                            <th style={{ width: "5%" }}></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td className={clsx(classes.bold)}>Proposition initiale</td>
+                                            <td>{observation.commonGenus}</td>
+                                            <td>{observation.commonSpeciesName}</td>
+                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmation" value="1" /> </td>
+                                        </tr>
+                                        <tr>
+                                            <td className={clsx(classes.bold)}>Proposition de la communauté</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmation" value="2" /> </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                </>
+                    }
+
+                    </Box>
+
+                    <Box className={clsx(classes.top)} hidden={this.state.isConfirmating}  >
+                        <table>
+                            <tr>
+                                <td style={{ width: "20%" }}>Confiance</td>
+                                <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isLowConfident ? "green" : "white" }} onClick={() => this.updateConfident("low")}>
+                                    Faible
+                                    </td>
+                                <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isMediumConfident ? "green" : "white" }} onClick={() => this.updateConfident("medium")}>
+                                    Moyen   
+                                </td>
+                                <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isHighConfident ? "green" : "white" }} onClick={() => this.updateConfident("high")} >
+                                    Haute
+                                </td>
+                            </tr>
+                        </table>
+                    </Box>
+
+                    <Box className={clsx(classes.buttonsDiv)}>
+                        <Box>                        
+                             {   this.state.displayConfirmButton &&
+                            <Button color="secondary" disabled={this.state.isValidated} variant="contained" startIcon={<Check />} onClick={() => this.showConfirmation()}>
+                                {t.__("Confirmer")}
+                            </Button>
+                            }
+                        </Box>
+                        <Box hidden={this.state.isConfirmating} >
+                            <Button color="default" variant="contained" startIcon={<Cancel />} onClick={() => { this.hideConfirmation() }}>
+                                {t.__("Annuler")}
+                            </Button>
+                        </Box>
+                   
+                    </Box>
+
+                    <Box className={clsx(classes.slider)} onTouchEnd={(e) => this.endSwipe(e)} onTouchStart={(e) => this.startSwipe(e)}>
+                        {
+                            observation.pictures.map((image, idx) => {
+                                if (idx !== this.state.currentPictureIndex) {
+                                    return null;
+                                }
+                                return (
+                                    <div key={idx} className={clsx("slide", classes.slide)} style={{/* backgroundImage: `url("${image}")`*/ }}>
+                                        <img src={`/pictures?path=${image}`} style={{ width: "40%", height: "auto", margin: "0 auto" }} />
+                                    </div>
+                                )
+                            })
+                        }
+                        {
+                            observation.pictures && observation.pictures.length > 1 &&
+                                <div className={clsx(classes.slideNav)}>
+                                    {
+                                       observation.pictures.map((_, index) => {
+                                           return (
+                                                <Icon key={index} className={clsx("fas fa-circle", { linkActive: index === this.state.currentPictureIndex })} onClick={() => this.setState({ currentPictureIndex: index })} />
+                                           )
+                                       })
+                            }
+                            </div>
+                        }
+                    </Box>
+                    <Box>                        
+                        <Box className={clsx(classes.buttonsDiv)}>
+                            <Button color="primary" variant="contained" startIcon={<NearMe />} onClick={async () => { await this.updateLocalStorage(); this.goTo("/map") }}>
+                                {t.__("Voir sur la map")}
+                            </Button>
+                        </Box>
+
+                        <ListItem>
+                            <ListItemText primary={t.__("Vous pouvez modifier le relevé ou bien confirmer que les informations sont correctes")} />
+                        </ListItem>
+
+                        <Box className={clsx(classes.buttonsDiv)}>
+                            <Button color="primary" variant="contained" startIcon={<Edit />} onClick={() => this.editObservation()}>
+                                {t.__("Modifier")}
+                            </Button>
+                            
+                        </Box>
+
+                        {enableDeleteButton &&
+                            <>
+
+                                <ListItem>
+                                    <ListItemText primary={t.__("Supprimer le relevé, cette opération est définitive")} />
+                                </ListItem>
+                                <Box className={clsx(classes.buttonsDiv)}>
+                                    <Button color="secondary" variant="contained" startIcon={<Delete />} fullWidth onClick={() => this.remove()}>
+
+                                        {t.__("Supprimer")}
+                                    </Button>
+                                </Box>
+
+                            </>
                         }
 
-                    </Tabs>
-
-                    {
-                        this.state.currentTab === "infos" &&
-                        <>
-                            <List>
-                                <ListItem>
-                                    <ListItemText primary={t.__("Auteur du relevé")} secondary={observation.authorName} />
-                                </ListItem>
-                                <ListItem>
-                                    <ListItemText primary={t.__("Genre")} secondary={observation.genus || t.__("Non renseignée")} />
-                                </ListItem>
-                                <ListItem>
-                                    <ListItemText primary={t.__("Genre vernaculaire")} secondary={observation.commonGenus || t.__("Non renseigné")} />
-                                </ListItem>
-                                <ListItem>
-                                    <ListItemText primary={t.__("Espèce")} secondary={observation.speciesName || t.__("Non renseignée")} />
-                                    {/*
-                                        observation.telaBotanicaTaxon &&
-                                        <ListItemIcon
-                                            title={t.__("Espèce")}
-                                            className={clsx(classes.tab)}
-                                            onClick={() => this.goTo(`/specy/${observation.telaBotanicaTaxon}`)}
-                                        >
-                                            <Icon className="fas fa-eye" style={{ width: "1.25em" }} />
-                                        </ListItemIcon>*/
-                                    }
-                                </ListItem>
-
-                                <ListItem>
-                                    <ListItemText primary={t.__("Nom vernaculaire")} secondary={observation.commonSpeciesName || t.__("Non renseigné")} />
-                                </ListItem>
-                                <ListItem>
-                                    <ListItemText
-                                        primary={t.__("Degré de confiance de l'observateur")}
-                                        secondary={t.__(observation.confident ? "Confiant" : "Peu confiant")}
-                                    />
-                                </ListItem>
-                            </List>
-                            <Box className={clsx(classes.buttonsDiv)}>
-                                <Button color="primary" variant="contained" startIcon={<NearMe />} onClick={async () => { await this.updateLocalStorage(); this.goTo("/map") }}>
-                                    {t.__("Voir sur la map")}
-                                </Button>
-                            </Box>
-                            
-                            <ListItem>
-                                <ListItemText primary={t.__("Vous pouvez modifier le relevé ou bien confirmer que les informations sont correctes")} />
-                            </ListItem>
-                            
-                            <Box className={clsx(classes.buttonsDiv)}>
-                                <Button color="primary" variant="contained" startIcon={<Edit />} onClick={() => this.editObservation()}>
-                                    {t.__("Modifier")}
-                                </Button>
-                                {this.state.displayConfirmButton &&
-                                    <Button color="secondary" disabled={this.state.isValidated} variant="contained" startIcon={<Check />} onClick={() => this.validateObservation()}>
-                                        {t.__("Confirmer")}
-                                    </Button>
-                                }
-                            </Box>
-                            
-                            <ListItem>
-                                <ListItemText primary={t.__("Si aucun arbre n'est présent, vous pouvez tagger ce relévé douteux")}/>
-                            </ListItem>
-                         
-                            <Typography component="div">
-                                <Grid component="label" container alignItems="center" spacing={1} className={clsx(classes.switchGrid)}>
-                                    <Grid item>
-                                        <InputLabel className={clsx(classes.label)}>{t.__("Non douteux")}</InputLabel>
-                                    </Grid>
-                                    <Grid item>
-                                        <Switch
-                                            title="Douteux"
-                                            onChange={(e, val) => { alert("TODO")}}
-                                        />
-                                    </Grid>
-                                    <Grid item>
-                                        <InputLabel className={clsx(classes.label)}>
-                                            {t.__("Douteux")}
-                                        </InputLabel>
-                                    </Grid>
-                                </Grid>
-                            </Typography>
-
-                            {   enableDeleteButton && 
-                                <>
-                                
-                                    <ListItem>
-                                        <ListItemText primary={t.__("Supprimer le relevé, cette opération est définitive")} />
-                                    </ListItem>
-                                    <Box className={clsx(classes.buttonsDiv)}>
-                                        <Button color="secondary" variant="contained" startIcon={<Delete />} fullWidth onClick={() => this.remove()}>
-
-                                            {t.__("Supprimer")}
-                                        </Button>
-                                    </Box>
-                                  
-                                </>
-                            }
-                            
-                        </>
-                    }
-                    {
-                        this.state.currentTab === "photo" &&
-                        <>{observation.pictures.map((img, i) =>
-                            <div style={{ margin: "0 auto" }} key={"photo" + i} >
-                                <img src={`/api/observations/picture/${observation.id}/${i}`} key={"photo" + i} style={{ maxWidth: "100vw", margin: "0 auto", marginTop: "3px" }} />
-                             </div>
-                                )}
-                        </>
-                    }
-
+                    </Box>
                 </Box>
             </>
         )
