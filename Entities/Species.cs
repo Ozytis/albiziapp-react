@@ -27,5 +27,11 @@ namespace Entities
         public string Description { get; set; }
 
         public List<string> FloraKeyValues { get; set; }
+
+        public int Difficult { get; set; }
+
+        public int Rarity { get; set; }
+
+
     }
 }
