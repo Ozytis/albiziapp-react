@@ -28,7 +28,7 @@ namespace Business
         public IConfiguration Configuration;
 
         public ObservationsManager(DataContext dataContext, FileManager fileManager,
-            SpeciesManager speciesManager, UsersManager usersManager, IServiceProvider serviceProvider, IUserNotify userNotify,IConfiguration configuration)
+            SpeciesManager speciesManager, UsersManager usersManager, IServiceProvider serviceProvider, IUserNotify userNotify, IConfiguration configuration)
             : base(dataContext)
         {
             this.FileManager = fileManager;
@@ -67,22 +67,23 @@ namespace Business
             return await this.DataContext.Observations.Find(obs => obs.Id == observationId).FirstOrDefaultAsync();
         }
 
-        public async Task<Observation> CreateObservationAsync(string speciesName, string genus,string userid,Confident? confident,decimal latitude,decimal longitude , string[] pictures)
+        public async Task<Observation> CreateObservationAsync(string speciesName, string genus, string userid, Confident? confident, decimal latitude, decimal longitude, string[] pictures)
         {
             using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
             Observation newObservation = new Observation();
             try
             {
                 session.StartTransaction();
-               
+
                 newObservation.Id = Guid.NewGuid().ToString("N");
                 newObservation.Pictures = new List<string>();
                 newObservation.Date = DateTime.UtcNow;
-                
+
                 var statement = new ObservationStatement();
                 statement.Id = Guid.NewGuid().ToString("N");
                 User user = await this.UsersManager.SelectAsync(userid);
                 newObservation.UserId = user.OsmId;
+                statement.UserId = user.OsmId;
                 newObservation.AuthorName = user?.Name;
                 newObservation.ObservationStatements = new List<ObservationStatement>();
                 newObservation.Latitude = latitude;
@@ -105,7 +106,7 @@ namespace Business
                     statement.CommonSpeciesName = species?.CommonSpeciesName;
                     statement.SpeciesName = species.SpeciesName;
                     statement.TelaBotanicaTaxon = species?.TelaBotanicaTaxon;
-                    statement.Expertise = await this.CalculateUserExpertise(user.Id, speciesName);
+                    statement.Expertise = await this.CalculateUserExpertise(user.OsmId, speciesName);
                 }
                 statement.TotalScore = statement.CalculateReliabilityStatement();
                 statement.Order = 1;
@@ -129,7 +130,7 @@ namespace Business
                 await this.DataContext.Observations.InsertOneAsync(newObservation);
                 //TODO VALidATE 
                 await this.AddExplorationPointsForNewObservation(newObservation);
-                                              
+
 
                 var validator = await MissionValidator.GetValidatorFromActivity(this.ServiceProvider, user);
                 await validator.UpdateActivityProgression();
@@ -140,13 +141,14 @@ namespace Business
                 await session.AbortTransactionAsync();
                 throw;
             }
-                       
+
 
             return newObservation;
         }
         //POUR VALIDER UNE PROPOSITION EXISTANTE
-        public async Task ConfirmStatement(string observationId, string statementId,string userId)
+        public async Task ConfirmStatement(string observationId, string statementId, string userId)
         {
+            //TODO add confident
             var existingObservation = await this.GetUserObservationbyId(observationId);
             if (existingObservation == null)
             {
@@ -154,7 +156,7 @@ namespace Business
             }
 
             var statement = existingObservation.ObservationStatements.FirstOrDefault(x => x.Id == statementId);
-            if(statement == null)
+            if (statement == null)
             {
                 throw new BusinessException("Cette propostion n'existe pas");
             }
@@ -164,7 +166,7 @@ namespace Business
                 throw new BusinessException("Vous avez déjà validé une proposition pour ce relevé");
             }
 
-            if(statement.ObservationStatementConfirmations == null)
+            if (statement.ObservationStatementConfirmations == null)
             {
                 statement.ObservationStatementConfirmations = new List<ObservationStatementConfirmation>();
             }
@@ -179,6 +181,9 @@ namespace Business
             statement.ObservationStatementConfirmations.Add(confirmation);
             statement.TotalScore = statement.CalculateReliabilityStatement();
             await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
+            await this.CalculateKnowledegePoints(observationId, statementId, confirmation.Id);
+            await this.CheckObservationIsIdentify(existingObservation.Id);
+
             //TODO voir calcul de points
         }
 
@@ -190,12 +195,12 @@ namespace Business
             {
                 throw new BusinessException("Ce relevé n'existe pas");
             }
-            
+
             var statement = new ObservationStatement();
             statement.Id = Guid.NewGuid().ToString("N");
            // User user = await this.UsersManager.SelectAsync(newStatement.UserId);
             statement.UserId = userId;
-        
+
 
             if (!string.IsNullOrEmpty(newStatement.Genus))
             {
@@ -217,16 +222,18 @@ namespace Business
                 statement.Expertise = await this.CalculateUserExpertise(userId, newStatement.Species);
             }
 
-            if(existingObservation.ObservationStatements.Any(s => s.SpeciesName == statement.SpeciesName && s.Genus == statement.Genus))
+            if (existingObservation.ObservationStatements.Any(s => s.SpeciesName == statement.SpeciesName && s.Genus == statement.Genus))
             {
                 throw new BusinessException("Une proposition identique existe déjà");
             }
             statement.TotalScore = statement.CalculateReliabilityStatement();
-            statement.Order = existingObservation.ObservationStatements.Count()+1;
+            statement.Order = existingObservation.ObservationStatements.Count() + 1;
 
             statement.TotalScore = statement.CalculateReliabilityStatement();
             existingObservation.ObservationStatements.Add(statement);
             await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
+            await this.CalculateKnowledegePoints(observationId, statement.Id, null);
+            await this.CheckObservationIsIdentify(existingObservation.Id);
         }
 
         public async Task CheckObservationIsIdentify(string observationId)
@@ -240,13 +247,13 @@ namespace Business
             var minPercent = int.Parse(this.Configuration["Reliability:MinimunPercent"]);
             var totalStatementsScore = existingObservation.ObservationStatements.Sum(x => x.TotalScore);
             ObservationStatement identifyStatement = null;
-            foreach(var s in existingObservation.ObservationStatements)
+            foreach (var s in existingObservation.ObservationStatements)
             {
-               
-                if(s.TotalScore >= minScore)
+
+                if (s.TotalScore >= minScore)
                 {
-                    var percent = s.TotalScore *100 / totalStatementsScore ;
-                    if(percent >= minPercent)
+                    var percent = s.TotalScore * 100 / totalStatementsScore;
+                    if (percent >= minPercent)
                     {
                         //statement identify
                         identifyStatement = s;
@@ -266,7 +273,7 @@ namespace Business
 
         public async Task AddExplorationPointsForNewObservation(Observation observation)
         {
-            /*
+
             // 1 point pour l'ajout d'un relevé           
             var currentDate = DateTime.UtcNow;
             var pointHistory = new List<PointHistory>();
@@ -277,67 +284,73 @@ namespace Business
                 pointHistory.Add(new PointHistory { Point = 2, Type = (int)ExplorationPoint.TakePictureTree, Date = currentDate });
             }
 
-            if (!string.IsNullOrEmpty(observation.SpeciesName) || !string.IsNullOrEmpty(observation.CommonSpeciesName))
+            if (!string.IsNullOrEmpty(observation.ObservationStatements[0].SpeciesName) || !string.IsNullOrEmpty(observation.ObservationStatements[0].CommonSpeciesName))
             {
                 //6 points pour le nom de l'espèce
                 pointHistory.Add(new PointHistory { Point = 6, Type = (int)ExplorationPoint.CompleteSpecies, Date = currentDate });
             }
 
-            if (!string.IsNullOrEmpty(observation.Genus) || !string.IsNullOrEmpty(observation.CommonGenus))
+            if (!string.IsNullOrEmpty(observation.ObservationStatements[0].Genus) || !string.IsNullOrEmpty(observation.ObservationStatements[0].CommonGenus))
             {
                 //3 points pour le genre de l'espèce
-                pointHistory.Add(new PointHistory { Point = 3, Type = (int)ExplorationPoint.CompleteGenus, Date = currentDate });                
+                pointHistory.Add(new PointHistory { Point = 3, Type = (int)ExplorationPoint.CompleteGenus, Date = currentDate });
             }
 
             await this.UsersManager.AddExplorationPoints(observation.UserId, pointHistory);
             await this.UsersManager.AddTitles(observation.UserId);
-            */
+
         }
 
-        public async Task CalculateKnowledegePoints(Observation newObservation)
+        public async Task CalculateKnowledegePoints(string observationId, string statementId, string confirmId)
         {
             //TODO recoder
-           /* BaseObservation compareObservation = newObservation.History.LastOrDefault();
+            var observation = await this.GetUserObservationbyId(observationId);
+            var statement = observation.ObservationStatements.FirstOrDefault(x => x.Id == statementId);
+            var confirm = statement.ObservationStatementConfirmations?.Where(x => x.Id == confirmId);
+
             var pointHistory = new List<PointHistory>();
             var currentDate = DateTime.UtcNow;
-            if (newObservation.IsIdentified)
+            if (observation.IsIdentified && !string.IsNullOrEmpty(observation.StatementValidatedId))
             {
-                if (newObservation.Genus == compareObservation.Genus)
+                var validatedStatement = observation.ObservationStatements.FirstOrDefault(x => x.Id == observation.StatementValidatedId);
+                if (statement.Genus == validatedStatement.Genus)
                 {
                     pointHistory.Add(new PointHistory { Point = 10, Type = (int)KnowledgePoint.GenusIdentify, Date = currentDate });
                 }
 
-                if (newObservation.SpeciesName == compareObservation.SpeciesName || newObservation.CommonSpeciesName == compareObservation.CommonSpeciesName)
+                if (statement.SpeciesName == validatedStatement.SpeciesName || statement.CommonSpeciesName == validatedStatement.CommonSpeciesName)
                 {
                     pointHistory.Add(new PointHistory { Point = 15, Type = (int)KnowledgePoint.SpeciesIdentify, Date = currentDate });
                 }
-                await this.UsersManager.AddKnowledegePoints(newObservation.UserId, pointHistory);
-                await this.UsersManager.AddTitles(newObservation.UserId);
+                await this.UsersManager.AddKnowledegePoints(observation.UserId, pointHistory);
+                await this.UsersManager.AddTitles(observation.UserId);
             }
             else
             {
-                if (newObservation.History != null && newObservation.History.Count == 1)
+                if (observation.ObservationStatements.Count == 2)
                 {
-                    if (newObservation.Genus == compareObservation.Genus)
+                    var otherStatement = observation.ObservationStatements.FirstOrDefault(x => x.Id != statementId);
+
+                    if (statement.Genus == otherStatement.Genus)
                     {
                         pointHistory.Add(new PointHistory { Point = 4, Type = (int)KnowledgePoint.ValidateSameGenus, Date = currentDate });
                     }
 
-                    if (newObservation.SpeciesName == compareObservation.SpeciesName || newObservation.CommonSpeciesName == compareObservation.CommonSpeciesName)
+                    if (statement.SpeciesName == otherStatement.SpeciesName || statement.CommonSpeciesName == otherStatement.CommonSpeciesName)
                     {
                         pointHistory.Add(new PointHistory { Point = 2, Type = (int)KnowledgePoint.ValidateSameSpecies, Date = currentDate });
                     }
-                    if (newObservation.Confident.HasValue && newObservation.Confident.Value == Confident.High)
+                    if (statement.Confident.HasValue && statement.Confident.Value == Confident.High)
                     {
                         pointHistory.Add(new PointHistory { Point = 2, Type = (int)KnowledgePoint.ObservationConfident, Date = currentDate });
                     }
-                    await this.UsersManager.AddKnowledegePoints(compareObservation.UserId, pointHistory);
-                    await this.UsersManager.AddTitles(compareObservation.UserId);
+                    await this.UsersManager.AddKnowledegePoints(statement.UserId, pointHistory);
+                    await this.UsersManager.AddTitles(statement.UserId);
                 }
                 else
                 {
-                    if (newObservation.History != null && newObservation.History.Count > 1)
-                    {                
+                    if (observation.ObservationStatements.Count > 2)
+                    {
                         var pointHistoryP0 = new List<PointHistory>();
                         var pointHistoryPb = new List<PointHistory>();
                         bool speciesPnToP0Isvalid = false;
@@ -346,51 +359,50 @@ namespace Business
                         // compareObservation = Pb
                         // compareHistory = P0
                         // newObservation = Pn
-                        foreach (var compareHistory in newObservation.History)
+                        foreach (var compareHistory in observation.ObservationStatements.Where(x => x.Id != statementId))
                         {
 
-                            if (newObservation.Genus == compareHistory.Genus)
+                            if (statement.Genus == compareHistory.Genus)
                             {
-                                pointHistoryP0.Add(new PointHistory { Point = (!speciesPnToP0Isvalid ? 4 : 2), Type = (int)KnowledgePoint.ValidateSameGenus, Date = currentDate });
+                                pointHistoryP0.Add(new PointHistory { Point = (!genusPnToP0Isvalid ? 4 : 2), Type = (int)KnowledgePoint.ValidateSameGenus, Date = currentDate });
                                 genusPnToP0Isvalid = true;
                             }
 
 
-                            if (newObservation.SpeciesName == compareHistory.SpeciesName || newObservation.CommonSpeciesName == compareHistory.CommonSpeciesName)
+                            if (statement.SpeciesName == compareHistory.SpeciesName || statement.CommonSpeciesName == compareHistory.CommonSpeciesName)
                             {
                                 pointHistoryP0.Add(new PointHistory { Point = (!speciesPnToP0Isvalid ? 2 : 1), Type = (int)KnowledgePoint.ValidateSameSpecies, Date = currentDate });
                                 speciesPnToP0Isvalid = true;
                             }
 
-                            if (newObservation.Confident.HasValue && newObservation.Confident.Value == Confident.High)
+                            if (statement.Confident.HasValue && statement.Confident.Value == Confident.High)
                             {
-                                pointHistoryP0.Add(new PointHistory { Point = 2, Type = (int)KnowledgePoint.ObservationConfident, Date = currentDate });                          
+                                pointHistoryP0.Add(new PointHistory { Point = 2, Type = (int)KnowledgePoint.ObservationConfident, Date = currentDate });
                             }
 
                             await this.UsersManager.AddKnowledegePoints(compareHistory.UserId, pointHistoryP0);
                             await this.UsersManager.AddTitles(compareHistory.UserId);
                         }
 
-                        if (newObservation.Genus == compareObservation.Genus)
-                        {
-                            pointHistoryPb.Add(new PointHistory { Point = (!genusPnToP0Isvalid ? 4 : 2), Type = (int)KnowledgePoint.ValidateSameGenus, Date = currentDate });
-                        }
+                        /* if (statement.Genus == compareObservation.Genus)
+                         {
+                             pointHistoryPb.Add(new PointHistory { Point = (!genusPnToP0Isvalid ? 4 : 2), Type = (int)KnowledgePoint.ValidateSameGenus, Date = currentDate });
+                         }
 
-                        if (newObservation.SpeciesName == compareObservation.SpeciesName || newObservation.CommonSpeciesName == compareObservation.CommonSpeciesName)
-                        {
-                            pointHistoryPb.Add(new PointHistory { Point = (!genusPnToP0Isvalid ? 2 : 1), Type = (int)KnowledgePoint.ValidateSameSpecies, Date = currentDate });
-                        }
-                        if (newObservation.Confident.HasValue && newObservation.Confident.Value == Confident.High)
-                        {
-                            pointHistoryPb.Add(new PointHistory { Point = 2, Type = (int)KnowledgePoint.ObservationConfident, Date = currentDate });
-                        }
-
-                        await this.UsersManager.AddKnowledegePoints(compareObservation.UserId, pointHistoryPb);
-                        await this.UsersManager.AddTitles(compareObservation.UserId);
+                         if (statement.SpeciesName == compareObservation.SpeciesName || statement.CommonSpeciesName == compareObservation.CommonSpeciesName)
+                         {
+                             pointHistoryPb.Add(new PointHistory { Point = (!genusPnToP0Isvalid ? 2 : 1), Type = (int)KnowledgePoint.ValidateSameSpecies, Date = currentDate });
+                         }
+                         if (statement.Confident.HasValue && statement.Confident.Value == Confident.High)
+                         {
+                             pointHistoryPb.Add(new PointHistory { Point = 2, Type = (int)KnowledgePoint.ObservationConfident, Date = currentDate });
+                         }
+                        */
+                        await this.UsersManager.AddKnowledegePoints(statement.UserId, pointHistoryPb);
+                        await this.UsersManager.AddTitles(statement.UserId);
                     }
-
                 }
-            }*/
+            }
         }
 
         [Obsolete]
@@ -492,19 +504,19 @@ namespace Business
             //TODO VALIDATE VOIR SI on garde
         }
 
-        public async Task<int> CalculateUserExpertise(string userId,string speciesName)
+        public async Task<int> CalculateUserExpertise(string userId, string speciesName)
         {
-            var data = await this.DataContext.Observations.Find(x => x.IsIdentified  &&
-            x.ObservationStatements.Any(s =>  s.SpeciesName == speciesName &&(s.UserId == userId || s.ObservationStatementConfirmations.Any(c => c.UserId == userId)))).ToListAsync();
+            var data = await this.DataContext.Observations.Find(x => x.IsIdentified &&
+            x.ObservationStatements.Any(s => s.SpeciesName == speciesName && (s.UserId == userId || s.ObservationStatementConfirmations.Any(c => c.UserId == userId)))).ToListAsync();
             //On filtre via le StatementValidatedId après, car cela n'est pas pris en charge par le drive MongoDb
             data = data.Where(o => o.ObservationStatements.Any(s => s.Id == o.StatementValidatedId)).ToList();
             var count = data.Count;
             var species = await this.SpeciesManager.GetSpeciesByNameAsync(speciesName);
             var expertise = (count * species.Difficult * species.Rarity);
             //TODO voir si on add +1 si besoin
-            return (int) Math.Min(expertise, 20);
+            return (int)Math.Min(expertise, 20);
         }
-      
-               
+
+
     }
 }

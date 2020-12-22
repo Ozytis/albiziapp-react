@@ -19,5 +19,7 @@ namespace Entities
 
         public Confident? Confident { get; set; }
 
+        public bool IsOnlyGenus { get; set; }
+
     }
 }
