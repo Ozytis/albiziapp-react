@@ -5,6 +5,7 @@ using Entities;
 using Entities.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Ozytis.Common.Core.Utilities;
 using Ozytis.Common.Core.Web.WebApi;
 using System.Collections.Generic;
 using System.IO;
@@ -45,7 +46,6 @@ namespace Web.Controllers
             IEnumerable<Observation> observations = await this.ObservationsManager.GetUserObservations(userId);
             return observations.Select(observation => observation.ToObservationModel());
         }
-
         [HttpPost]
         [HandleBusinessException, ValidateModel]
         public async Task CreateObservationAysnc([FromBody] ObservationCreationModel model)
@@ -53,6 +53,21 @@ namespace Web.Controllers
 
             await this.ObservationsManager.CreateObservationAsync( model.Species,model.Genus, this.User.Identity.Name,(Confident?)model.IsConfident,model.Latitude,model.Longitude,
                   model.Pictures );
+        }
+
+        [HttpPost("addStatement/{observationId}")]
+        [HandleBusinessException, ValidateModel]
+        public async Task CreateStatementAysnc([FromBody] ObservationCreationModel model, string observationId)
+        {
+            try
+            {
+                await this.ObservationsManager.AddStatement(observationId, model, this.User.Identity.Name);
+            }
+            catch (BusinessException be) {
+                
+                await this.UserNotify.SendErrorNotif(this.User.Identity.Name, be.Message);
+                throw be;
+            }
         }
 
         [HttpGet("picture/{observationId}/{index}")]

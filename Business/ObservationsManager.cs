@@ -1,4 +1,5 @@
-﻿using Business.Extensions;
+﻿using Api;
+using Business.Extensions;
 using Business.MissionValidation;
 using Common;
 using Entities;
@@ -47,7 +48,6 @@ namespace Business
         {
             return await this.DataContext.Observations.Find(obs => obs.UserId == userId).ToListAsync();
         }
-
         public async Task<IEnumerable<Observation>> GetUserVerifyObservations(string userId)
         {
             //TODO ajouter code, pour statement confirmation...
@@ -82,6 +82,7 @@ namespace Business
                 var statement = new ObservationStatement();
                 statement.Id = Guid.NewGuid().ToString("N");
                 User user = await this.UsersManager.SelectAsync(userid);
+                newObservation.UserId = user.OsmId;
                 newObservation.AuthorName = user?.Name;
                 newObservation.ObservationStatements = new List<ObservationStatement>();
                 newObservation.Latitude = latitude;
@@ -143,7 +144,7 @@ namespace Business
 
             return newObservation;
         }
-
+        //POUR VALIDER UNE PROPOSITION EXISTANTE
         public async Task ConfirmStatement(string observationId, string statementId,string userId)
         {
             var existingObservation = await this.GetUserObservationbyId(observationId);
@@ -181,7 +182,8 @@ namespace Business
             //TODO voir calcul de points
         }
 
-        public async Task AddStatement(string observationId,ObservationStatement newStatement)
+        //AJOUT D'UNE PROPOSITION
+        public async Task AddStatement(string observationId, ObservationCreationModel newStatement, string userId)
         {
             var existingObservation = await this.GetUserObservationbyId(observationId);
             if (existingObservation == null)
@@ -191,8 +193,8 @@ namespace Business
             
             var statement = new ObservationStatement();
             statement.Id = Guid.NewGuid().ToString("N");
-            User user = await this.UsersManager.SelectAsync(newStatement.UserId);
-            statement.UserId = user.Id;
+           // User user = await this.UsersManager.SelectAsync(newStatement.UserId);
+            statement.UserId = userId;
         
 
             if (!string.IsNullOrEmpty(newStatement.Genus))
@@ -204,15 +206,15 @@ namespace Business
                 statement.Genus = s?.Genus;
             }
 
-            if (!string.IsNullOrEmpty(newStatement.SpeciesName))
+            if (!string.IsNullOrEmpty(newStatement.Species))
             {
                 Species species = await this.SpeciesManager
-                   .GetSpeciesByNameAsync(newStatement.SpeciesName);
+                   .GetSpeciesByNameAsync(newStatement.Species);
 
                 statement.CommonSpeciesName = species?.CommonSpeciesName;
                 statement.SpeciesName = species.SpeciesName;
                 statement.TelaBotanicaTaxon = species?.TelaBotanicaTaxon;
-                statement.Expertise = await this.CalculateUserExpertise(user.Id, newStatement.SpeciesName);
+                statement.Expertise = await this.CalculateUserExpertise(userId, newStatement.Species);
             }
 
             if(existingObservation.ObservationStatements.Any(s => s.SpeciesName == statement.SpeciesName && s.Genus == statement.Genus))

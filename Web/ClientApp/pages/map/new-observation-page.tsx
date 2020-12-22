@@ -66,7 +66,6 @@ const styles = (theme: Theme) => createStyles({
 });
 
 interface NewObservationPageProps extends RouteComponentProps, IPropsWithAppContext, WithStyles<typeof styles> {
-
 }
 
 class NewObservationPageState {
@@ -151,10 +150,17 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
     }
 
     async cancelCreation() {
-        ObservationsApi.setNextObservationCoordinates(null);
-        await this.props.history.push({
-            pathname: "/map"
-        });
+        if (!this.props.match.params["observationid"]) {
+            ObservationsApi.setNextObservationCoordinates(null);
+            await this.props.history.push({
+                pathname: "/map"
+            });
+        }
+        else if (this.props.match.params["observationid"]) {
+            await this.props.history.push({
+                pathname: "/observation/" + this.props.match.params["observationid"]
+            });
+        }
     }
 
     async updateCommonGenus(commonGenus: string) {
@@ -224,31 +230,51 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
 
 
     async process() {
+        if (!this.props.match.params["observationid"]) {
+            if (this.state.isProcessing || !await Confirm(t.__("Etes vous sûr de vouloir valider ce relevé ?"))) {
+                return;
+            }
 
-        if (this.state.isProcessing || !await Confirm(t.__("Etes vous sûr de vouloir valider ce relevé ?"))) {
-            return;
+            var now = new Date();
+            localStorage.setItem("mapPosition", JSON.stringify({ Latitude: this.state.model.latitude, Longitude: this.state.model.longitude, Zoom: 18, Date: now } as MapPosition));
+
+            await this.setState({ isProcessing: true, errors: [] });
+
+            const result = await ObservationsApi.createObservation(this.state.model);
+
+            if (!result.success) {
+                await this.setState({
+                    isProcessing: false,
+                    errors: result.errors
+                })
+            }
+            else {
+                await this.setState({ isProcessing: false });
+
+                this.props.history.push({
+                    pathname: "/map"
+                })
+            }
+        }
+        else if (this.props.match.params["observationid"]) {
+
+            const result = await ObservationsApi.addStatement(this.state.model, this.props.match.params["observationid"]);
+
+            if (!result.success) {
+                await this.setState({
+                    isProcessing: false,
+                    errors: result.errors
+                })
+            }
+            else {
+                await this.setState({ isProcessing: false });
+
+                this.props.history.push({
+                    pathname: "/observation/" + this.props.match.params["observationid"]
+                })
+            }
         }
 
-        var now = new Date();
-        localStorage.setItem("mapPosition", JSON.stringify({ Latitude: this.state.model.latitude, Longitude: this.state.model.longitude, Zoom:18 , Date: now } as MapPosition));
-
-        await this.setState({ isProcessing: true, errors: [] });
-
-        const result = await ObservationsApi.createObservation(this.state.model);
-
-        if (!result.success) {
-            await this.setState({
-                isProcessing: false,
-                errors: result.errors
-            })
-        }
-        else {
-            await this.setState({ isProcessing: false });
-
-            this.props.history.push({
-                pathname: "/map"
-            })
-        }
     }
 
     findSpeciesTelaBotanicaTaxon() {
@@ -307,9 +333,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         commonSpecies = commonSpecies.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName));
         return (
             <>
-                <Box className={clsx(classes.root)}>
-
-                    <ErrorSummary errors={this.state.errors} />
+                <Box className={clsx(classes.root)}>                    
 
                     <Typography variant="h6" className={clsx(classes.sectionHeading)}>
                         {t.__("Genre")}

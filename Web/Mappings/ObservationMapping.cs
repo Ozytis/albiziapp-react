@@ -23,6 +23,27 @@ namespace Web.Mappings
                 UserId = observation.UserId,
                 IsIdentified = observation.IsIdentified,
                 AuthorName = observation.AuthorName,
+                ObservationStatements = observation.ObservationStatements.Select(s=>s.ToObservationStatementModel()).ToArray(),
+            };
+        }
+        public static ObservationStatementModel ToObservationStatementModel(this ObservationStatement observationStatement)
+        {
+            return new ObservationStatementModel
+            {
+                Id= observationStatement.Id,
+                UserId= observationStatement.UserId,
+                Date= observationStatement.Date,
+                CommonSpeciesName= observationStatement.CommonSpeciesName,
+                SpeciesName= observationStatement.SpeciesName,
+                CommonGenus= observationStatement.CommonGenus,
+                Genus= observationStatement.Genus,
+                TelaBotanicaTaxon= observationStatement.TelaBotanicaTaxon,
+                Expertise= observationStatement.Expertise,
+                Validate= observationStatement.Validate,
+                Order= observationStatement.Order,
+                Confident= (int?)observationStatement.Confident,
+                TotalScore= observationStatement.TotalScore,
+
             };
         }
     }

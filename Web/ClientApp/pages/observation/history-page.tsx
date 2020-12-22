@@ -49,7 +49,6 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
 
         const observation = await ObservationsApi.getObservation(this.props.match.params["observationid"]);
         const currentUser = await AuthenticationApi.getCurrentUser();
-        console.log(observation.historyEditor);
         await this.setState({ observation: observation, currentUser: currentUser.osmId });
     }
 

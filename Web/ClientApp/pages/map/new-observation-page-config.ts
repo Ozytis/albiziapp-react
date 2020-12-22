@@ -7,7 +7,7 @@ export const NewObservationPageConfig: PageConfig = {
         title: "Nouveau relevé"
     },
     routes: [{
-        path: '/new-observation',
+        path: '/new-observation/:observationid?',
         component: NewObservationPage,
         exact: true
     }]

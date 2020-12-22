@@ -4,13 +4,13 @@ import { SpeciesApi } from "./species-service";
 import { ObservationModel } from "./generated/observation-model";
 import { ObservationCreationModel } from "./generated/observation-creation-model";
 import { ObservationEditionModel } from "./generated/observation-edition-model";
+import { ObservationStatementModel } from "./generated/observation-statement-model";
 
 class ObservationsService extends BaseService {
 
     async getUserObservations(userId: string) {
         return await this.get<ObservationModel[]>(`users/${userId}/observations`);
     }
-
  
 
     constructor() {
@@ -35,6 +35,17 @@ class ObservationsService extends BaseService {
     async createObservation(observation: ObservationCreationModel) {
 
         const result = await this.post<ObservationModel>(`observations`, observation);
+
+        if (result.success) {
+            this.loadObservations();
+        }
+
+        return result;
+    }
+
+    async addStatement(statement: ObservationCreationModel, observationId: string) {
+
+        const result = await this.post<ObservationModel>(`observations/addStatement/${observationId}`, statement);
 
         if (result.success) {
             this.loadObservations();

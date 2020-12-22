@@ -4,7 +4,7 @@
 // </auto-generated>
 //----------------------
 
-import { string  } from "./string- ";
+import { ObservationStatementModel } from "./observation-statement-model";
 export interface ObservationModel {
     commonGenus: string;
     commonSpeciesName: string;
@@ -20,6 +20,5 @@ export interface ObservationModel {
     telaBotanicaTaxon: string;
     authorName: string;
     isIdentified: boolean;
-    validations: string [];
-    historyEditor: string[];
+    observationStatements: ObservationStatementModel[];
 }

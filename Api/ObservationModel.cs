@@ -32,6 +32,7 @@ namespace Api
 
         public bool IsIdentified { get; set; }
 
+        public ObservationStatementModel[] ObservationStatements { get; set; }
 
     }
 }

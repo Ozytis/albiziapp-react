@@ -98,7 +98,6 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
         console.log(observation);
         model.id = observation.id;
         model.genus = observation.genus;
-        //model.image = observation.i
         model.isConfident = observation.confident;
         model.latitude = observation.latitude;
         model.longitude = observation.longitude;

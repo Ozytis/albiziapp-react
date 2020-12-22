@@ -1,5 +1,5 @@
 import { Box, Button, createStyles, Grid, Icon, InputLabel, List, ListItem, ListItemIcon, ListItemText, Switch, Tab, Tabs, Theme, Typography, WithStyles, withStyles, Radio, Paper } from "@material-ui/core";
-import { Check, Delete, Edit, NearMe, Cancel } from "@material-ui/icons";
+import { Check, Delete, Edit, NearMe, Cancel, Add } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -13,7 +13,9 @@ import { SpeciesApi } from "../../services/species-service";
 import { t } from "../../services/translation-service";
 import { AuthenticationApi } from "../../services/authentication-service";
 import { MapPosition } from "../../components/mapPosition";
-import { forEach } from "lodash";
+import { forEach, first } from "lodash";
+import { ObservationStatementModel } from "../../services/generated/observation-statement-model";
+import { NewObservationPage } from "../map/new-observation-page";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -104,6 +106,9 @@ const styles = (theme: Theme) => createStyles({
         textAlign: 'center',
         color: theme.palette.text.secondary,
     },
+    trait: {
+        borderBottom: "1px solid black",
+    }
 });
 
 interface ObservationPageProps extends RouteComponentProps, IPropsWithAppContext, WithStyles<typeof styles> {
@@ -114,17 +119,20 @@ class ObservationPageState {
     observation: ObservationModel;
     currentTab: "common" | "latin" = "common";
     isDeleting = false;
-    specyInfo: SpeciesInfoModel;
     isValidated: boolean = false;
     displayConfirmButton: boolean = true;
     currentUser: string;
-    enableDeleteButton: boolean;
     isConfirmating: boolean = true;
     currentPictureIndex = 0;
     confidentLevel: string;
     isLowConfident: boolean;
     isMediumConfident: boolean;
     isHighConfident: boolean;
+    observationStatements: ObservationStatementModel[];
+    firstObservationStatement: ObservationStatementModel;
+    enableEditAndDeleteButton: boolean;
+    newStatement: ObservationStatementModel;
+    isAddingStatement: boolean;
 }
 
 class ObservationPageComponent extends BaseComponent<ObservationPageProps, ObservationPageState>{
@@ -135,14 +143,17 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
     async componentDidMount() {
         const observation = await ObservationsApi.getObservation(this.props.match.params["observationid"]);
         const currentUser = await AuthenticationApi.getCurrentUser();
-        await this.setState({ observation: observation, currentUser:currentUser.osmId });
-        await this.isValidated();
-        await this.enableConfirmButton();
-        await this.isDeleteButtonEnable();
-        if (observation.telaBotanicaTaxon) {
-            const info = await SpeciesApi.getSpeciesInfo(observation.telaBotanicaTaxon);
-            await this.setState({ specyInfo: info[0] });
-        }
+        await this.setState({ observation: observation, currentUser: currentUser.osmId, observationStatements: observation.observationStatements });   
+        this.filterObservationStatements();
+        this.isEditAndDeleteEnable();
+    }
+
+    async filterObservationStatements() {
+            const os = this.state.observationStatements;
+            const fot = os.find(x => x.order = 1);
+            this.setState({ firstObservationStatement: fot }); 
+            const filteredOs = os.filter(x => x.order != 1);
+            this.setState({ observationStatements: filteredOs });
     }
 
     async remove() {
@@ -168,32 +179,10 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         });
     }
 
-    async isValidated() {
-        if (this.state.observation != null && this.state.observation.validations != null) {
-            var isValidated = this.state.observation.validations.findIndex(x => x == AuthenticationApi.user.osmId);
-            console.log((isValidated != -1))
-            await this.setState({ isValidated: (isValidated != -1) });
-        } else {
-            await this.setState({ isValidated: false });
-        }
-    }
-
-    async enableConfirmButton() {
-        if (this.state.observation.historyEditor != null) {
-            var displayConfirmButton = this.state.observation.historyEditor.findIndex(x => x == AuthenticationApi.user.osmId);
-            await this.setState({ displayConfirmButton: (displayConfirmButton == -1 || this.state.observation.userId != AuthenticationApi.user.osmId ) });
-        } else {
-            await this.setState({ displayConfirmButton: this.state.observation.userId != AuthenticationApi.user.osmId });
-        }
-    }
-
-
-
-
-    async validateObservation() {
-        await this.setState({ isDeleting: true });
-        const result = await ObservationsApi.ValidateObservation(this.state.observation);
-        await this.setState({ isDeleting: false, isValidated: true });
+    async addStatement() {
+        this.props.history.push({
+            pathname: `/new-observation/${this.state.observation.id}`
+        });
     }
 
     async goTo(path: string) {
@@ -205,42 +194,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         var now = new Date();
         localStorage.setItem("mapPosition", JSON.stringify({ Latitude: this.state.observation.latitude, Longitude: this.state.observation.longitude, Zoom: 18, Date: now } as MapPosition));
     }
-
-
-    getConfidentLabel(confident: number) {
-        switch (confident) {
-            case 0: return t.__("Peu confiant");
-            case 1: return t.__("Moyennement confiant");
-            case 2: return t.__("Confiant");
-            default: return t.__("Non renseigné");
-        }
-    }
-
-   
-    async isDeleteButtonEnable() {
-
-        const history = this.state.observation.historyEditor;
-        const currentUser = this.state.currentUser; 
-
-        if (history == undefined && currentUser == this.state.observation.userId) {
-            await this.setState({ enableDeleteButton: true });
-            return;
-        }
-        const historyFiltered = history.filter(h => h == currentUser);
-
-
-        if (historyFiltered.length == history.length) {
-            if (currentUser == this.state.observation.userId) {
-                await this.setState({ enableDeleteButton: true });
-            }
-            else {
-                await this.setState({ enableDeleteButton: false });
-            }
-        }
-        else {
-            await this.setState({ enableDeleteButton: false });
-        }
-    }
+    
     async showConfirmation() {
         if (this.state.isConfirmating) {
 
@@ -255,6 +209,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
             await this.setState({ isConfirmating: true });
         }
     }
+
     async updateConfident(level: string) {
 
         if (level == "low") {
@@ -311,17 +266,31 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
             this.setState({ currentPictureIndex: index });
         }
     }
-
     startSwipe(e: React.TouchEvent<HTMLElement>): void {
         //e.preventDefault();
         this.swipeStartLocation = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     }
-
     swipeStartLocation: { x: number; y: number } = null;
+
+    async isEditAndDeleteEnable() {
+        const o = this.state.observation;
+        const os = this.state.observationStatements;
+        const cu = this.state.currentUser;
+        if (o.userId == cu && os.length == null || os.length == 0) {
+            await this.setState({ enableEditAndDeleteButton: true})
+        }
+        else {
+            await this.setState({ enableEditAndDeleteButton: false})
+        }
+
+    }
+
+
     render() {
 
         const { classes } = this.props;
-        const { observation, enableDeleteButton } = this.state;
+        const { observation, enableEditAndDeleteButton, observationStatements, firstObservationStatement } = this.state;
+        console.log(firstObservationStatement);
         if (!observation) {
             return <>Chargement</>;
         }
@@ -352,7 +321,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                     {
                         this.state.currentTab === "common" &&
                             <> 
-                                <table style={{ marginTop: "3%" }}>
+                                <table style={{ marginTop: "3%", textAlign:"center" }}>
                                     <thead>
                                         <tr className={clsx(classes.bold)}>
                                             <th style={{ width: "35%" }}></th>
@@ -360,7 +329,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                             <th style={{ width: "25%" }}>Espèce</th>
                                             <th style={{ width: "5%" }}></th>
                                         </tr>
-                                    </thead>
+                                    </thead>                                    
                                     <tbody>
                                         <tr>
                                             <td></td>
@@ -368,21 +337,50 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                             <td></td>
                                             <td></td>
                                         </tr>
+                                        {
+                                            firstObservationStatement &&
                                         <tr>
                                             <td className={clsx(classes.bold)}>Proposition initiale</td>
-                                            <td>{observation.commonGenus}</td>
-                                            <td>{observation.commonSpeciesName}</td>
+                                            <td>{firstObservationStatement.commonGenus}</td>
+                                            <td>{firstObservationStatement.commonSpeciesName}</td>
                                             <td hidden={this.state.isConfirmating}><input type="radio" name="confirmation" value="1" /> </td>
-                                        </tr>
-                                        <tr>
-                                            <td className={clsx(classes.bold)}>Proposition de la communauté</td>
+                                            </tr>
+                                        }
+                                        <tr className={clsx(classes.trait)}>
                                             <td></td>
                                             <td></td>
-                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmation" value="2" /> </td>
+                                            <td></td>
+                                            <td></td>
                                         </tr>
+                                        {
+                                            observationStatements && observationStatements.map((os, index) => {
+                                                if (index == 0) {
+                                                    return (
+                                                        <tr key={"CommonObservationStatement-"+ index }>
+                                                            <td className={clsx(classes.bold)}>Proposition de la communauté</td>
+                                                            <td>{os.commonGenus}</td>
+                                                            <td>{os.commonSpeciesName}</td>
+                                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmation" value={index} /> </td>
+                                                        </tr>
+                                                    )
+                                                }
+                                                else {
+                                                    return (
+                                                        <tr key={"CommonObservationStatement-" + index}>
+                                                            <td></td>
+                                                            <td>{os.commonGenus}</td>
+                                                            <td>{os.commonSpeciesName}</td>
+                                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmation" value={index} /> </td>
+                                                        </tr>
+                                                 )
+                                                }}
+                                        )}
                                     </tbody>
                                     <tfoot>
                                         <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
                                             <td></td>
                                         </tr>
                                     </tfoot>
@@ -393,7 +391,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                         this.state.currentTab === "latin" &&
                             
                             <>
-                                <table style={{ marginTop: "3%" }}>
+                                <table style={{ marginTop: "3%", textAlign: "center" }}>
                                     <thead>
                                         <tr className={clsx(classes.bold)}>
                                             <th style={{ width: "35%" }}></th>
@@ -409,21 +407,51 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                             <td></td>
                                             <td></td>
                                         </tr>
-                                        <tr>
-                                            <td className={clsx(classes.bold)}>Proposition initiale</td>
-                                            <td>{observation.commonGenus}</td>
-                                            <td>{observation.commonSpeciesName}</td>
-                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmation" value="1" /> </td>
-                                        </tr>
-                                        <tr>
-                                            <td className={clsx(classes.bold)}>Proposition de la communauté</td>
+                                        {
+                                            firstObservationStatement &&
+                                            <tr>
+                                                <td className={clsx(classes.bold)}>Proposition initiale</td>
+                                                <td>{firstObservationStatement.genus}</td>
+                                                <td>{firstObservationStatement.speciesName}</td>
+                                                <td hidden={this.state.isConfirmating}><input type="radio" name="confirmation" value="1" /> </td>
+                                            </tr>
+                                        }
+                                        <tr className={clsx(classes.trait)}>
                                             <td></td>
                                             <td></td>
-                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmation" value="2" /> </td>
+                                            <td></td>
+                                            <td></td>
                                         </tr>
+                                        {
+                                            observationStatements && observationStatements.map((os, index) => {
+                                                if (index == 0) {
+                                                    return (
+                                                        <tr key={"LatinObservationStatement-" + index}>
+                                                            <td className={clsx(classes.bold)}>Proposition de la communauté</td>
+                                                            <td>{os.genus}</td>
+                                                            <td>{os.speciesName}</td>
+                                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmation" value={index} /> </td>
+                                                        </tr>
+                                                    )
+                                                }
+                                                else {
+                                                    return (
+                                                        <tr key= { "LatinObservationStatement-" + index }>
+                                                            <td></td>
+                                                            <td>{os.genus}</td>
+                                                            <td>{os.speciesName}</td>
+                                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmation" value={index} /> </td>
+                                                        </tr>
+                                                    )
+                                                }
+                                            }
+                                            )}
                                     </tbody>
                                     <tfoot>
                                         <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
                                             <td></td>
                                         </tr>
                                     </tfoot>
@@ -435,6 +463,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
 
                     <Box className={clsx(classes.top)} hidden={this.state.isConfirmating}  >
                         <table>
+                          <tbody>
                             <tr>
                                 <td style={{ width: "20%" }}>Confiance</td>
                                 <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isLowConfident ? "green" : "white" }} onClick={() => this.updateConfident("low")}>
@@ -447,6 +476,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                     Haute
                                 </td>
                             </tr>
+                            </tbody>
                         </table>
                     </Box>
 
@@ -492,41 +522,34 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                             </div>
                         }
                     </Box>
-                    <Box>                        
-                        <Box className={clsx(classes.buttonsDiv)}>
+                    <Box className={clsx(classes.buttonsDiv)}>
+                        <Box>
+                            <Button color="primary" variant="contained" startIcon={<Add />} onClick={() => this.addStatement()}>
+                                {t.__("Ajout d'une propostion")}
+                            </Button>
+                        </Box>
+                        <Box>
                             <Button color="primary" variant="contained" startIcon={<NearMe />} onClick={async () => { await this.updateLocalStorage(); this.goTo("/map") }}>
                                 {t.__("Voir sur la map")}
                             </Button>
                         </Box>
-
-                        <ListItem>
-                            <ListItemText primary={t.__("Vous pouvez modifier le relevé ou bien confirmer que les informations sont correctes")} />
-                        </ListItem>
-
-                        <Box className={clsx(classes.buttonsDiv)}>
-                            <Button color="primary" variant="contained" startIcon={<Edit />} onClick={() => this.editObservation()}>
-                                {t.__("Modifier")}
-                            </Button>
-                            
-                        </Box>
-
-                        {enableDeleteButton &&
-                            <>
-
-                                <ListItem>
-                                    <ListItemText primary={t.__("Supprimer le relevé, cette opération est définitive")} />
-                                </ListItem>
-                                <Box className={clsx(classes.buttonsDiv)}>
-                                    <Button color="secondary" variant="contained" startIcon={<Delete />} fullWidth onClick={() => this.remove()}>
-
-                                        {t.__("Supprimer")}
-                                    </Button>
-                                </Box>
-
-                            </>
-                        }
-
                     </Box>
+
+                        {
+                            enableEditAndDeleteButton &&
+                            <>
+                            <Box className={clsx(classes.buttonsDiv)}>
+                                <Button color="primary" variant="contained" startIcon={<Edit />} onClick={() => this.editObservation()}>
+                                     {t.__("Modifier")}
+                                 </Button>
+                                 <Button color="secondary" variant="contained" startIcon={<Delete />} onClick={() => this.remove()}>
+                                     {t.__("Supprimer")}
+                                  </Button>
+                                </Box>
+                            </>
+                        }                       
+
+                    
                 </Box>
             </>
         )
