@@ -5,6 +5,8 @@ import { ObservationModel } from "./generated/observation-model";
 import { ObservationCreationModel } from "./generated/observation-creation-model";
 import { ObservationEditionModel } from "./generated/observation-edition-model";
 import { ObservationStatementModel } from "./generated/observation-statement-model";
+import { ObservationStatementConfirmationModel } from "./generated/observation-statement-confirmation-model";
+import { AddObservationStatementConfirmationModel } from "./generated/add-observation-statement-confirmation-model";
 
 class ObservationsService extends BaseService {
 
@@ -140,6 +142,17 @@ class ObservationsService extends BaseService {
         }
 
         return this.observations && this.observations.find(o => o.id === observationId);
+    }
+
+    async confirmStatement(statementConfirmation: AddObservationStatementConfirmationModel) {
+
+        const result = await this.post(`observations/confirmStatement`, statementConfirmation);
+
+        if (result.success) {
+            this.loadObservations();
+        }
+
+        return result;
     }
 
     async getUserArboretum(userId: string) {

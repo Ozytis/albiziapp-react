@@ -8,6 +8,8 @@ import { ObservationsApi } from "../../services/observation";
 import { ObservationModel } from "../../services/generated/observation-model";
 import clsx from "clsx";
 import { t } from "../../services/translation-service";
+import { ObservationStatementModel } from "../../services/generated/observation-statement-model";
+import { UserModel } from "../../services/generated/user-model";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -21,6 +23,9 @@ const styles = (theme: Theme) => createStyles({
     bold: {
         fontWeight: "bold"
     },
+    trait: {
+        borderBottom: "1px solid black"
+    }
 });
 
 interface HistoryPageProps extends RouteComponentProps, IPropsWithAppContext, WithStyles<typeof styles> {
@@ -35,7 +40,10 @@ class HistoryPageState {
     isProcessing = false;
     errors: string[];
     observation: ObservationModel;
-    currentUser: string;
+    observationStatements: ObservationStatementModel[];
+    filteredObservationStatements: ObservationStatementModel[];
+    firstObservationStatement: ObservationStatementModel;    
+    currentUser: UserModel;
     currentTab: "common" | "latin" = "common";
 }
 
@@ -49,16 +57,37 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
 
         const observation = await ObservationsApi.getObservation(this.props.match.params["observationid"]);
         const currentUser = await AuthenticationApi.getCurrentUser();
-        await this.setState({ observation: observation, currentUser: currentUser.osmId });
+        await this.setState({ observation: observation, currentUser: currentUser, observationStatements: observation.observationStatements });
+        this.filterObservationStatements();
     }
 
+    async filterObservationStatements() {
+        const os = this.state.observationStatements;
+        const fot = os.find(x => x.order = 1);
+        this.setState({ firstObservationStatement: fot });
+        const filteredOs = os.filter(x => x.order != 1);
+        this.setState({ filteredObservationStatements: filteredOs });
+    }
+
+    setDateFormat(date: string) {
+        console.log(date);
+        if (date != null) {
+            return new Date(date).toLocaleDateString()
+        }
+        return "";
+
+    }
+    async getUser(id: string) {
+        const user = await AuthenticationApi.getUser(id);
+        return user.name;
+    }
     
     render() {
 
         const { classes } = this.props;
-        const { observation } = this.state;  
+        const { observation, firstObservationStatement, currentUser, filteredObservationStatements } = this.state;  
 
-        if (!observation) {
+        if (!observation && !firstObservationStatement) {
             return <>Chargement</>;
         }
         return (
@@ -71,36 +100,45 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
                 {
                     this.state.currentTab === "common" &&
                     <>
-                        <table style={{ marginTop: "3%" }}>
+                            <table style={{ marginTop: "3%", textAlign: "center"  }}>
                             <thead>
                                 <tr className={clsx(classes.bold)}>
-                                    <th style={{ width: "35%" }}></th>
-                                    <th style={{ width: "25%" }}>Genre</th>
-                                    <th style={{ width: "25%" }}>Espèce</th>
+                                        <th style={{ width: "50%", textAlign: "left"  }}>Proposition initiale</th>
+                                        <th style={{ width: "25%" }}>Genre</th>
+                                        <th style={{ width: "25%"}}>Espèce</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td className={clsx(classes.bold)}>Proposition initiale</td>
-                                    <td>{observation.commonGenus}</td>
-                                    <td>{observation.commonSpeciesName}</td>
-                                </tr>
-                                <tr>
-                                    <td className={clsx(classes.bold)}>Proposition de la communauté</td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
+                                    
+                                    {
+                                        firstObservationStatement && currentUser &&
+                                        <tr>
+                                            <td>{currentUser.name + ", " + this.setDateFormat(firstObservationStatement.date)}</td>
+                                            <td>{firstObservationStatement.commonGenus}</td>
+                                            <td>{firstObservationStatement.commonSpeciesName}</td>
+                                        </tr>
+                                    }
+                                    <tr className={clsx(classes.trait)}>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                     <tr>
+                                        <td className={clsx(classes.bold)} style={{textAlign:"left"}}>Proposition de la communauté</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    {
+                                        filteredObservationStatements && filteredObservationStatements.map((os, index) => {
+                                            return (<tr key={"CommonObservationStatement-" + index}>
+                                                <td>{this.getUser(os.userId) + ", " + this.setDateFormat(os.date)}</td>
+                                                <td>{os.commonGenus}</td>
+                                                <td>{os.commonSpeciesName}</td>
+                                            </tr>                                            
+                                             )})
+                                        }
+                                    
                             </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td></td>
-                                </tr>
-                            </tfoot>
                         </table>
                     </>
                 }

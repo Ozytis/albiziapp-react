@@ -4,6 +4,7 @@
 // </auto-generated>
 //----------------------
 
+import { ObservationStatementConfirmationModel } from "./observation-statement-confirmation-model";
 export interface ObservationStatementModel {
     id: string;
     userId: string;
@@ -18,4 +19,5 @@ export interface ObservationStatementModel {
     order: number;
     confident: number;
     totalScore: number;
+    observationStatementConfirmations: ObservationStatementConfirmationModel[];
 }

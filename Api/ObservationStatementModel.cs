@@ -28,6 +28,8 @@ namespace Api
         public int? Confident { get; set; }
 
         public int TotalScore { get; set; }
+
+        public ObservationStatementConfirmationModel[] ObservationStatementConfirmations { get; set; }
     }
 
 }

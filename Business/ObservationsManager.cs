@@ -108,6 +108,7 @@ namespace Business
                     statement.TelaBotanicaTaxon = species?.TelaBotanicaTaxon;
                     statement.Expertise = await this.CalculateUserExpertise(user.OsmId, speciesName);
                 }
+                statement.Date = DateTime.UtcNow;
                 statement.TotalScore = statement.CalculateReliabilityStatement();
                 statement.Order = 1;
                 statement.Confident = confident;
@@ -146,7 +147,7 @@ namespace Business
             return newObservation;
         }
         //POUR VALIDER UNE PROPOSITION EXISTANTE
-        public async Task ConfirmStatement(string observationId, string statementId, string userId)
+        public async Task ConfirmStatement(string observationId, string statementId, string userId, bool isOnlyGenus)
         {
             //TODO add confident
             var existingObservation = await this.GetUserObservationbyId(observationId);
@@ -176,7 +177,8 @@ namespace Business
                 Id = Guid.NewGuid().ToString("N"),
                 Date = DateTime.UtcNow,
                 UserId = userId,
-                Expertise = await this.CalculateUserExpertise(userId, statement.SpeciesName)
+                Expertise = await this.CalculateUserExpertise(userId, statement.SpeciesName),
+                IsOnlyGenus = isOnlyGenus
             };
             statement.ObservationStatementConfirmations.Add(confirmation);
             statement.TotalScore = statement.CalculateReliabilityStatement();
@@ -200,7 +202,7 @@ namespace Business
             statement.Id = Guid.NewGuid().ToString("N");
            // User user = await this.UsersManager.SelectAsync(newStatement.UserId);
             statement.UserId = userId;
-
+            statement.Date = DateTime.UtcNow;
 
             if (!string.IsNullOrEmpty(newStatement.Genus))
             {

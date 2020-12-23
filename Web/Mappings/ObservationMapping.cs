@@ -43,6 +43,21 @@ namespace Web.Mappings
                 Order= observationStatement.Order,
                 Confident= (int?)observationStatement.Confident,
                 TotalScore= observationStatement.TotalScore,
+                ObservationStatementConfirmations = observationStatement.ObservationStatementConfirmations?.Select(sc=>sc.ToObservationStatementConfirmationModel()).ToArray() ?? null
+                
+
+            };
+        }
+        public static ObservationStatementConfirmationModel ToObservationStatementConfirmationModel(this ObservationStatementConfirmation observationStatementConfirmation)
+        {
+            return new ObservationStatementConfirmationModel
+            {
+                Id = observationStatementConfirmation.Id,
+                UserId = observationStatementConfirmation.UserId,
+                Date = observationStatementConfirmation.Date,
+                Expertise = observationStatementConfirmation.Expertise,
+                Confident = (int?)observationStatementConfirmation.Confident,
+                IsOnlyGenus = observationStatementConfirmation.IsOnlyGenus
 
             };
         }
