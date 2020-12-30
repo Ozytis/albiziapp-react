@@ -19,5 +19,7 @@ export interface ObservationStatementModel {
     order: number;
     confident: number;
     totalScore: number;
+    totalScoreSpecies: number;
     observationStatementConfirmations: ObservationStatementConfirmationModel[];
+    userName: string;
 }

@@ -269,9 +269,10 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
             else {
                 await this.setState({ isProcessing: false });
 
-                this.props.history.push({
+                this.props.history.replace({
                     pathname: "/observation/" + this.props.match.params["observationid"]
                 })
+
             }
         }
 

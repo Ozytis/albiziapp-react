@@ -19,7 +19,7 @@ namespace Api
 
         public string TelaBotanicaTaxon { get; set; }
 
-        public int Expertise { get; set; }
+        public decimal Expertise { get; set; }
 
         public bool Validate { get; set; }
 
@@ -27,9 +27,13 @@ namespace Api
 
         public int? Confident { get; set; }
 
-        public int TotalScore { get; set; }
+        public decimal TotalScore { get; set; }
+        public decimal TotalScoreSpecies { get; set; }
 
         public ObservationStatementConfirmationModel[] ObservationStatementConfirmations { get; set; }
+
+        public string UserName { get; set; }
+
     }
 
 }

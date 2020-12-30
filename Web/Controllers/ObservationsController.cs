@@ -20,11 +20,12 @@ namespace Web.Controllers
     [Authorize]
     public class ObservationsController : ControllerBase
     {
-        public ObservationsController(ObservationsManager observationsManager, FileManager fileManager, IUserNotify userNotify)
+        public ObservationsController(ObservationsManager observationsManager, UsersManager userManager,FileManager fileManager, IUserNotify userNotify)
         {
             this.ObservationsManager = observationsManager;
             this.FileManager = fileManager;
             this.UserNotify = userNotify;
+            this.UsersManager = userManager;
         }
 
         public FileManager FileManager { get; }
@@ -33,18 +34,35 @@ namespace Web.Controllers
 
         public ObservationsManager ObservationsManager { get; }
 
+        public UsersManager UsersManager { get; }
+
         [HttpGet("")]
         public async Task<IEnumerable<ObservationModel>> GetAllObservations()
         {
             IEnumerable<Observation> observations = await this.ObservationsManager.GetAllObservations();
-            return observations.Select(observation => observation.ToObservationModel());
+            var userIds = observations.SelectMany(o => this.ObservationsManager.GetAllUserIdForObservation(o)).Distinct().ToArray();
+            var users = (await this.UsersManager.GetUsersByOsmIds(userIds)).ToArray();
+            return observations.Select(observation => observation.ToObservationModel(users));
         }
+
+        [HttpGet("observationId/{observationId}")]
+        public async Task<ObservationModel> GetObservationById(string observationId)
+        {
+            Observation observation = await this.ObservationsManager.GetObservationbyId(observationId);
+            var userIds = this.ObservationsManager.GetAllUserIdForObservation(observation).ToArray();
+            var users = (await this.UsersManager.GetUsersByOsmIds(userIds)).ToArray();
+            return observation.ToObservationModel(users);
+
+        }
+
 
         [HttpGet("/api/users/{userId}/observations")]
         public async Task<IEnumerable<ObservationModel>> GetUserObservations(string userId)
         {
             IEnumerable<Observation> observations = await this.ObservationsManager.GetUserObservations(userId);
-            return observations.Select(observation => observation.ToObservationModel());
+            var userIds = observations.SelectMany(o => this.ObservationsManager.GetAllUserIdForObservation(o)).Distinct().ToArray();
+            var users = (await this.UsersManager.GetUsersByOsmIds(userIds)).ToArray();
+            return observations.Select(observation => observation.ToObservationModel(users));
         }
         [HttpPost]
         [HandleBusinessException, ValidateModel]

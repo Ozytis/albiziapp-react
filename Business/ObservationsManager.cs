@@ -48,6 +48,15 @@ namespace Business
         {
             return await this.DataContext.Observations.Find(obs => obs.UserId == userId).ToListAsync();
         }
+
+        public string[] GetAllUserIdForObservation(Observation obs)
+        {
+            List<string> ids = new List<string>();
+            ids.Add(obs.UserId);
+            ids.AddRange(obs.ObservationStatements.Select(s => s.UserId)); 
+         
+            return ids.Distinct().ToArray();
+        }
         public async Task<IEnumerable<Observation>> GetUserVerifyObservations(string userId)
         {
             //TODO ajouter code, pour statement confirmation...
@@ -66,7 +75,10 @@ namespace Business
         {
             return await this.DataContext.Observations.Find(obs => obs.Id == observationId).FirstOrDefaultAsync();
         }
-
+        public async Task<Observation> GetObservationbyId(string observationId)
+        {
+            return await this.DataContext.Observations.Find(obs => obs.Id == observationId).FirstOrDefaultAsync();
+        }
         public async Task<Observation> CreateObservationAsync(string speciesName, string genus, string userid, Confident? confident, decimal latitude, decimal longitude, string[] pictures)
         {
             using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
@@ -96,6 +108,10 @@ namespace Business
                         .FirstOrDefault();
                     statement.CommonGenus = s?.CommonGenus;
                     statement.Genus = s?.Genus;
+                    if (string.IsNullOrEmpty(speciesName))
+                    {
+                        statement.Expertise = await this.CalculateUserGenusExpertise(user.OsmId, statement.Genus);
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(speciesName))
@@ -106,10 +122,11 @@ namespace Business
                     statement.CommonSpeciesName = species?.CommonSpeciesName;
                     statement.SpeciesName = species.SpeciesName;
                     statement.TelaBotanicaTaxon = species?.TelaBotanicaTaxon;
-                    statement.Expertise = await this.CalculateUserExpertise(user.OsmId, speciesName);
+                    statement.Expertise = await this.CalculateUserSpeciesExpertise(user.OsmId, speciesName);
                 }
                 statement.Date = DateTime.UtcNow;
                 statement.TotalScore = statement.CalculateReliabilityStatement();
+                statement.TotalScoreSpecies = statement.CalculateSpeciesReliabilityStatement();
                 statement.Order = 1;
                 statement.Confident = confident;
                 newObservation.ObservationStatements.Add(statement);
@@ -177,11 +194,12 @@ namespace Business
                 Id = Guid.NewGuid().ToString("N"),
                 Date = DateTime.UtcNow,
                 UserId = userId,
-                Expertise = await this.CalculateUserExpertise(userId, statement.SpeciesName),
+                Expertise = !isOnlyGenus ? await this.CalculateUserSpeciesExpertise(userId, statement.SpeciesName) : await this.CalculateUserGenusExpertise(userId, statement.Genus),
                 IsOnlyGenus = isOnlyGenus
             };
             statement.ObservationStatementConfirmations.Add(confirmation);
             statement.TotalScore = statement.CalculateReliabilityStatement();
+            statement.TotalScoreSpecies = statement.CalculateSpeciesReliabilityStatement();
             await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
             await this.CalculateKnowledegePoints(observationId, statementId, confirmation.Id);
             await this.CheckObservationIsIdentify(existingObservation.Id);
@@ -221,7 +239,7 @@ namespace Business
                 statement.CommonSpeciesName = species?.CommonSpeciesName;
                 statement.SpeciesName = species.SpeciesName;
                 statement.TelaBotanicaTaxon = species?.TelaBotanicaTaxon;
-                statement.Expertise = await this.CalculateUserExpertise(userId, newStatement.Species);
+                statement.Expertise = await this.CalculateUserSpeciesExpertise(userId, newStatement.Species);
             }
 
             if (existingObservation.ObservationStatements.Any(s => s.SpeciesName == statement.SpeciesName && s.Genus == statement.Genus))
@@ -247,19 +265,22 @@ namespace Business
             }
             var minScore = int.Parse(this.Configuration["Reliability:MinimunScore"]);
             var minPercent = int.Parse(this.Configuration["Reliability:MinimunPercent"]);
-            var totalStatementsScore = existingObservation.ObservationStatements.Sum(x => x.TotalScore);
+            var totalSpeciesStatementsScore = existingObservation.ObservationStatements.Sum(x => x.TotalScoreSpecies);
             ObservationStatement identifyStatement = null;
-            foreach (var s in existingObservation.ObservationStatements)
+            if (totalSpeciesStatementsScore != 0)
             {
-
-                if (s.TotalScore >= minScore)
+                foreach (var s in existingObservation.ObservationStatements)
                 {
-                    var percent = s.TotalScore * 100 / totalStatementsScore;
-                    if (percent >= minPercent)
+
+                    if (s.TotalScore >= minScore)
                     {
-                        //statement identify
-                        identifyStatement = s;
-                        break;
+                        var percent = s.TotalScoreSpecies * 100 / totalSpeciesStatementsScore;
+                        if (percent >= minPercent)
+                        {
+                            //statement identify
+                            identifyStatement = s;
+                            break;
+                        }
                     }
                 }
             }
@@ -506,17 +527,34 @@ namespace Business
             //TODO VALIDATE VOIR SI on garde
         }
 
-        public async Task<int> CalculateUserExpertise(string userId, string speciesName)
+        public async Task<int> CalculateUserSpeciesExpertise(string userId, string speciesName)
         {
             var data = await this.DataContext.Observations.Find(x => x.IsIdentified &&
             x.ObservationStatements.Any(s => s.SpeciesName == speciesName && (s.UserId == userId || s.ObservationStatementConfirmations.Any(c => c.UserId == userId)))).ToListAsync();
             //On filtre via le StatementValidatedId après, car cela n'est pas pris en charge par le drive MongoDb
             data = data.Where(o => o.ObservationStatements.Any(s => s.Id == o.StatementValidatedId)).ToList();
+
             var count = data.Count;
             var species = await this.SpeciesManager.GetSpeciesByNameAsync(speciesName);
-            var expertise = (count * species.Difficult * species.Rarity);
             //TODO voir si on add +1 si besoin
-            return (int)Math.Min(expertise, 20);
+            var expertise = (count * species.Difficult * species.Rarity) +1;
+        
+            return (int)Math.Min(expertise, 50);
+        }
+        public async Task<int> CalculateUserGenusExpertise(string userId, string genus)
+        {
+            var data = await this.DataContext.Observations.Find(x => x.IsIdentified &&
+            x.ObservationStatements.Any(s => s.Genus == genus && (s.UserId == userId || s.ObservationStatementConfirmations.Any(c => c.UserId == userId)))).ToListAsync();
+            //On filtre via le StatementValidatedId après, car cela n'est pas pris en charge par le drive MongoDb
+            data = data.Where(o => o.ObservationStatements.Any(s => s.Id == o.StatementValidatedId)).ToList();
+
+            var count = data.Count;
+            //TODO voir si on add +1 si besoin
+            var genusDifficult = await this.SpeciesManager.CalculDifficultGenus(genus);
+            var genusRarity = await this.SpeciesManager.CalculRarityGenus(genus);
+            var expertise = (count * genusDifficult * genusRarity) +1;
+        
+            return (int)Math.Min(expertise, 50);
         }
 
 

@@ -25,7 +25,7 @@ namespace Entities
 
         public string TelaBotanicaTaxon { get; set; }
 
-        public int Expertise { get; set; }
+        public decimal Expertise { get; set; }
 
         public bool Validate { get; set; } 
 
@@ -35,6 +35,7 @@ namespace Entities
 
         public List<ObservationStatementConfirmation> ObservationStatementConfirmations { get; set; }
 
-        public int TotalScore { get; set; }
+        public decimal TotalScore { get; set; }
+        public decimal  TotalScoreSpecies { get; set; }
     }
 }

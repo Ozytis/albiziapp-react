@@ -293,7 +293,12 @@ namespace Business
             return await this.DataContext.Users.Find(_ => true).ToListAsync();
         }
 
-        public async Task<User> EditUserAsync(User user)
+        public async Task<IEnumerable<User>> GetUsersByOsmIds(string[] osmIds)
+        {
+            return await this.DataContext.Users.Find(u => osmIds.Contains(u.OsmId)).ToListAsync();
+        }
+
+            public async Task<User> EditUserAsync(User user)
         {
             using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
             var oldUser = await this.SelectAsync(user.OsmId);

@@ -92,6 +92,12 @@ class ObservationsService extends BaseService {
         return result;
     }
 
+    async getObservationById(observationId: string) {
+
+        return await this.get<ObservationModel>(`observations/observationId/${observationId}`);
+    
+    }
+
 
     private observations: ObservationModel[];
 

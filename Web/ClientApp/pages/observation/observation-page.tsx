@@ -141,8 +141,9 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
     }
 
     async componentDidMount() {
-        const observation = await ObservationsApi.getObservation(this.props.match.params["observationid"]);
+        const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
         const currentUser = await AuthenticationApi.getCurrentUser();
+        console.log(observation);
         await this.setState({ observation: observation, currentUser: currentUser.osmId, observationStatements: observation.observationStatements });   
         this.filterObservationStatements();
         this.isEditAndDeleteEnable();
@@ -150,7 +151,8 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
     }
 
     async filterObservationStatements() {
-            const os = this.state.observationStatements;
+        const os = this.state.observationStatements;
+        console.log(os);
             const fot = os.find(x => x.order = 1);
             this.setState({ firstObservationStatement: fot }); 
             const filteredOs = os.filter(x => x.order != 1);
@@ -364,22 +366,22 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                     <Box>
                     <Tabs value={this.state.currentTab} onChange={(_, index) => this.setState({ currentTab: index })} aria-label="simple tabs example">
                         <Tab label={t.__("Commun")} className={clsx(classes.tab)} value="common" />
-                        {
-                            observation.pictures &&
                             <Tab label={t.__("Latin")} className={clsx(classes.tab)} value="latin" />
-                            }
+                            
                         </Tabs>
                         <div className={clsx(classes.flex)}>
                             <span className={clsx(classes.bold)}>
                                 Identification:(
-                                <span style={{ fontWeight: "normal", textDecoration: "underline" }} onClick={() => this.goTo(`/history/${observation.id}`)}>{this.state.observationStatements.length}</span>
+                                {this.state.observationStatements &&
+                                    <span style={{ fontWeight: "normal", textDecoration: "underline" }} onClick={() => this.goTo(`/history/${observation.id}`)}>{this.state.observationStatements.length}</span>
+                                }
                                 )
                             </span>
-
-                            <span>
+                            {/*<span>
                                 <span className={clsx(classes.bold)}>Fiabilité:</span>
                                15%
                             </span>
+                            */}
                         </div>
                         
                     {
@@ -558,7 +560,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
 
                     <Box className={clsx(classes.slider)} onTouchEnd={(e) => this.endSwipe(e)} onTouchStart={(e) => this.startSwipe(e)}>
                         {
-                            observation.pictures.map((image, idx) => {
+                            observation.pictures && observation.pictures.map((image, idx) => {
                                 if (idx !== this.state.currentPictureIndex) {
                                     return null;
                                 }

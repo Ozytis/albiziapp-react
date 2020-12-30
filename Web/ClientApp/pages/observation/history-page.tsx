@@ -1,4 +1,4 @@
-import { Box, Button, createStyles, FormControl, Grid, InputLabel, MenuItem, Select, Switch, Theme, Typography, WithStyles, withStyles, TextField, Modal, IconButton, RadioGroup, Radio, FormControlLabel, Tab, Tabs } from "@material-ui/core";
+ï»¿import { Box, Button, createStyles, FormControl, Grid, InputLabel, MenuItem, Select, Switch, Theme, Typography, WithStyles, withStyles, TextField, Modal, IconButton, RadioGroup, Radio, FormControlLabel, Tab, Tabs } from "@material-ui/core";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
@@ -77,10 +77,6 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
         return "";
 
     }
-    async getUser(id: string) {
-        const user = await AuthenticationApi.getUser(id);
-        return user.name;
-    }
     
     render() {
 
@@ -105,7 +101,7 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
                                 <tr className={clsx(classes.bold)}>
                                         <th style={{ width: "50%", textAlign: "left"  }}>Proposition initiale</th>
                                         <th style={{ width: "25%" }}>Genre</th>
-                                        <th style={{ width: "25%"}}>Espèce</th>
+                                        <th style={{ width: "25%"}}>EspÃ¨ce</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -113,7 +109,7 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
                                     {
                                         firstObservationStatement && currentUser &&
                                         <tr>
-                                            <td>{currentUser.name + ", " + this.setDateFormat(firstObservationStatement.date)}</td>
+                                            <td>{firstObservationStatement.userName + ", " + this.setDateFormat(firstObservationStatement.date)}</td>
                                             <td>{firstObservationStatement.commonGenus}</td>
                                             <td>{firstObservationStatement.commonSpeciesName}</td>
                                         </tr>
@@ -124,14 +120,14 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
                                         <td></td>
                                     </tr>
                                      <tr>
-                                        <td className={clsx(classes.bold)} style={{textAlign:"left"}}>Proposition de la communauté</td>
+                                        <td className={clsx(classes.bold)} style={{textAlign:"left"}}>Proposition de la communautÃ©</td>
                                         <td></td>
                                         <td></td>
                                     </tr>
                                     {
                                         filteredObservationStatements && filteredObservationStatements.map((os, index) => {
                                             return (<tr key={"CommonObservationStatement-" + index}>
-                                                <td>{this.getUser(os.userId) + ", " + this.setDateFormat(os.date)}</td>
+                                                <td>{`${os.userName}, ${this.setDateFormat(os.date)}`}</td>
                                                 <td>{os.commonGenus}</td>
                                                 <td>{os.commonSpeciesName}</td>
                                             </tr>                                            
@@ -146,37 +142,47 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
                     this.state.currentTab === "latin" &&
 
                     <>
-                        <table style={{ marginTop: "3%" }}>
-                            <thead>
-                                <tr className={clsx(classes.bold)}>
-                                    <th style={{ width: "35%" }}></th>
-                                    <th style={{ width: "25%" }}>Genre</th>
-                                    <th style={{ width: "25%" }}>Espèce</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td className={clsx(classes.bold)}>Proposition initiale</td>
-                                    <td>{observation.commonGenus}</td>
-                                    <td>{observation.commonSpeciesName}</td>
-                                </tr>
-                                <tr>
-                                    <td className={clsx(classes.bold)}>Proposition de la communauté</td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td></td>
-                                </tr>
-                            </tfoot>
-                        </table>
+                            <table style={{ marginTop: "3%", textAlign: "center" }}>
+                                <thead>
+                                    <tr className={clsx(classes.bold)}>
+                                        <th style={{ width: "50%", textAlign: "left" }}>Proposition initiale</th>
+                                        <th style={{ width: "25%" }}>Genre</th>
+                                        <th style={{ width: "25%" }}>EspÃ¨ce</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    {
+                                        firstObservationStatement && currentUser &&
+                                        <tr>
+                                            <td>{firstObservationStatement.userName + ", " + this.setDateFormat(firstObservationStatement.date)}</td>
+                                            <td>{firstObservationStatement.genus}</td>
+                                            <td>{firstObservationStatement.speciesName}</td>
+                                        </tr>
+                                    }
+                                    <tr className={clsx(classes.trait)}>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td className={clsx(classes.bold)} style={{ textAlign: "left" }}>Proposition de la communautÃ©</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    {
+                                        filteredObservationStatements && filteredObservationStatements.map((os, index) => {
+                                            return (<tr key={"CommonObservationStatement-" + index}>
+                                                <td>{`${os.userName}, ${this.setDateFormat(os.date)}`}</td>
+                                                <td>{os.genus}</td>
+                                                <td>{os.speciesName}</td>
+                                            </tr>
+                                            )
+                                        })
+                                    }
+
+                                </tbody>
+                            </table>
                     </>
                     }
                     </Box>

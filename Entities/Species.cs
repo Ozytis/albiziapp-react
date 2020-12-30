@@ -30,7 +30,7 @@ namespace Entities
 
         public int Difficult { get; set; }
 
-        public int Rarity { get; set; }
+        public decimal Rarity { get; set; }
 
 
     }

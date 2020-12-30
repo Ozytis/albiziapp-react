@@ -6,7 +6,7 @@ namespace Web.Mappings
 {
     public static class ObservationMapping
     {
-        public static ObservationModel ToObservationModel(this Observation observation)
+        public static ObservationModel ToObservationModel(this Observation observation,User[] users)
         {
             return new ObservationModel
             {
@@ -23,10 +23,10 @@ namespace Web.Mappings
                 UserId = observation.UserId,
                 IsIdentified = observation.IsIdentified,
                 AuthorName = observation.AuthorName,
-                ObservationStatements = observation.ObservationStatements.Select(s=>s.ToObservationStatementModel()).ToArray(),
+                ObservationStatements = observation.ObservationStatements.Select(s=>s.ToObservationStatementModel(users)).ToArray(),
             };
         }
-        public static ObservationStatementModel ToObservationStatementModel(this ObservationStatement observationStatement)
+        public static ObservationStatementModel ToObservationStatementModel(this ObservationStatement observationStatement, User[] users)
         {
             return new ObservationStatementModel
             {
@@ -43,7 +43,9 @@ namespace Web.Mappings
                 Order= observationStatement.Order,
                 Confident= (int?)observationStatement.Confident,
                 TotalScore= observationStatement.TotalScore,
-                ObservationStatementConfirmations = observationStatement.ObservationStatementConfirmations?.Select(sc=>sc.ToObservationStatementConfirmationModel()).ToArray() ?? null
+                TotalScoreSpecies = observationStatement.TotalScoreSpecies,
+                ObservationStatementConfirmations = observationStatement.ObservationStatementConfirmations?.Select(sc=>sc.ToObservationStatementConfirmationModel()).ToArray() ?? null,
+                UserName = users?.FirstOrDefault(u => u.OsmId == observationStatement.UserId)?.Name
                 
 
             };
@@ -58,7 +60,6 @@ namespace Web.Mappings
                 Expertise = observationStatementConfirmation.Expertise,
                 Confident = (int?)observationStatementConfirmation.Confident,
                 IsOnlyGenus = observationStatementConfirmation.IsOnlyGenus
-
             };
         }
     }

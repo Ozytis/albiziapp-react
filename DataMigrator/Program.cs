@@ -41,6 +41,7 @@ namespace DataMigrator
                 Console.WriteLine("\t3 - Mission");
                 Console.WriteLine("\t4 - Trophée");
                 Console.WriteLine("\t5 - Titre");
+                Console.WriteLine("\t6 - Rareté");
                 Console.WriteLine("\tQ - Quitter");
 
                 ConsoleKeyInfo key = Console.ReadKey();
@@ -63,6 +64,9 @@ namespace DataMigrator
                         break;
                     case '5':
                         await MigrateTitles();
+                        break;
+                    case '6':
+                        await MigrateRarety();
                         break;
                     case 'q':
                         return;
@@ -246,6 +250,34 @@ namespace DataMigrator
                         webClient.Headers.Add("Accept", "text/json");
                         webClient.Headers.Add("Content-Type", "text/json");
                         await webClient.UploadDataTaskAsync(new Uri($"{URL}/api/titles"), Encoding.UTF8.GetBytes(json));
+                    }
+                }
+            }
+        }
+        private static async Task MigrateRarety()
+        {
+            using StreamReader reader = new StreamReader(Path.Combine(Directory.GetCurrentDirectory(), "Migrate", "rarete.json"));
+            using JsonTextReader jsonReader = new JsonTextReader(reader);
+
+            jsonReader.SupportMultipleContent = true;
+
+            JsonSerializer serializer = new JsonSerializer();
+
+
+
+            while (jsonReader.Read())
+            {
+                if (jsonReader.TokenType == JsonToken.StartObject)
+                {
+
+                    RaretyCreationModel rarety = serializer.Deserialize<RaretyCreationModel>(jsonReader);
+                    Console.WriteLine(JsonConvert.SerializeObject(rarety));
+                    string json = JsonConvert.SerializeObject(rarety);
+                    using (WebClient webClient = new WebClient())
+                    {
+                        webClient.Headers.Add("Accept", "text/json");
+                        webClient.Headers.Add("Content-Type", "text/json");
+                        await webClient.UploadDataTaskAsync(new Uri($"{URL}/api/species/rarety"), Encoding.UTF8.GetBytes(json));
                     }
                 }
             }

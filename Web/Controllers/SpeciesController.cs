@@ -56,6 +56,18 @@ namespace Web.Controllers
                 model.Pictures);
         }
 
+        [HttpPost("rarety")]
+        [ValidateModel, HandleBusinessException]
+        public async Task UpdateRaretySpeciesAsync([FromBody] RaretyCreationModel model)
+        {
+            await this.SpeciesManager.UpdateSpeciesRarety(
+                new Species
+                {SpeciesName=model.Value,
+                Rarity = model.Rarety,
+                Difficult = 2
+                });
+        }
+
         [HttpGet("keys")]
         public async Task<FloraKeyModel[]> GetFloraKeysAsync()
         {
