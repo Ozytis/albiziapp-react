@@ -25,7 +25,7 @@ const styles = (theme: Theme) => createStyles({
         minWidth: "100vw",
     },
     map: {
-        height: "calc(100vh - 180px)",
+        
         width: "100vw",
         maxWidth: "100vw",
         position: "relative",
@@ -245,6 +245,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                     <Map
                         ref={this.state.mapRef}
                         className={clsx(classes.map)}
+                        style={{ "height": window.innerHeight -180+"px" }}
                         center={position}
                         zoom={21}
                         zoomSnap={0.5}
