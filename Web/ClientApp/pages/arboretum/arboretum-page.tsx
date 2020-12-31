@@ -42,6 +42,8 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
     }
 
     async componentDidMount() {
+        console.log("CDM AP");
+        
         const species = await ObservationsApi.getUserArboretum(AuthenticationApi.user.osmId);
         await this.setState({ species: species });
        
