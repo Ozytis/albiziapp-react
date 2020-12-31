@@ -389,7 +389,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                     {
                         this.state.currentTab === "common" &&
                             <> 
-                                <table style={{ marginTop: "3%", textAlign:"center" }}>
+                                <table style={{ marginTop: "3%", textAlign: "center", width:"100%" }} className={clsx(classes.center)}>
                                     <thead>
                                         <tr className={clsx(classes.bold)}>
                                             <th style={{ width: "35%" }}></th>
@@ -467,7 +467,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                         this.state.currentTab === "latin" &&
                             
                             <>
-                                <table style={{ marginTop: "3%", textAlign: "center" }}>
+                                <table style={{ marginTop: "3%", textAlign: "center", width: "100%" }} className={clsx(classes.center)}>
                                     <thead>
                                         <tr className={clsx(classes.bold)}>
                                             <th style={{ width: "35%" }}></th>
@@ -546,7 +546,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                     </Box>
 
                     <Box className={clsx(classes.top)} hidden={this.state.isConfirmating}  >
-                        <table>
+                        <table className={clsx(classes.center)}>
                           <tbody>
                             <tr>
                                 <td style={{ width: "20%" }}>Confiance</td>
@@ -563,23 +563,20 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                             </tbody>
                         </table>
                     </Box>
-
-                    <Box className={clsx(classes.buttonsDiv)}>
-                        <Box>                        
-                             {   this.state.displayAddAndConfirmButton &&
-                            <Button color="secondary" disabled={this.state.isValidated} variant="contained" startIcon={<Check />} onClick={() => this.showConfirmation()}>
+            {   this.state.displayAddAndConfirmButton &&
+                    <Box className={clsx(classes.buttonsDiv)}>                        
+                            <Button color="secondary" disabled={this.state.isValidated} fullWidth variant="contained" startIcon={<Check />} onClick={() => this.showConfirmation()}>
                                 {t.__("Confirmer")}
-                            </Button>
-                            }
+                            </Button> 
                         </Box>
-                        <Box hidden={this.state.isConfirmating} >
-                            <Button color="default" variant="contained" startIcon={<Cancel />} onClick={() => { this.hideConfirmation() }}>
+                    }
+                    {!this.state.isConfirmating &&
+                        <Box className={clsx(classes.buttonsDiv)} >
+                            <Button color="default" variant="contained" fullWidth startIcon={<Cancel />} onClick={() => { this.hideConfirmation() }}>
                                 {t.__("Annuler")}
                             </Button>
                         </Box>
-                   
-                    </Box>
-
+                    }
                     <Box className={clsx(classes.slider)} onTouchEnd={(e) => this.endSwipe(e)} onTouchStart={(e) => this.startSwipe(e)}>
                         {
                             observation.pictures && observation.pictures.map((image, idx) => {
@@ -608,13 +605,13 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                     </Box>
                     {this.state.displayAddAndConfirmButton &&
                         <Box className={clsx(classes.buttonsDiv)}>
-                            <Button color="primary" variant="contained" startIcon={<Add />} onClick={() => this.addStatement()}>
+                        <Button color="primary" variant="contained" fullWidth startIcon={<Add />} onClick={() => this.addStatement()}>
                                 {t.__("Ajout d'une propostion")}
                             </Button>
                         </Box>
                     }
                     <Box className={clsx(classes.buttonsDiv)}>
-                            <Button color="secondary" variant="contained" startIcon={<NearMe />} onClick={async () => { await this.updateLocalStorage(); this.goTo("/map") }}>
+                        <Button color="secondary" variant="contained" fullWidth startIcon={<NearMe />} onClick={async () => { await this.updateLocalStorage(); this.goTo("/map") }}>
                                 {t.__("Voir sur la map")}
                             </Button>                        
                     </Box>   
@@ -625,10 +622,10 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                             enableEditAndDeleteButton &&
                             <>
                             <Box className={clsx(classes.buttonsDiv)}>
-                                <Button color="primary" variant="contained" startIcon={<Edit />} onClick={() => this.editObservation()}>
+                                <Button color="primary" variant="contained" fullWidth startIcon={<Edit />} onClick={() => this.editObservation()}>
                                      {t.__("Modifier")}
                                  </Button>
-                                 <Button color="secondary" variant="contained" startIcon={<Delete />} onClick={() => this.remove()}>
+                                <Button color="secondary" variant="contained" fullWidth startIcon={<Delete />} onClick={() => this.remove()}>
                                      {t.__("Supprimer")}
                                   </Button>
                                 </Box>
