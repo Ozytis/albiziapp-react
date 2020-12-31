@@ -25,7 +25,7 @@ const styles = (theme: Theme) => createStyles({
         minWidth: "100vw",
     },
     map: {
-        height: "calc(100vh - 180px)",
+        
         width: "100vw",
         maxWidth: "100vw",
         position: "relative",
@@ -185,7 +185,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
     }
 
     getTilesUrl() {
-        if (document.location.host.indexOf("localhost") > -1) {
+        if (document.location.host.indexOf("localhost") > -1 || document.location.host.indexOf("192.168.1.") > -1) {
             return "//wxs.ign.fr/choisirgeoportail/geoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/jpeg&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}"
         } else {
             return "//wxs.ign.fr/3urbr0dt1qgjytxdkbt6z3cq/geoportail/wmts?service=WMTS&request=GetTile&version=1.0.0&tilematrixset=PM&tilematrix={z}&tilecol={x}&tilerow={y}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&format=image/jpeg&style=normal";
@@ -245,6 +245,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                     <Map
                         ref={this.state.mapRef}
                         className={clsx(classes.map)}
+                        style={{ "height": window.innerHeight -180+"px" }}
                         center={position}
                         zoom={21}
                         zoomSnap={0.5}
