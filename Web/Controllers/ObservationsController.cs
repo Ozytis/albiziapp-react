@@ -92,8 +92,8 @@ namespace Web.Controllers
         [HandleBusinessException, ValidateModel]
         public async Task ConfirmStatementAysnc([FromBody] AddObservationStatementConfirmationModel osc)
         {
-            
-                await this.ObservationsManager.ConfirmStatement(osc.ObservationId, osc.StatementId, this.User.Identity.Name, osc.IsOnlyGenus);
+
+            await this.ObservationsManager.ConfirmStatement(osc.ObservationId, osc.StatementId, this.User.Identity.Name, osc.IsOnlyGenus);
                 await this.UserNotify.SendNotif(this.User.Identity.Name, "Le relevé a bien été confirmé");
 
         }
