@@ -16,8 +16,8 @@ const styles = (theme: Theme) => createStyles({
         position: "fixed",
         bottom: 0,
         left: 0,
-        width: "100vw",
-        justifyContent: "flex-start",
+        width: "100%",
+      
         "& .MuiIcon-root": {
             width: "auto"
         }
