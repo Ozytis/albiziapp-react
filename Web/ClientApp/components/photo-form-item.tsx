@@ -249,7 +249,7 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
                                 }
                                 {   !this.state.md.mobile() &&
                                     <Button color="secondary" variant="contained" className="button button-primary  button-block mb-1"
-                                        onClick={() => this.takePicture("library")}>
+                                        onClick={() => this.takePicture("camera")}>
                                         Selectionner une photo
                                     </Button>
                                 }
