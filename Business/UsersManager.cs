@@ -119,9 +119,11 @@ namespace Business
                 else
                 {
                     var titlesToAdd = titles.Where(t => !user.Titles.Any(ut => ut == t.Id)).Select(t => t.Id).ToList();
-                    user.Titles = user.Titles.Concat(titlesToAdd).ToArray();
-
-                    await this.UserNotify.SendNotif(userId, "Vous avez debloqué un nouveau titre !");
+                    if (titlesToAdd.Count > 0)
+                    {
+                        user.Titles = user.Titles.Concat(titlesToAdd).ToArray();
+                        await this.UserNotify.SendNotif(userId, "Vous avez debloqué un nouveau titre !");
+                    }
                 }
                 await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
             }
