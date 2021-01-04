@@ -90,6 +90,7 @@ namespace Business
                 newObservation.Id = Guid.NewGuid().ToString("N");
                 newObservation.Pictures = new List<string>();
                 newObservation.Date = DateTime.UtcNow;
+                newObservation.TreeSize = TreeSize.MoreThan10m;
 
                 var statement = new ObservationStatement();
                 statement.Id = Guid.NewGuid().ToString("N");
@@ -255,7 +256,21 @@ namespace Business
             await this.CalculateKnowledegePoints(observationId, statement.Id, null);
             await this.CheckObservationIsIdentify(existingObservation.Id);
         }
+        public async Task AddPictures(string observationId, string[] pictures)
+        {
+            var existingObservation = await this.GetUserObservationbyId(observationId);
+            if (existingObservation == null)
+            {
+                throw new BusinessException("Ce relevé n'existe pas");
+            }
 
+            foreach(string pic in pictures?.Where(p => !string.IsNullOrEmpty(p)))
+            {
+                existingObservation.Pictures.Add(await this.FileManager.SaveDataUrlAsFileAsync("observations", pic));
+            }
+
+            await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
+        }
         public async Task CheckObservationIsIdentify(string observationId)
         {
             var existingObservation = await this.GetUserObservationbyId(observationId);
@@ -556,7 +571,17 @@ namespace Business
         
             return (int)Math.Min(expertise, 50);
         }
+        public async Task UpdateTreeSize(string observationId, int treeSize)
+        {
+            var existingObservation = await this.GetUserObservationbyId(observationId);
+            if (existingObservation == null)
+            {
+                throw new BusinessException("Ce relevé n'existe pas");
+            }
+            existingObservation.TreeSize = (TreeSize?)treeSize;
 
+            await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
+        }
 
     }
 }

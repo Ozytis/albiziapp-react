@@ -56,6 +56,28 @@ class ObservationsService extends BaseService {
         return result;
     }
 
+    async addPictures(pictures :string[], observationId: string) {
+
+        const result = await this.post<ObservationModel>(`observations/addPictures/${observationId}`, pictures);
+
+        if (result.success) {
+            this.loadObservations();
+        }
+
+        return result;
+    }
+
+    async updateTreeSize(treeSize: number, observationId: string) {
+
+        const result = await this.put<ObservationModel>(`observations/setTreeSize/${observationId}/${treeSize}`,null);
+
+        if (result.success) {
+            this.loadObservations();
+        }
+
+        return result;
+    }
+
     async editObservation(observation: ObservationEditionModel) {
 
         const result = await this.put<ObservationModel>(`observations`, observation);

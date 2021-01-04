@@ -73,6 +73,38 @@ namespace Web.Controllers
                   model.Pictures );
         }
 
+        [HttpPut("setTreeSize/{observationId}/{treeSize}")]
+        [HandleBusinessException, ValidateModel]
+        public async Task UpdateTreeSizeAysnc(int treeSize, string observationId)
+        {
+            try
+            {
+                await this.ObservationsManager.UpdateTreeSize(observationId, treeSize);
+            }
+            catch (BusinessException be)
+            {
+
+                await this.UserNotify.SendErrorNotif(this.User.Identity.Name, be.Message);
+                throw be;
+            }
+        }
+
+        [HttpPost("addPictures/{observationId}")]
+        [HandleBusinessException, ValidateModel]
+        public async Task AddPicturesAysnc([FromBody] string[] pictures, string observationId)
+        {
+            try
+            {
+                await this.ObservationsManager.AddPictures(observationId,pictures);
+            }
+            catch (BusinessException be)
+            {
+
+                await this.UserNotify.SendErrorNotif(this.User.Identity.Name, be.Message);
+                throw be;
+            }
+        }
+
         [HttpPost("addStatement/{observationId}")]
         [HandleBusinessException, ValidateModel]
         public async Task CreateStatementAysnc([FromBody] ObservationCreationModel model, string observationId)
@@ -87,6 +119,8 @@ namespace Web.Controllers
                 throw be;
             }
         }
+
+
 
         [HttpPost("confirmStatement")]
         [HandleBusinessException, ValidateModel]

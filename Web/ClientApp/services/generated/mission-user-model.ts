@@ -5,8 +5,7 @@
 //----------------------
 
 import { MissionProgressionModel } from "./mission-progression-model";
-import { MissionsCompleteModel } from "./missions-user-model";
-
+import { MissionsCompleteModel } from "./missions-complete-model";
 export interface MissionUserModel {
     missionProgression: MissionProgressionModel;
     missionsComplete: MissionsCompleteModel[];

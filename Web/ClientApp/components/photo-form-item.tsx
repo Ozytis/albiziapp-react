@@ -164,8 +164,6 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
 
     render() {
 
-        console.log(this.props.value);
-        console.log(this.state.md.mobile());
         return (
             <div className="photo-form-item">
                 <div className="photo-form-item-preview">

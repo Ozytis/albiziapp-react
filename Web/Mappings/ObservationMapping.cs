@@ -24,6 +24,7 @@ namespace Web.Mappings
                 IsIdentified = observation.IsIdentified,
                 AuthorName = observation.AuthorName,
                 ObservationStatements = observation.ObservationStatements.Select(s=>s.ToObservationStatementModel(users)).ToArray(),
+                TreeSize = (int?)observation.TreeSize,
             };
         }
         public static ObservationStatementModel ToObservationStatementModel(this ObservationStatement observationStatement, User[] users)

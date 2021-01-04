@@ -21,4 +21,5 @@ export interface ObservationModel {
     authorName: string;
     isIdentified: boolean;
     observationStatements: ObservationStatementModel[];
+    treeSize: number;
 }

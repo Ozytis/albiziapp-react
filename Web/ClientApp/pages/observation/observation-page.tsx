@@ -14,6 +14,7 @@ import { MapPosition } from "../../components/mapPosition";
 import { ObservationStatementModel } from "../../services/generated/observation-statement-model";
 import { AddObservationStatementConfirmationModel } from "../../services/generated/add-observation-statement-confirmation-model";
 import { filter } from "lodash";
+import { PhotoFormItem } from "../../components/photo-form-item";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -94,7 +95,8 @@ const styles = (theme: Theme) => createStyles({
     tabConfiance: {
         width: "20%",
         border: "solid 1px black",
-        textAlign: "center"
+        textAlign: "center",
+        cursor:"pointer"
     },
     top: {
         marginTop: "4%"
@@ -129,12 +131,20 @@ class ObservationPageState {
     isLowConfident: boolean;
     isMediumConfident: boolean;
     isHighConfident: boolean;   
+    isLessThan2m: boolean;   
+    isBetween2And5m: boolean;   
+    isBetween5And10m: boolean;   
+    isMoreThan10m: boolean;   
     filteredObservationStatements: ObservationStatementModel[];
     firstObservationStatement: ObservationStatementModel;
     enableEditAndDeleteButton: boolean;
     genusSelectedRadio: number;
     speciesSelectedRadio: number;
     confirmationStatement = new AddObservationStatementConfirmationModel();
+    addPictures: string[];
+    isAddingPic: boolean;
+    isUpdatingTreeSize: boolean;
+    newTreeSize: number = null;
 }
 
 class ObservationPageComponent extends BaseComponent<ObservationPageProps, ObservationPageState>{
@@ -145,19 +155,39 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
     async componentDidMount() {
         const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
         const currentUser = await AuthenticationApi.getCurrentUser();
-        console.log(observation);
         await this.setState({ observation: observation, currentUser: currentUser.osmId });   
         this.filterObservationStatements();
         this.isEditAndDeleteEnable();
         this.canAddOrConfirmStatement();
+        this.checkTreeSize();
     }
 
     async filterObservationStatements() {
-        const os = this.state.observation.observationStatements;
+        const os = this.state.observation.observationStatements;        
         const fot = os.find(x => x.order = 1);
             this.setState({ firstObservationStatement: fot }); 
             const filteredOs = os.filter(x => x.order != 1);
         this.setState({ filteredObservationStatements: filteredOs });
+    }
+
+    async checkTreeSize() {
+        const obsTS = this.state.observation.treeSize;
+        console.log(obsTS);
+        if (obsTS != null) {
+            if (obsTS == 0) {
+                await this.setState({ isLessThan2m: true, isUpdatingTreeSize:false });
+            }
+            if (obsTS == 1) {
+                await this.setState({ isBetween2And5m: true, isUpdatingTreeSize: false });
+            }
+            if (obsTS == 2) {
+                await this.setState({ isBetween5And10m: true, isUpdatingTreeSize: false });
+            }
+            if (obsTS == 3) {
+                await this.setState({ isMoreThan10m: true, isUpdatingTreeSize: false });
+            }
+        }
+        else return;
     }
 
     async remove() {
@@ -289,6 +319,72 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         }
 
     }
+    async updateTreeSize() {
+        if (! await Confirm(t.__("Etes-vous sûr de vouloir changer la hauteur de l'arbre de ce relevé ?"))) {
+            return;
+        }
+            const observationId = this.state.observation.id;
+            const result = await ObservationsApi.updateTreeSize(this.state.newTreeSize, observationId);
+
+            if (result.success) {
+                const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
+                await this.setState({ observation: observation});
+                this.filterObservationStatements();
+                this.checkTreeSize();
+                console.log(this.state.observation)
+            }
+
+            else {
+                await ObservationsApi.notifError(AuthenticationApi.getCurrentUser().osmId, "La hauteur n'a pas pu être changé");
+            }
+    }
+
+    async setTreeSize(level: number) {
+
+
+        if (level == this.state.observation.treeSize) {
+            await this.setState({ isUpdatingTreeSize: false });
+        }
+        else if (level != this.state.observation.treeSize) {
+            await this.setState({ isUpdatingTreeSize: true });
+        }
+
+        if (level == 0) {
+            if (this.state.isLessThan2m) {
+                await this.setState({ isLessThan2m: false, newTreeSize: null, isUpdatingTreeSize: false })
+            }
+            else if (!this.state.isLessThan2m) {
+                await this.setState({ isLessThan2m: true, isBetween2And5m: false, isBetween5And10m: false, isMoreThan10m: false, newTreeSize: 0})
+            }
+        }
+
+        if (level == 1) {
+            if (this.state.isBetween2And5m) {
+                await this.setState({ isBetween2And5m: false, newTreeSize: null, isUpdatingTreeSize: false })
+            }
+            else if (!this.state.isBetween2And5m) {
+                await this.setState({ isBetween2And5m: true, isLessThan2m: false, isBetween5And10m: false, isMoreThan10m: false, newTreeSize: 1 })
+            }
+        }
+
+        if (level == 2) {
+            if (this.state.isBetween5And10m) {
+                await this.setState({ isBetween5And10m: false, newTreeSize: null, isUpdatingTreeSize: false })
+            }
+            else if (!this.state.isBetween5And10m) {
+                await this.setState({ isBetween5And10m: true, isLessThan2m: false, isBetween2And5m: false, isMoreThan10m: false, newTreeSize: 2 })
+            }
+        }
+        if (level == 3) {
+            if (this.state.isMoreThan10m) {
+                await this.setState({ isMoreThan10m: false, newTreeSize: null, isUpdatingTreeSize: false })
+            }
+            else if (!this.state.isMoreThan10m) {
+                await this.setState({ isMoreThan10m: true, isLessThan2m: false, isBetween2And5m: false, isBetween5And10m: false, newTreeSize: 3 })
+            }
+        }
+
+    }
     endSwipe(e: React.TouchEvent<HTMLElement>): void {
 
         if (!this.swipeStartLocation || !this.state.observation || !this.state.observation.pictures || this.state.observation.pictures.length < 2) {
@@ -353,8 +449,45 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
     async confirmSpeciesStatement(val) {
         await this.setState({ speciesSelectedRadio: val, genusSelectedRadio: val });
     }
+    async addPicture(value: any) {
+
+        let pictures = this.state.addPictures;  
+        if (pictures == null) {
+
+            pictures = [];
+        }
+        pictures.push(value);
+        await this.setState({ addPictures: pictures });
+    }
+    async deletePicture(index: any) {
+
+        const pictures = this.state.addPictures;
+        if (pictures == null) {
+
+            return;
+        }
+        pictures.splice(index, 1);
+        await this.setState({ addPictures: pictures });
+    }
+    async updatePicture() {
+
+            const observationId = this.state.observation.id;
+            const result = await ObservationsApi.addPictures(this.state.addPictures,observationId);
+
+            if (result.success) {
+                const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
+                await this.setState({observation: observation, isAddingPic:false, addPictures:[] });
+                this.filterObservationStatements();
+
+            }
+        
+        else {
+            await ObservationsApi.notifError(AuthenticationApi.getCurrentUser().osmId, "Les photos n'ont pas pu etre ajouter");
+        }
 
 
+
+    }
     render() {
 
         const { classes } = this.props;
@@ -603,20 +736,46 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                             </div>
                         }
                     </Box>
+
+                    <PhotoFormItem label={t.__("Ajouter une photo")} value={this.state.addPictures} onAdd={val => this.addPicture(val).then(() => this.setState({ isAddingPic: true }))} onDelete={index => this.deletePicture(index).then(() => this.setState({ isAddingPic: false }))} />
+                    {this.state.isAddingPic &&
+                        <Box className={clsx(classes.buttonsDiv)}>
+                            <Button color="secondary" variant="contained" fullWidth startIcon={<Check />} onClick={() => this.updatePicture()}>
+                                {t.__("Valider la photo")}
+                            </Button>
+                        </Box>
+                    }
                     {this.state.displayAddAndConfirmButton &&
                         <Box className={clsx(classes.buttonsDiv)}>
                         <Button color="primary" variant="contained" fullWidth startIcon={<Add />} onClick={() => this.addStatement()}>
                                 {t.__("Ajout d'une propostion")}
                             </Button>
                         </Box>
-                    }
-                    <Box className={clsx(classes.buttonsDiv)}>
-                        <Button color="secondary" variant="contained" fullWidth startIcon={<NearMe />} onClick={async () => { await this.updateLocalStorage(); this.goTo("/map") }}>
-                                {t.__("Voir sur la map")}
-                            </Button>                        
-                    </Box>   
-
-                       
+                    }  
+                    <Box className={clsx(classes.top)}>
+                        <table className={clsx(classes.center)}>
+                            <tbody>
+                                <tr>
+                                    <td style={{ width: "20%" }}>Hauteur</td>
+                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isLessThan2m ? "green" : "white" }} onClick={() => this.setTreeSize(0)}>
+                                        - de 2m
+                                    </td>
+                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isBetween2And5m ? "green" : "white" }} onClick={() => this.setTreeSize(1)}>
+                                        2m à 5m
+                                </td>
+                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isBetween5And10m ? "green" : "white" }} onClick={() => this.setTreeSize(2)} >
+                                        5m à 10m
+                                </td>
+                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isMoreThan10m ? "green" : "white" }} onClick={() => this.setTreeSize(3)} >
+                                        + de 10m
+                                </td>
+                                    {this.state.isUpdatingTreeSize &&
+                                        <td onClick={() => this.updateTreeSize()}>{<Check />}</td>
+                                    }
+                                </tr>
+                            </tbody>
+                        </table>
+                    </Box>
 
                         {
                             enableEditAndDeleteButton &&
@@ -632,6 +791,11 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                             </>
                         }                       
 
+                    <Box className={clsx(classes.buttonsDiv)}>
+                        <Button color="secondary" variant="contained" fullWidth startIcon={<NearMe />} onClick={async () => { await this.updateLocalStorage(); this.goTo("/map") }}>
+                            {t.__("Voir sur la map")}
+                        </Button>
+                    </Box> 
                     
                 </Box>
             </>

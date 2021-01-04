@@ -34,5 +34,7 @@ namespace Api
 
         public ObservationStatementModel[] ObservationStatements { get; set; }
 
+        public int? TreeSize { get; set; }
+
     }
 }

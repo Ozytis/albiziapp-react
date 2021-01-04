@@ -33,5 +33,7 @@ namespace Entities
 
         public string StatementValidatedId { get; set; }
 
+        public TreeSize? TreeSize { get; set; }
+
     }
 }
