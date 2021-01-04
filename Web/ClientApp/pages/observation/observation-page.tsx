@@ -201,7 +201,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         await this.setState({ isDeleting: false });
 
         if (result.success) {
-            this.props.history.push({
+            this.props.history.re({
                 pathname: "/map"
             })
         }
@@ -220,7 +220,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
     }
 
     async goTo(path: string) {
-        this.props.history.push({
+        this.props.history.replace({
             pathname: path
         });
     }

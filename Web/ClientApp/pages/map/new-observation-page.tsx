@@ -95,7 +95,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
 
     async componentDidMount() {
         if (!this.state.model.latitude) {
-            this.props.history.push({
+            this.props.history.replace({
                 pathname: "/map"
             })
         }
@@ -152,12 +152,12 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
     async cancelCreation() {
         if (!this.props.match.params["observationid"]) {
             ObservationsApi.setNextObservationCoordinates(null);
-            await this.props.history.push({
+            await this.props.history.replace({
                 pathname: "/map"
             });
         }
         else if (this.props.match.params["observationid"]) {
-            await this.props.history.push({
+            await this.props.history.replace({
                 pathname: "/observation/" + this.props.match.params["observationid"]
             });
         }
@@ -251,7 +251,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
             else {
                 await this.setState({ isProcessing: false });
 
-                this.props.history.push({
+                this.props.history.replace({
                     pathname: "/map"
                 })
             }
