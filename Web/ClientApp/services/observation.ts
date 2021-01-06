@@ -7,6 +7,7 @@ import { ObservationEditionModel } from "./generated/observation-edition-model";
 import { ObservationStatementModel } from "./generated/observation-statement-model";
 import { ObservationStatementConfirmationModel } from "./generated/observation-statement-confirmation-model";
 import { AddObservationStatementConfirmationModel } from "./generated/add-observation-statement-confirmation-model";
+import { ObservationCommentaryModel } from "./generated/observation-commentary-model";
 
 class ObservationsService extends BaseService {
 
@@ -55,7 +56,16 @@ class ObservationsService extends BaseService {
 
         return result;
     }
+    async addCommentary(commentary: string, observationId: string) {
 
+        const result = await this.put<ObservationModel>(`observations/addCommentary/${observationId}/${commentary}`,null );
+
+        if (result.success) {
+            this.loadObservations();
+        }
+
+        return result;
+    }
     async addPictures(pictures :string[], observationId: string) {
 
         const result = await this.post<ObservationModel>(`observations/addPictures/${observationId}`, pictures);

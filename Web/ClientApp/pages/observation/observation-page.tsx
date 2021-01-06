@@ -15,6 +15,7 @@ import { ObservationStatementModel } from "../../services/generated/observation-
 import { AddObservationStatementConfirmationModel } from "../../services/generated/add-observation-statement-confirmation-model";
 import { filter } from "lodash";
 import { PhotoFormItem } from "../../components/photo-form-item";
+import { ObservationCommentaryModel } from "../../services/generated/observation-commentary-model";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -44,9 +45,6 @@ const styles = (theme: Theme) => createStyles({
         "&>button": {
             marginRight: theme.spacing(1)
         }
-    },
-    label: {
-
     },
     switchGrid: {
         padding: `0 ${theme.spacing(2)}px`
@@ -99,7 +97,7 @@ const styles = (theme: Theme) => createStyles({
         cursor:"pointer"
     },
     top: {
-        marginTop: "4%"
+        marginTop: "2%"
     },
     paper: {
         padding: theme.spacing(2),
@@ -108,10 +106,16 @@ const styles = (theme: Theme) => createStyles({
     },
     trait: {
         borderBottom: "1px solid black",
+        width: "95%",
+        marginTop: "2%"
     },
     score: {
         fontSize: "small",
         color:"gray"
+    },
+    textArea: {
+        width: "100%",
+        border:"solid 1px black"
     }
 });
 
@@ -145,6 +149,8 @@ class ObservationPageState {
     isAddingPic: boolean;
     isUpdatingTreeSize: boolean;
     newTreeSize: number = null;
+    isAddingCommentary: boolean;
+    newCommentary: string="";
 }
 
 class ObservationPageComponent extends BaseComponent<ObservationPageProps, ObservationPageState>{
@@ -155,6 +161,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
     async componentDidMount() {
         const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
         const currentUser = await AuthenticationApi.getCurrentUser();
+        console.log(observation);
         await this.setState({ observation: observation, currentUser: currentUser.osmId });   
         this.filterObservationStatements();
         this.isEditAndDeleteEnable();
@@ -201,7 +208,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         await this.setState({ isDeleting: false });
 
         if (result.success) {
-            this.props.history.re({
+            this.props.history.replace({
                 pathname: "/map"
             })
         }
@@ -488,6 +495,43 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
 
 
     }
+
+    async updateCommentary(com: string) {
+        this.setState({ newCommentary: com });
+    }
+
+    async addCommentary(stat :string) {
+        const observationId = this.state.observation.id;
+        let isAddingCom = this.state.isAddingCommentary;
+        if (stat == "confirm") {
+            if (isAddingCom) {
+                const result = await ObservationsApi.addCommentary(this.state.newCommentary, observationId);
+                if (result.success) {
+                    const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
+                    await this.setState({ observation: observation,isAddingCommentary:false,newCommentary:"" });
+                    this.filterObservationStatements();
+                }
+
+                else {
+                    await ObservationsApi.notifError(AuthenticationApi.getCurrentUser().osmId, "Le commentaire n'a pas pu être ajouté");
+                }
+            }
+            else {
+                this.setState({ isAddingCommentary: true})
+            }
+        }
+        if (stat == "cancel") {
+            this.setState({ isAddingCommentary: false, newCommentary:""})
+        }
+    }
+    setDateFormat(date: string) {
+        console.log(date);
+        if (date != null) {
+            return new Date(date).toLocaleDateString()
+        }
+        return "";
+
+    }
     render() {
 
         const { classes } = this.props;
@@ -696,6 +740,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                             </tbody>
                         </table>
                     </Box>
+
             {   this.state.displayAddAndConfirmButton &&
                     <Box className={clsx(classes.buttonsDiv)}>                        
                             <Button color="secondary" disabled={this.state.isValidated} fullWidth variant="contained" startIcon={<Check />} onClick={() => this.showConfirmation()}>
@@ -710,7 +755,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                             </Button>
                         </Box>
                     }
-                    <Box className={clsx(classes.slider)} onTouchEnd={(e) => this.endSwipe(e)} onTouchStart={(e) => this.startSwipe(e)}>
+                    <Box className={clsx(classes.slider, classes.top)} onTouchEnd={(e) => this.endSwipe(e)} onTouchStart={(e) => this.startSwipe(e)}>
                         {
                             observation.pictures && observation.pictures.map((image, idx) => {
                                 if (idx !== this.state.currentPictureIndex) {
@@ -736,7 +781,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                             </div>
                         }
                     </Box>
-
+                    <div className={clsx(classes.trait, classes.center)}> </div>
                     <PhotoFormItem label={t.__("Ajouter une photo")} value={this.state.addPictures} onAdd={val => this.addPicture(val).then(() => this.setState({ isAddingPic: true }))} onDelete={index => this.deletePicture(index).then(() => this.setState({ isAddingPic: false }))} />
                     {this.state.isAddingPic &&
                         <Box className={clsx(classes.buttonsDiv)}>
@@ -745,6 +790,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                             </Button>
                         </Box>
                     }
+                    <div className={clsx(classes.trait, classes.center)}> </div>
                     {this.state.displayAddAndConfirmButton &&
                         <Box className={clsx(classes.buttonsDiv)}>
                         <Button color="primary" variant="contained" fullWidth startIcon={<Add />} onClick={() => this.addStatement()}>
@@ -776,6 +822,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                             </tbody>
                         </table>
                     </Box>
+                    <div className={clsx(classes.trait, classes.center)}> </div>
 
                         {
                             enableEditAndDeleteButton &&
@@ -795,8 +842,44 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                         <Button color="secondary" variant="contained" fullWidth startIcon={<NearMe />} onClick={async () => { await this.updateLocalStorage(); this.goTo("/map") }}>
                             {t.__("Voir sur la map")}
                         </Button>
-                    </Box> 
-                    
+                    </Box>
+                    <div className={clsx(classes.trait, classes.center)}> </div>
+                    {//observation.observationCommentarys &&
+                        <Box>
+                            <div style={{ marginTop: "2%", marginLeft: "3%", fontWeight:"bold", textDecoration:"underline" }}>
+                                Commentaires ({observation.observationCommentarys && observation.observationCommentarys.length ? observation.observationCommentarys.length : 0})
+                                </div>
+                            {observation.observationCommentarys && observation.observationCommentarys.map((com, idx) => {
+                                return (
+                                    <div style={{ fontSize: "small" }} key={"Commentary-" + idx }>
+                                        <div style={{ marginTop: "2%", marginLeft: "6%", fontWeight: "bold" }}>
+                                            {`${com.userName}, le ${this.setDateFormat(com.date)}`}
+                                    </div>
+                                    <div style={{ marginTop: "1%", marginLeft: "10%" }}>
+                                        {com.commentary}
+                                        </div>
+                                    </div>
+                                )
+                            })
+
+                            }
+                            {this.state.isAddingCommentary && 
+                                <textarea className={clsx(classes.textArea)} value={this.state.newCommentary} onChange={(value) => this.updateCommentary(value.target.value)} />
+                            }                           
+                                <Box className={clsx(classes.buttonsDiv)}>
+                                    <Button color="primary" variant="contained" fullWidth startIcon={<Add />} onClick={() => this.addCommentary("confirm")}>
+                                        {t.__("Ajouter un commentaire")}
+                                    </Button>
+                            </Box>
+                            {this.state.isAddingCommentary && 
+                                <Box className={clsx(classes.buttonsDiv)}>
+                                    <Button color="secondary" variant="contained" fullWidth startIcon={<Cancel />} onClick={() => this.addCommentary("cancel")}>
+                                        {t.__("Anuler")}
+                                    </Button>
+                                </Box>
+                            }
+                        </Box>
+                    }
                 </Box>
             </>
         )

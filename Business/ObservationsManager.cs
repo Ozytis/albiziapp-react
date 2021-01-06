@@ -583,5 +583,27 @@ namespace Business
             await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
         }
 
+        public async Task AddCommentary(string observationId, string newCommentary, string userId)
+        {
+            var existingObservation = await this.GetUserObservationbyId(observationId);
+            if (existingObservation == null)
+            {
+                throw new BusinessException("Ce relevé n'existe pas");
+            }
+            var commentary = new ObservationCommentary();
+
+            commentary.Id = Guid.NewGuid().ToString("N");
+            commentary.Date = DateTime.UtcNow;
+            commentary.Commentary = newCommentary;
+            User currentUser = await this.UsersManager.SelectAsync(userId);
+            commentary.UserName = currentUser.Name;
+            if(existingObservation.ObservationCommentarys == null)
+            {
+                existingObservation.ObservationCommentarys = new List<ObservationCommentary>();
+            }
+            existingObservation.ObservationCommentarys.Add(commentary);
+            await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
+        }
+
     }
 }

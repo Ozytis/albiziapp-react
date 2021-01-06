@@ -35,5 +35,7 @@ namespace Entities
 
         public TreeSize? TreeSize { get; set; }
 
+        public List<ObservationCommentary> ObservationCommentarys { get; set; }
+
     }
 }

@@ -5,6 +5,7 @@
 //----------------------
 
 import { ObservationStatementModel } from "./observation-statement-model";
+import { ObservationCommentaryModel } from "./observation-commentary-model";
 export interface ObservationModel {
     commonGenus: string;
     commonSpeciesName: string;
@@ -22,4 +23,5 @@ export interface ObservationModel {
     isIdentified: boolean;
     observationStatements: ObservationStatementModel[];
     treeSize: number;
+    observationCommentarys: ObservationCommentaryModel[];
 }

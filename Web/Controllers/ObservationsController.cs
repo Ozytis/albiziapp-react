@@ -180,6 +180,22 @@ namespace Web.Controllers
             await this.ObservationsManager.VaidateObservationAsync(observationId, this.User.Identity.Name);
         }
 
+        [HttpPut("addCommentary/{observationId}/{commentary}")]
+        [HandleBusinessException, ValidateModel]
+        public async Task CreateCommentaryAysnc(string commentary, string observationId)
+        {
+            try
+            {
+                await this.ObservationsManager.AddCommentary(observationId, commentary, this.User.Identity.Name);
+            }
+            catch (BusinessException be)
+            {
+
+                await this.UserNotify.SendErrorNotif(this.User.Identity.Name, be.Message);
+                throw be;
+            }
+        }
+
         [HttpPost("errorNotif/{userId}/{error}")]
         [HandleBusinessException, ValidateModel]
         public void NotifyError(string userId, string error)

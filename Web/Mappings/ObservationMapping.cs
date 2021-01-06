@@ -25,6 +25,8 @@ namespace Web.Mappings
                 AuthorName = observation.AuthorName,
                 ObservationStatements = observation.ObservationStatements.Select(s=>s.ToObservationStatementModel(users)).ToArray(),
                 TreeSize = (int?)observation.TreeSize,
+                ObservationCommentarys = observation.ObservationCommentarys?.Select(s => s.ToObservationCommentaryModel()).ToArray(),
+
             };
         }
         public static ObservationStatementModel ToObservationStatementModel(this ObservationStatement observationStatement, User[] users)
@@ -63,5 +65,16 @@ namespace Web.Mappings
                 IsOnlyGenus = observationStatementConfirmation.IsOnlyGenus
             };
         }
+        public static ObservationCommentaryModel ToObservationCommentaryModel(this ObservationCommentary observationCommentary)
+        {
+            return new ObservationCommentaryModel
+            {
+                Id = observationCommentary.Id,
+                UserName = observationCommentary.UserName,
+                Date = observationCommentary.Date,
+                Commentary = observationCommentary.Commentary
+            };
+        }
+
     }
 }

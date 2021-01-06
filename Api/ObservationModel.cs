@@ -36,5 +36,7 @@ namespace Api
 
         public int? TreeSize { get; set; }
 
+        public ObservationCommentaryModel[] ObservationCommentarys { get; set; }
+
     }
 }
