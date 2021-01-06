@@ -5,6 +5,7 @@ import MobileDetect from "mobile-detect";
 import { t } from "../services/translation-service";
 import { BaseComponent } from "./base-component";
 import { Close } from "@material-ui/icons";
+import { compress } from "ahdin";
 
 const styles = (theme: Theme) => createStyles({
     input: {
@@ -128,22 +129,22 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
         }
     }
 
-    onFileSelected(fileList: FileList) {
+    async onFileSelected(fileList: FileList) {
 
         if (this.state.loading || fileList.length === 0) {
             return;
         }
 
-        this.setState({ loading: true }).then(() => {
+        this.setState({ loading: true }).then(async() => {
 
             const reader = new FileReader();
 
-            reader.onloadend = result => {
+            reader.onloadend =  result => {
                 this.setState({ loading: false, showSourceSelection: false });
                 this.props.onAdd((result.target as FileReader).result);
             };
-
-            reader.readAsDataURL(fileList[0]);
+            var compressFile = await compress(fileList[0], { maxWidth: 1200, outputFormat: 'jpeg', quality: 0.4 });
+            reader.readAsDataURL(compressFile);
         });
 
     }
