@@ -97,7 +97,7 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
         const { keys, species, filters } = this.state;
 
         let filteredSpecies = species;
-        console.log(species);
+       
         for (const filter in filters) {
 
             const value = filters[filter];
@@ -108,7 +108,7 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
             }
         }
 
-        console.log(filters);
+        
         return (
             <Box className={clsx(classes.root)}>
 
