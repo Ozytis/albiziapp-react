@@ -10,6 +10,8 @@ import clsx from "clsx";
 import { t } from "../../services/translation-service";
 import { ObservationStatementModel } from "../../services/generated/observation-statement-model";
 import { UserModel } from "../../services/generated/user-model";
+import { Edit, Delete } from "@material-ui/icons";
+import { Confirm } from "../../components/confirm";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -25,6 +27,14 @@ const styles = (theme: Theme) => createStyles({
     },
     trait: {
         borderBottom: "1px solid black"
+    },
+    buttonsDiv: {
+        padding: `${theme.spacing(1)}px ${theme.spacing(2)}px`,
+        display: "flex",
+        justifyContent: "center",
+        "&>button": {
+            marginRight: theme.spacing(1)
+        }
     }
 });
 
@@ -46,6 +56,9 @@ class HistoryPageState {
     myObservation: ObservationStatementModel;
     currentUser: UserModel;
     currentTab = "common";
+    enableEditAndDeleteButton: boolean;
+    isDeleting = false;
+
 }
 
 class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageState>{
@@ -54,13 +67,19 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
     }
 
     async componentDidMount() {
-   
+        console.log("cdm");
 
-        const observation = await ObservationsApi.getObservation(this.props.match.params["observationid"]);
+        const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
         const currentUser = await AuthenticationApi.getCurrentUser();
         await this.setState({ observation: observation, currentUser: currentUser, observationStatements: observation.observationStatements });
         this.filterObservationStatements();
         this.getUserObservation();
+        this.isEditAndDeleteEnable();
+    }
+
+
+    componentWillReceiveProps() {
+        console.log("cwrp");
     }
 
     async filterObservationStatements() {
@@ -89,6 +108,40 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
     async updateCurrentTab(val: string) {
         await this.setState({ currentTab: val });
         console.log(this.state.currentTab);
+    }
+
+    async isEditAndDeleteEnable() {
+        const os = this.state.myObservation;
+        console.log(os);
+        if (os && !os.observationStatementConfirmations) {
+            await this.setState({ enableEditAndDeleteButton: true })
+        }
+        else {
+            await this.setState({ enableEditAndDeleteButton: false })
+        }
+    }
+
+    async editObservation() {
+        this.props.history.push({
+            pathname: `/edit-observation/${this.state.observation.id}/${this.state.myObservation.id}`
+        });
+    }
+    async remove() {
+
+        if (this.state.isDeleting || ! await Confirm(t.__("Etes-vous sûr de vouloir supprimer ce relevé ?"))) {
+            return;
+        }
+
+        await this.setState({ isDeleting: true });
+        const result = await ObservationsApi.deleteStatement(this.state.observation.id, this.state.myObservation.id);
+        await this.setState({ isDeleting: false });
+
+        if (result.success) {
+            const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
+            await this.setState({ observation: observation, observationStatements: observation.observationStatements });
+            this.filterObservationStatements();
+            this.getUserObservation();
+        }
     }
     render() {
 
@@ -229,6 +282,19 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
                             </table>
                     </>
                     }
+
+                    {this.state.enableEditAndDeleteButton &&
+                        <>
+                        <Box className={clsx(classes.buttonsDiv)}>
+                                <Button color="primary" variant="contained" fullWidth startIcon={<Edit />} onClick={() => this.editObservation()}>
+                                    {t.__("Modifier")}
+                                </Button>
+                                <Button color="secondary" variant="contained" fullWidth startIcon={<Delete />} onClick={() => this.remove()}>
+                                    {t.__("Supprimer")}
+                                </Button>
+                            </Box>
+                        </>
+                    } 
                     </Box>
             </>
         )

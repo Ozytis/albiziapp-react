@@ -7,7 +7,7 @@ export const EditObservationPageConfig: PageConfig = {
         title: "Modification d'un relevé"
     },
     routes: [{
-        path: '/edit-observation/:observationid',
+        path: '/edit-observation/:observationid/:statementid?',
         component: EditObservationPage,
         exact: true
     }]

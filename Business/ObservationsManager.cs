@@ -535,6 +535,7 @@ namespace Business
             await this.DataContext.Observations.DeleteOneAsync(o => o.Id == observationId);
         }
 
+
         public async Task VaidateObservationAsync(string observationId, string currentUserId)
         {
             Observation observation = await this.DataContext.Observations.Find(o => o.Id == observationId).FirstOrDefaultAsync();
@@ -605,5 +606,65 @@ namespace Business
             await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
         }
 
+        public async Task<Observation> EditObservationStatementAsync(ObservationStatement editStatement, string observationId)
+        {
+            using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
+            var existingObservation = await this.GetUserObservationbyId(observationId);
+            var existingStatement = existingObservation.ObservationStatements.Find(s => s.Id == editStatement.Id);
+
+
+            if (existingStatement == null )
+            {
+                throw new BusinessException("Ce relevé n'existe pas");
+            }
+            foreach(ObservationStatement os in existingObservation.ObservationStatements)
+            {
+                if(string.IsNullOrEmpty(os.CommonSpeciesName)||string.IsNullOrEmpty(os.SpeciesName))
+                {
+                    if(os.Genus==editStatement.Genus && os.CommonGenus == editStatement.CommonGenus)
+                    {
+                        throw new BusinessException("Ce relevé existe deja");
+                    }
+                }
+                else if(os.CommonSpeciesName==editStatement.CommonSpeciesName && os.SpeciesName == editStatement.SpeciesName)
+                {
+                    throw new BusinessException("Ce relevé existe deja, vous pouvez le confirmer");
+                }
+            }
+            try
+            {
+                session.StartTransaction();
+
+                existingStatement.CommonGenus = editStatement.CommonGenus;
+                existingStatement.Genus = editStatement.Genus;
+                existingStatement.SpeciesName = editStatement.SpeciesName;
+                if (!string.IsNullOrEmpty(existingStatement.SpeciesName))
+                {
+                    Species species = await this.SpeciesManager
+                       .GetSpeciesByNameAsync(existingStatement.SpeciesName);
+
+                    existingStatement.CommonSpeciesName = species?.CommonSpeciesName;
+                }
+
+                await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
+
+            }
+            catch
+            {
+                await session.AbortTransactionAsync();
+                throw;
+            }
+            
+            return existingObservation;
+        }
+        public async Task DeleteObservationStatementAsync(string observationId, string statementId, string currentUserId)
+        {
+            Observation observation = await this.DataContext.Observations.Find(o => o.Id == observationId).FirstOrDefaultAsync();
+            
+
+            observation.ObservationStatements.Remove(observation.ObservationStatements.Find(o => o.Id == statementId));
+
+            await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == observation.Id, observation);
+        }
     }
 }

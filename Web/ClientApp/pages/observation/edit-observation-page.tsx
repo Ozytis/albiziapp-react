@@ -20,6 +20,9 @@ import { ObservationEditionModel } from "../../services/generated/observation-ed
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { SpeciesInfoComponent } from "../species/species-info-component";
 import { StringHelper } from "../../utils/string-helper";
+import { ObservationStatementEditionModel } from "../../services/generated/observation-statement-edition-model";
+import { ObservationModel } from "../../services/generated/observation-model";
+import { ObservationStatementModel } from "../../services/generated/observation-statement-model";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -74,12 +77,15 @@ class EditObservationPageState {
 
     isProcessing = false;
     errors: string[];
-    model = new ObservationEditionModel();
+    model :any;
     speciesData: SpeciesModel[];
     genusData: TreeGenusModel[];
     commonGenus: TreeGenusModel;
     genus: TreeGenusModel;
-
+    observation: ObservationModel;
+    statement: ObservationStatementModel;
+    observationModel = new ObservationEditionModel();
+    statementModel = new ObservationStatementEditionModel();
     speciesName: SpeciesModel;
     speciesCommonName: SpeciesModel;
     loaded: boolean;
@@ -93,26 +99,16 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
 
     async componentDidMount() {
 
-        const observation = await ObservationsApi.getObservation(this.props.match.params["observationid"]);
-        var model = new ObservationEditionModel();
-        console.log(observation);
-        model.id = observation.id;
-        model.genus = observation.genus;
-        model.isConfident = observation.confident;
-        model.latitude = observation.latitude;
-        model.longitude = observation.longitude;
-        model.species = observation.speciesName;
-        model.commonGenus = observation.commonGenus;
-        model.commonSpeciesName = observation.commonSpeciesName;
-
-
-        await this.setState({ model: model });
-
+        const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
+        const statement = await ObservationsApi.getStatement(this.props.match.params["observationid"], this.props.match.params["statementid"]);        
+        await this.setState({ observation: observation,statement:statement })
+        this.setModel();
 
         AuthenticationApi.refreshUser();
 
         this.listener = SpeciesApi.registerSpeciesListener(() => this.refreshSpecies());
-
+        const model = this.state.model;
+        console.log(model);
         await this.refreshSpecies();
         await this.updateCommonGenus(model.commonGenus);
         await this.updateGenus(model.genus);
@@ -125,6 +121,34 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
 
     async componentWillUnmount() {
         SpeciesApi.unregisterSpeciesListener(this.listener);
+    }
+
+    async setModel() {
+        
+
+        if (this.state.statement) {
+            const statement = this.state.statement;
+            const model = new ObservationStatementEditionModel();
+            model.id = statement.id;
+            model.genus = statement.genus;
+            model.species = statement.speciesName;
+            model.commonGenus = statement.commonGenus;
+            model.commonSpeciesName = statement.commonSpeciesName;
+            await this.setState({ model: model });
+        }
+        else {
+            const observation = this.state.observation;
+            const model = new ObservationEditionModel();
+            model.id = observation.id;
+            model.genus = observation.genus;
+            model.species = observation.speciesName;
+            model.commonGenus = observation.commonGenus;
+            model.commonSpeciesName = observation.commonSpeciesName;
+            model.latitude = observation.latitude;
+            model.longitude = observation.longitude;
+            model.isConfident = observation.confident;
+            await this.setState({ model: model });
+        }
     }
 
     async refreshSpecies() {
@@ -144,10 +168,18 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
     }
 
     async cancelCreation() {
-        ObservationsApi.setNextObservationCoordinates(null);
-        await this.props.history.push({
-            pathname: "/observations"
-        });
+
+        if (this.props.match.params["statementid"]) {
+            await this.props.history.replace({
+                pathname: "/observation/" + this.props.match.params["observationid"]
+            });
+        }
+        else {
+            ObservationsApi.setNextObservationCoordinates(null);
+            await this.props.history.push({
+                pathname: "/observations"
+            });
+        }
     }
 
     async updateCommonGenus(commonGenus: string) {
@@ -199,7 +231,6 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
             model.species = null;
             await this.setState({ model: model, speciesCommonName: null, speciesName: null });
         }
-
         await this.clearConfident();
     }
 
@@ -220,10 +251,27 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
 
 
     async process() {
-        if (this.state.isProcessing || !await Confirm(t.__("Etes vous sûr de vouloir valider ce relevé ?"))) {
+        if (this.state.isProcessing || !await Confirm(t.__("Etes vous sûr de vouloir modifier ce relevé ?"))) {
             return;
         }
-
+        if (this.props.match.params["statementid"]) {
+            await this.setState({ isProcessing: true, errors: [] });
+            const result = await ObservationsApi.editStatement(this.state.model, this.props.match.params["observationid"]);
+            console.log(result);
+            if (!result.success) {
+                await this.setState({
+                    isProcessing: false,
+                    errors: result.errors
+                })
+            }
+            else {
+                await this.setState({ isProcessing: false });
+                this.props.history.replace({
+                    pathname: "/history/" + this.props.match.params["observationid"]
+                })
+            }
+        }
+        else {
         await this.setState({ isProcessing: true, errors: [] });
 
         const result = await ObservationsApi.editObservation(this.state.model);
@@ -240,6 +288,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                 pathname: "/observations"
             })
         }
+                    }
     }
 
 
@@ -328,7 +377,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
             <>
                 <Box className={clsx(classes.root)}>
 
-                    <ErrorSummary errors={this.state.errors} />
+                    
 
                     <Typography variant="h6" className={clsx(classes.sectionHeading)}>
                         {t.__("Genre")}
@@ -397,19 +446,21 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                             </FormControl>
 
 
-                            {this.showConfident() &&
-                                <>
-                                    <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                                        {t.__("Confiance")}
-                                    </Typography>
+                        {this.showConfident() &&
+                            <>
+                                <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                                    {t.__("Confiance")}
+                                </Typography>
 
-
+                            {/*
                                     <RadioGroup value={model.isConfident} onChange={(event) => { this.updateModel("isConfident", event.target.value) }} >
                                         <FormControlLabel value={0} control={<Radio checked={model.isConfident == 0} />} label={t.__("Peu confiant")} className={clsx(classes.label)} />
                                         <FormControlLabel value={1} control={<Radio checked={model.isConfident == 1} />} label={t.__("Moyennement confiant")} className={clsx(classes.label)} />
                                         <FormControlLabel value={2} control={<Radio checked={model.isConfident == 2} />} label={t.__("Confiant")} className={clsx(classes.label)} />
                                     </RadioGroup>
+                                */}
                                 </>
+                                
                             }
 
                             <Typography variant="h6" className={clsx(classes.sectionHeading)}>
