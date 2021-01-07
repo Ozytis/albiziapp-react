@@ -22,7 +22,7 @@ const styles = (theme: Theme) => createStyles({
         //backgroundColor: theme.palette.primary.main,
         maxWidth: "100vw",
         margin: 0,
-        minHeight: "calc(100vh - 120px)",
+        height: "calc(" + window.innerHeight + "px - 112px)",
         maxHeight: "calc(100vh - 120px)",
         overflowY: "auto",
         padding: "1vh 1vw 1vh 1vw",

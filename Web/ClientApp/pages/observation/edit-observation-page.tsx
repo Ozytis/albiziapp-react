@@ -24,7 +24,7 @@ import { StringHelper } from "../../utils/string-helper";
 
 const styles = (theme: Theme) => createStyles({
     root: {
-        minHeight: "calc(100vh - 120px)",
+        height: "calc(" + window.innerHeight + "px - 112px)",
         maxHeight: "calc(100vh - 120px)",
         overflowY: "auto",
         padding: theme.spacing(1),

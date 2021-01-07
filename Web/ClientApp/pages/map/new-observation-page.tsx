@@ -22,11 +22,12 @@ import { SpeciesInfoPage } from "../species/species-info-page";
 import { SpeciesInfoComponent } from "../species/species-info-component";
 import { StringHelper } from "../../utils/string-helper";
 import { MapPosition } from "../../components/mapPosition";
+import { ScreenVars } from "../../app";
 
 const styles = (theme: Theme) => createStyles({
-    root: {
-        minHeight: "calc(100vh - 120px)",
+    root: {        
         maxHeight: "calc(100vh - 120px)",
+        height: "calc(" + window.innerHeight+"px - 112px)",
         overflowY: "auto",
         padding: theme.spacing(1),
         color: theme.palette.common.white
@@ -342,7 +343,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         commonSpecies = commonSpecies.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName));
         return (
             <>
-                <Box className={clsx(classes.root)}>                    
+                <Box className={clsx(classes.root)} >                    
 
                     <Typography variant="h6" className={clsx(classes.sectionHeading)}>
                         {t.__("Genre")}

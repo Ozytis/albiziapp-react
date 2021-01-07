@@ -20,6 +20,10 @@ const styles = (theme: Theme) => createStyles({
       
         "& .MuiIcon-root": {
             width: "auto"
+        },
+
+        "& .MuiButtonBase-root": {
+            minWidth : "auto !important"
         }
     },
     menuItem: {
