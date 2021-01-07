@@ -116,6 +116,10 @@ const styles = (theme: Theme) => createStyles({
     textArea: {
         width: "100%",
         border:"solid 1px black"
+    },
+    switch: {
+        position: "absolute",
+        opacity:0,
     }
 });
 
@@ -125,7 +129,7 @@ interface ObservationPageProps extends RouteComponentProps, IPropsWithAppContext
 
 class ObservationPageState {
     observation: ObservationModel;
-    currentTab: "common" | "latin" = "common";
+    currentTab = "common";
     isDeleting = false;
     isValidated: boolean = false;
     displayAddAndConfirmButton: boolean = true;
@@ -532,6 +536,11 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         return "";
 
     }
+
+    async updateCurrentTab(val: string) {
+        await this.setState({ currentTab: val });
+        console.log(this.state.currentTab);
+    }
     render() {
 
         const { classes } = this.props;
@@ -543,11 +552,20 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
             <>
                 <Box className={clsx(classes.root)}>
                     <Box>
-                    <Tabs value={this.state.currentTab} onChange={(_, index) => this.setState({ currentTab: index })} aria-label="simple tabs example">
-                        <Tab label={t.__("Commun")} className={clsx(classes.tab)} value="common" />
-                            <Tab label={t.__("Latin")} className={clsx(classes.tab)} value="latin" />
-                            
-                        </Tabs>
+                        <div>
+                            <table style={{marginLeft: "auto", marginRight: "auto",border:"solid 1px black", width:"50%", height:"15px", borderRadius:"25px"}}>
+                                <tr>
+                                    <td onClick={() => this.updateCurrentTab("common")}
+                                        style={{ textAlign: "center", width: "50%", backgroundColor: this.state.currentTab == "common" ? "green" : "white", color: this.state.currentTab == "common" ? "white" : "black" }}>
+                                        COMMUN
+                                    </td>
+                                    <td onClick={() => this.updateCurrentTab("latin")}
+                                        style={{ textAlign: "center", width: "50%", backgroundColor: this.state.currentTab == "latin" ? "green" : "white", color: this.state.currentTab == "latin" ? "white" : "black" }}>
+                                        LATIN
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
                         <div className={clsx(classes.flex)}>
                             <span className={clsx(classes.bold)}>
                                 Identification:(
@@ -727,13 +745,13 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                           <tbody>
                             <tr>
                                 <td style={{ width: "20%" }}>Confiance</td>
-                                <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isLowConfident ? "green" : "white" }} onClick={() => this.updateConfident("low")}>
+                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isLowConfident ? "green" : "white", color: this.state.isLowConfident ? "white" : "black"  }} onClick={() => this.updateConfident("low")}>
                                     Faible
                                     </td>
-                                <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isMediumConfident ? "green" : "white" }} onClick={() => this.updateConfident("medium")}>
+                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isMediumConfident ? "green" : "white", color: this.state.isMediumConfident ? "white" : "black"  }} onClick={() => this.updateConfident("medium")}>
                                     Moyen   
                                 </td>
-                                <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isHighConfident ? "green" : "white" }} onClick={() => this.updateConfident("high")} >
+                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isHighConfident ? "green" : "white", color: this.state.isHighConfident ? "white" : "black" }} onClick={() => this.updateConfident("high")} >
                                     Haute
                                 </td>
                             </tr>
@@ -803,16 +821,16 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                             <tbody>
                                 <tr>
                                     <td style={{ width: "20%" }}>Hauteur</td>
-                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isLessThan2m ? "green" : "white" }} onClick={() => this.setTreeSize(0)}>
+                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isLessThan2m ? "green" : "white", color: this.state.isLessThan2m ? "white" : "black" }} onClick={() => this.setTreeSize(0)}>
                                         - de 2m
                                     </td>
-                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isBetween2And5m ? "green" : "white" }} onClick={() => this.setTreeSize(1)}>
+                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isBetween2And5m ? "green" : "white", color: this.state.isBetween2And5m ? "white" : "black" }} onClick={() => this.setTreeSize(1)}>
                                         2m à 5m
                                 </td>
-                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isBetween5And10m ? "green" : "white" }} onClick={() => this.setTreeSize(2)} >
+                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isBetween5And10m ? "green" : "white", color: this.state.isBetween5And10m ? "white" : "black" }} onClick={() => this.setTreeSize(2)} >
                                         5m à 10m
                                 </td>
-                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isMoreThan10m ? "green" : "white" }} onClick={() => this.setTreeSize(3)} >
+                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isMoreThan10m ? "green" : "white", color: this.state.isMoreThan10m ? "white" : "black"  }} onClick={() => this.setTreeSize(3)} >
                                         + de 10m
                                 </td>
                                     {this.state.isUpdatingTreeSize &&

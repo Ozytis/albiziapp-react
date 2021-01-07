@@ -42,9 +42,10 @@ class HistoryPageState {
     observation: ObservationModel;
     observationStatements: ObservationStatementModel[];
     filteredObservationStatements: ObservationStatementModel[];
-    firstObservationStatement: ObservationStatementModel;    
+    firstObservationStatement: ObservationStatementModel;
+    myObservation: ObservationStatementModel;
     currentUser: UserModel;
-    currentTab: "common" | "latin" = "common";
+    currentTab = "common";
 }
 
 class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageState>{
@@ -59,6 +60,7 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
         const currentUser = await AuthenticationApi.getCurrentUser();
         await this.setState({ observation: observation, currentUser: currentUser, observationStatements: observation.observationStatements });
         this.filterObservationStatements();
+        this.getUserObservation();
     }
 
     async filterObservationStatements() {
@@ -77,7 +79,17 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
         return "";
 
     }
-    
+    async getUserObservation() {
+        const os = this.state.observationStatements;
+        const cu = this.state.currentUser;
+        const observation = os.find(x => x.userId == cu.osmId);
+        this.setState({ myObservation: observation });
+    }
+
+    async updateCurrentTab(val: string) {
+        await this.setState({ currentTab: val });
+        console.log(this.state.currentTab);
+    }
     render() {
 
         const { classes } = this.props;
@@ -89,10 +101,20 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
         return (
             <>
                 <Box>
-                    <Tabs value={this.state.currentTab} onChange={(_, index) => this.setState({ currentTab: index })} aria-label="simple tabs example">
-                        <Tab label={t.__("Commun")} className={clsx(classes.tab)} value="common" />
-                         <Tab label={t.__("Latin")} className={clsx(classes.tab)} value="latin" />                        
-                    </Tabs>
+                    <div style={{ marginTop: "2%" }}>
+                        <table style={{ marginLeft: "auto", marginRight: "auto", border: "solid 1px black", width: "50%", height: "15px", borderRadius: "25px" }}>
+                            <tr>
+                                <td onClick={() => this.updateCurrentTab("common")}
+                                    style={{ textAlign: "center", width: "50%", backgroundColor: this.state.currentTab == "common" ? "green" : "white", color: this.state.currentTab == "common" ? "white" : "black" }}>
+                                    COMMUN
+                                    </td>
+                                <td onClick={() => this.updateCurrentTab("latin")}
+                                    style={{ textAlign: "center", width: "50%", backgroundColor: this.state.currentTab == "latin" ? "green" : "white", color: this.state.currentTab == "latin" ? "white" : "black" }}>
+                                    LATIN
+                                    </td>
+                            </tr>
+                        </table>
+                    </div>
                 {
                     this.state.currentTab === "common" &&
                     <>
@@ -133,7 +155,18 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
                                             </tr>                                            
                                              )})
                                         }
-                                    
+                                    <tr className={clsx(classes.trait)}>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    {this.state.myObservation && 
+                                        <tr>
+                                            <td className={clsx(classes.bold)} style={{ textAlign: "left" }}>Ma proposition</td>
+                                            <td>{this.state.myObservation.commonGenus}</td>
+                                            <td>{this.state.myObservation.commonSpeciesName}</td>
+                                        </tr>
+                                    }
                             </tbody>
                         </table>
                     </>
@@ -180,7 +213,18 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
                                             )
                                         })
                                     }
-
+                                    <tr className={clsx(classes.trait)}>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    {this.state.myObservation &&
+                                        <tr>
+                                            <td className={clsx(classes.bold)} style={{ textAlign: "left" }}>Ma proposition</td>
+                                            <td>{this.state.myObservation.genus}</td>
+                                            <td>{this.state.myObservation.speciesName}</td>
+                                        </tr>
+                                    }
                                 </tbody>
                             </table>
                     </>
