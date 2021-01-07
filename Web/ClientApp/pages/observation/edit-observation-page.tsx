@@ -27,7 +27,7 @@ import { ObservationStatementModel } from "../../services/generated/observation-
 
 const styles = (theme: Theme) => createStyles({
     root: {
-        minHeight: "calc(100vh - 120px)",
+        height: "calc(" + window.innerHeight + "px - 112px)",
         maxHeight: "calc(100vh - 120px)",
         overflowY: "auto",
         padding: theme.spacing(1),
