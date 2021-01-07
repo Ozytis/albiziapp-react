@@ -70,7 +70,7 @@ interface EditObservationPageProps extends RouteComponentProps, IPropsWithAppCon
 class EditObservationPageState {
 
     constructor() {
-           }
+    }
 
     isProcessing = false;
     errors: string[];
@@ -92,7 +92,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
     }
 
     async componentDidMount() {
-   
+
         const observation = await ObservationsApi.getObservation(this.props.match.params["observationid"]);
         var model = new ObservationEditionModel();
         console.log(observation);
@@ -283,6 +283,13 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
         return (state.commonGenus != null || !StringHelper.isNullOrEmpty(state.model.genus) || state.speciesCommonName != null || !StringHelper.isNullOrEmpty(state.model.species));
     }
 
+    blurField(id) {
+        let element = document.getElementById(id);
+        if (element != null) {
+            element.blur();
+        }
+    }
+
     render() {
 
         const { classes } = this.props;
@@ -306,7 +313,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
             let s = this.state.speciesData.filter(g => g.speciesName === model.species).map(s => s.genus);
             genusData = genusData.filter(g => s.indexOf(g.genus) != -1);
         }
-        
+
         if (speciesCommonName != null) {
 
             speciesData = speciesData.filter(species => species.commonSpeciesName === speciesCommonName.commonSpeciesName);
@@ -337,7 +344,8 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                                     renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}
                                     getOptionSelected={(o, v) => o.commonGenus == v?.commonGenus}
                                     value={this.state.commonGenus || ""}
-                                    onChange={(e, v) => this.updateCommonGenus((v as any)?.commonGenus)}
+                                    onChange={(e, v) => { this.updateCommonGenus((v as any)?.commonGenus); }}
+                                    onClose={() => { this.blurField("commonGenusSelect"); }}
                                 />
 
                             </FormControl>
@@ -350,7 +358,8 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                                     renderInput={(params) => <TextField {...params} label="Latin" variant="outlined" />}
                                     value={this.state.genus || ""}
                                     getOptionSelected={(o, v) => o.genus == v?.genus}
-                                    onChange={(e, v) => this.updateGenus((v as any)?.genus)}
+                                    onChange={(e, v) => { this.updateGenus((v as any)?.genus); }}
+                                    onClose={() => { this.blurField("genusSelect"); }}
                                 />
                             </FormControl>
 
@@ -364,9 +373,10 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                                     options={commonSpecies}
                                     getOptionLabel={(option: SpeciesModel) => option?.commonSpeciesName ?? ""}
                                     renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}
-                                    onChange={(e, v) => this.updateCommon((v as any)?.commonSpeciesName)}
+                                    onChange={(e, v) => { this.updateCommon((v as any)?.commonSpeciesName); }}
                                     getOptionSelected={(o, v) => o.commonSpeciesName == v?.commonSpeciesName}
                                     value={this.state.speciesCommonName || ""}
+                                    onClose={() => { this.blurField("speciesCommonNameSelect"); }}
                                 />
                             </FormControl>
 
@@ -376,9 +386,10 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
                                     options={speciesData.sort((s1, s2) => s1.speciesName.localeCompare(s2.speciesName))}
                                     getOptionLabel={(option: SpeciesModel) => option?.speciesName ?? ""}
                                     renderInput={(params) => <TextField {...params} label="Latine" variant="outlined" />}
-                                    onChange={(e, v) => this.updateSpecies((v as any)?.speciesName)}
+                                    onChange={(e, v) => { this.updateSpecies((v as any)?.speciesName); }}
                                     getOptionSelected={(o, v) => o.speciesName == v?.speciesName}
                                     value={this.state.speciesName || ""}
+                                    onClose={() => { this.blurField("speciesNameSelect"); }}
                                 />
                                 {(this.state.model.species != null && this.state.model.species.length > 0) &&
                                     <a style={{ color: 'black' }} onClick={() => { this.goToSpeciesPage(); }}>Voir la fiche de l'espèce </a>

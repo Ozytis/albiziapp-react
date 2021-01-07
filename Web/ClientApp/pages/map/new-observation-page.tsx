@@ -299,6 +299,14 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         var state = this.state;        
         return (state.selectedCommonGenus != null || !StringHelper.isNullOrEmpty(state.model.genus) || state.selectedCommonSpecies != null || !StringHelper.isNullOrEmpty(state.model.species));
     }
+
+    blurField(id)
+    {
+        let element = document.getElementById(id);
+        if (element != null) {
+            element.blur();  
+        }      
+    }
     
     render() {
 
@@ -341,24 +349,28 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                     </Typography>
 
                     <FormControl className={clsx(classes.formControl)}>
-                        <Autocomplete
+                        <Autocomplete                         
                             id="commonGenusSelect"
                             options={commonGenus}
                             getOptionLabel={(option: TreeGenusModel) => option?.commonGenus ?? ""}
                             renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}
-                            value={this.state.selectedCommonGenus ||''}
-                            onChange={(e, v) => this.updateCommonGenus((v as any)?.commonGenus)}
+                            value={this.state.selectedCommonGenus || ''}
+                            onChange={(e, v) => {
+                                this.updateCommonGenus((v as any)?.commonGenus); 
+                            }}
+                            onClose={() => {this.blurField("commonGenusSelect");}}
                         />
                     </FormControl>
 
                     <FormControl className={clsx(classes.formControl)}>
                         <Autocomplete
-                            id="GenusSelect"          
+                            id="GenusSelect"
                             options={genus.sort((g1, g2) => g1.genus.localeCompare(g2.genus))}
                             getOptionLabel={(option: TreeGenusModel) => option?.genus ?? ""}
-                            value={this.state.selectedGenus ||""}                          
+                            value={this.state.selectedGenus || ""}
                             renderInput={(params) => <TextField {...params} label="Latin" variant="outlined" />}
-                            onChange={(e, v) => this.updateGenus((v as any)?.genus)}
+                            onChange={(e, v) => { this.updateGenus((v as any)?.genus); }}
+                            onClose={() => { this.blurField("GenusSelect"); }}
                         />
 
                     </FormControl>
@@ -374,18 +386,20 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                             value={this.state.selectedCommonSpecies || ""}
                             getOptionLabel={(option: SpeciesModel) => option?.commonSpeciesName ?? ""}
                             renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}
-                            onChange={(e, v) => this.updateCommonSpecies((v as any)?.commonSpeciesName)}
+                            onChange={(e, v) => { this.updateCommonSpecies((v as any)?.commonSpeciesName); }}
+                            onClose={() => { this.blurField("commonSpeciesSelect"); }}         
                         />
                     </FormControl>
 
                     <FormControl className={clsx(classes.formControl)}>
                         <Autocomplete
                             id="SpeciesSelect"
-                            options={species.sort((s1, s2) => s1.speciesName.localeCompare(s2.speciesName))}                           
+                            options={species.sort((s1, s2) => s1.speciesName.localeCompare(s2.speciesName))}
                             value={this.state.selectedspecies || ""}
                             getOptionLabel={(option: SpeciesModel) => option?.speciesName ?? ""}
                             renderInput={(params) => <TextField {...params} label="Latine" variant="outlined" />}
-                            onChange={(e, v) => this.updateSpecies((v as any)?.speciesName)}
+                            onChange={(e, v) => { this.updateSpecies((v as any)?.speciesName); }}
+                            onClose={() => { this.blurField("SpeciesSelect"); }} 
                         />
                         {(this.state.model.species != null && this.state.model.species.length > 0) &&
                             <a style={{ color: 'black' }} onClick={() => { this.goToSpeciesPage(); }}>Voir la fiche de l'espèce </a>
