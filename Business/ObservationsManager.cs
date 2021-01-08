@@ -444,7 +444,7 @@ namespace Business
         }
 
         [Obsolete]
-        public async Task<Observation> EditObservationAsync(Observation editObservation, string[] pictures, string currentUserId)
+        public async Task<Observation> EditObservationAsync(ObservationStatement editObservation, string currentUserId)
         {
             using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
             var existingObservation = await this.GetUserObservationbyId(editObservation.Id);

@@ -143,6 +143,19 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
             this.getUserObservation();
         }
     }
+
+    checkIsIdentified(statementId:string) {
+
+        if (this.state.observation.statementValidatedId == statementId) {
+            return "#267F00";
+        }
+        else {
+            return "black";
+        }
+    }
+
+
+
     render() {
 
         const { classes } = this.props;
@@ -156,6 +169,7 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
                 <Box>
                     <div style={{ marginTop: "2%" }}>
                         <table style={{ marginLeft: "auto", marginRight: "auto", border: "solid 1px black", width: "50%", height: "15px", borderRadius: "25px" }}>
+                            <tbody>
                             <tr>
                                 <td onClick={() => this.updateCurrentTab("common")}
                                     style={{ textAlign: "center", width: "50%", backgroundColor: this.state.currentTab == "common" ? "green" : "white", color: this.state.currentTab == "common" ? "white" : "black" }}>
@@ -165,7 +179,8 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
                                     style={{ textAlign: "center", width: "50%", backgroundColor: this.state.currentTab == "latin" ? "green" : "white", color: this.state.currentTab == "latin" ? "white" : "black" }}>
                                     LATIN
                                     </td>
-                            </tr>
+                                </tr>
+                                </tbody>
                         </table>
                     </div>
                 {
@@ -183,7 +198,7 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
                                     
                                     {
                                         firstObservationStatement && currentUser &&
-                                        <tr>
+                                        <tr style={{ color: this.checkIsIdentified(firstObservationStatement.id)}}>
                                             <td>{firstObservationStatement.userName + ", " + this.setDateFormat(firstObservationStatement.date)}</td>
                                             <td>{firstObservationStatement.commonGenus}</td>
                                             <td>{firstObservationStatement.commonSpeciesName}</td>
@@ -201,7 +216,7 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
                                     </tr>
                                     {
                                         filteredObservationStatements && filteredObservationStatements.map((os, index) => {
-                                            return (<tr key={"CommonObservationStatement-" + index}>
+                                            return (<tr key={"CommonObservationStatement-" + index} style={{ color: this.checkIsIdentified(os.id) }}>
                                                 <td>{`${os.userName}, ${this.setDateFormat(os.date)}`}</td>
                                                 <td>{os.commonGenus}</td>
                                                 <td>{os.commonSpeciesName}</td>
@@ -216,8 +231,8 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
                                     {this.state.myObservation && 
                                         <tr>
                                             <td className={clsx(classes.bold)} style={{ textAlign: "left" }}>Ma proposition</td>
-                                            <td>{this.state.myObservation.commonGenus}</td>
-                                            <td>{this.state.myObservation.commonSpeciesName}</td>
+                                        <td style={{ color: this.checkIsIdentified(this.state.myObservation.id) }}>{this.state.myObservation.commonGenus}</td>
+                                        <td style={{ color: this.checkIsIdentified(this.state.myObservation.id) }}>{this.state.myObservation.commonSpeciesName}</td>
                                         </tr>
                                     }
                             </tbody>
@@ -240,7 +255,7 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
 
                                     {
                                         firstObservationStatement && currentUser &&
-                                        <tr>
+                                        <tr style={{ color: this.checkIsIdentified(firstObservationStatement.id) }}>
                                             <td>{firstObservationStatement.userName + ", " + this.setDateFormat(firstObservationStatement.date)}</td>
                                             <td>{firstObservationStatement.genus}</td>
                                             <td>{firstObservationStatement.speciesName}</td>
@@ -258,7 +273,7 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
                                     </tr>
                                     {
                                         filteredObservationStatements && filteredObservationStatements.map((os, index) => {
-                                            return (<tr key={"CommonObservationStatement-" + index}>
+                                            return (<tr key={"CommonObservationStatement-" + index} style={{ color: this.checkIsIdentified(os.id) }}>
                                                 <td>{`${os.userName}, ${this.setDateFormat(os.date)}`}</td>
                                                 <td>{os.genus}</td>
                                                 <td>{os.speciesName}</td>
@@ -272,10 +287,10 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
                                         <td></td>
                                     </tr>
                                     {this.state.myObservation &&
-                                        <tr>
+                                        <tr style={{ color: this.checkIsIdentified(this.state.myObservation.id) }}>
                                             <td className={clsx(classes.bold)} style={{ textAlign: "left" }}>Ma proposition</td>
-                                            <td>{this.state.myObservation.genus}</td>
-                                            <td>{this.state.myObservation.speciesName}</td>
+                                        <td style={{ color: this.checkIsIdentified(this.state.myObservation.id) }}>{this.state.myObservation.genus}</td>
+                                        <td style={{ color: this.checkIsIdentified(this.state.myObservation.id) }}>{this.state.myObservation.speciesName}</td>
                                         </tr>
                                     }
                                 </tbody>

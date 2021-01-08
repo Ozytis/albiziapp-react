@@ -155,6 +155,8 @@ class ObservationPageState {
     newTreeSize: number = null;
     isAddingCommentary: boolean;
     newCommentary: string="";
+    validatedC: string="";
+    validatedL: string="";
 }
 
 class ObservationPageComponent extends BaseComponent<ObservationPageProps, ObservationPageState>{
@@ -171,6 +173,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         this.isEditAndDeleteEnable();
         this.canAddOrConfirmStatement();
         this.checkTreeSize();
+        this.getValidatedStatement();
     }
 
     async filterObservationStatements() {
@@ -342,7 +345,6 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                 await this.setState({ observation: observation});
                 this.filterObservationStatements();
                 this.checkTreeSize();
-                console.log(this.state.observation)
             }
 
             else {
@@ -455,8 +457,6 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
     }
 
     async confirmGenusStatement(val) {
-        console.log(this.state.genusSelectedRadio);
-        console.log(val);
         if (this.state.genusSelectedRadio == val) {
             await this.setState({ genusSelectedRadio: null, speciesSelectedRadio: null });
         }
@@ -466,8 +466,6 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         
     }
     async confirmSpeciesStatement(val) {
-        console.log(this.state.speciesSelectedRadio);
-        console.log(val);
         if (this.state.speciesSelectedRadio == val) {
             await this.setState({ speciesSelectedRadio: null, genusSelectedRadio: null });
         }
@@ -544,7 +542,6 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         }
     }
     setDateFormat(date: string) {
-        console.log(date);
         if (date != null) {
             return new Date(date).toLocaleDateString()
         }
@@ -556,6 +553,17 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         await this.setState({ currentTab: val });
         console.log(this.state.currentTab);
     }
+
+    async getValidatedStatement() {
+
+            if (this.state.observation.isIdentified) {
+                const validatedL = this.state.observation.observationStatements.find(x => x.id == this.state.observation.statementValidatedId).speciesName;
+                const validatedC = this.state.observation.observationStatements.find(x => x.id == this.state.observation.statementValidatedId).commonSpeciesName;
+                await this.setState({ validatedC: validatedC,validatedL:validatedL })
+            }
+        
+    }
+
     render() {
 
         const { classes } = this.props;
@@ -566,9 +574,20 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         return (
             <>
                 <Box className={clsx(classes.root)}>
+                    {observation.isIdentified &&
+                        <div style={{ backgroundColor: "#267F00", color: "white", borderRadius: "3px" }}>
+                            <span style={{ marginLeft: "1%" }}>Identification certaine</span>
+                        {this.state.currentTab == "common" &&
+                            <span style={{ float: "right", marginRight: "1%" }}>{this.state.validatedC}</span>
+                            }
+                            {this.state.currentTab == "latin" &&
+                            <span style={{ float: "right", marginRight: "1%" }}>{this.state.validatedL}</span>
+                            }
+                        </div>
+                    }
                     <Box>
                         <div>
-                            <table style={{ marginLeft: "auto", marginRight: "auto", border: "solid 1px black", width: "50%", height: "15px", borderRadius: "25px" }}>
+                            <table style={{ marginTop:"2%",marginLeft: "auto", marginRight: "auto", border: "solid 1px black", width: "50%", height: "15px", borderRadius: "25px" }}>
                                 <tbody>
                                 <tr>
                                     <td onClick={() => this.updateCurrentTab("common")}
@@ -776,7 +795,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                         </table>
                     </Box>
 
-            {   this.state.displayAddAndConfirmButton &&
+            {   this.state.displayAddAndConfirmButton && !observation.isIdentified && 
                     <Box className={clsx(classes.buttonsDiv)}>                        
                             <Button color="secondary" disabled={this.state.isValidated} fullWidth variant="contained" startIcon={<Check />} onClick={() => this.showConfirmation()}>
                                 {t.__("Confirmer")}
@@ -826,7 +845,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                         </Box>
                     }
                     <div className={clsx(classes.trait, classes.center)}> </div>
-                    {this.state.displayAddAndConfirmButton &&
+                    {this.state.displayAddAndConfirmButton && this.state.isConfirmating && !observation.isIdentified &&
                         <Box className={clsx(classes.buttonsDiv)}>
                         <Button color="primary" variant="contained" fullWidth startIcon={<Add />} onClick={() => this.addStatement()}>
                                 {t.__("Ajout d'une propostion")}
@@ -859,7 +878,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                     </Box>
                     <div className={clsx(classes.trait, classes.center)}> </div>
 
-                        {
+                        {/*
                             enableEditAndDeleteButton &&
                             <>
                             <Box className={clsx(classes.buttonsDiv)}>
@@ -871,7 +890,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                   </Button>
                                 </Box>
                             </>
-                        }                       
+                        */}                       
 
                     <Box className={clsx(classes.buttonsDiv)}>
                         <Button color="secondary" variant="contained" fullWidth startIcon={<NearMe />} onClick={async () => { await this.updateLocalStorage(); this.goTo("/map") }}>

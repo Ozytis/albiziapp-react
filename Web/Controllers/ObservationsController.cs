@@ -152,18 +152,15 @@ namespace Web.Controllers
         [HandleBusinessException, ValidateModel]
         public async Task EditObservationAysnc([FromBody] ObservationEditionModel model)
         {
-          /*  await this.ObservationsManager.EditObservationAsync(
-                new Observation
+          await this.ObservationsManager.EditObservationAsync(
+                new ObservationStatement
                 {
                     Id = model.Id,
                     Genus = model.Genus,
                     Confident = (Confident?) model.IsConfident,
-                    Latitude = model.Latitude,
-                    Longitude = model.Longitude,
                     SpeciesName = model.Species,
                     UserId = this.User.Identity.Name,
-                },
-                 model.Pictures , this.User.Identity.Name);*/
+                }, this.User.Identity.Name);
         }
         [HttpPut("editStatement/{observationId}")]
         [HandleBusinessException, ValidateModel]
