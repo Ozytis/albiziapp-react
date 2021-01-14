@@ -38,7 +38,7 @@
       }
     ]
   },
-  {
+  /*{
     "type": 4,
     "option": "NONE",
     "instructions": {
@@ -50,7 +50,7 @@
         "actionCount": 3
       }
     ]
-  },
+  },*/
   {
     "type": 1,
     "option": "NONE",
