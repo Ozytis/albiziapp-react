@@ -23,9 +23,10 @@ namespace Web.Mappings
                 UserId = observation.UserId,
                 IsIdentified = observation.IsIdentified,
                 AuthorName = observation.AuthorName,
-                ObservationStatements = observation.ObservationStatements.Select(s=>s.ToObservationStatementModel(users)).ToArray(),
+                ObservationStatements = observation.ObservationStatements.Select(s => s.ToObservationStatementModel(users)).ToArray(),
                 TreeSize = (int?)observation.TreeSize,
                 ObservationCommentarys = observation.ObservationCommentarys?.Select(s => s.ToObservationCommentaryModel()).ToArray(),
+                StatementValidatedId = observation.StatementValidatedId
 
             };
         }

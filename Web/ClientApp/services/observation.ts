@@ -8,6 +8,7 @@ import { ObservationStatementModel } from "./generated/observation-statement-mod
 import { ObservationStatementConfirmationModel } from "./generated/observation-statement-confirmation-model";
 import { AddObservationStatementConfirmationModel } from "./generated/add-observation-statement-confirmation-model";
 import { ObservationCommentaryModel } from "./generated/observation-commentary-model";
+import { ObservationStatementEditionModel } from "./generated/observation-statement-edition-model";
 
 class ObservationsService extends BaseService {
 
@@ -98,7 +99,28 @@ class ObservationsService extends BaseService {
 
         return result;
     }
+    async editStatement(statement: ObservationStatementEditionModel, observationId: string) {
 
+        const result = await this.put<ObservationModel>(`observations/editStatement/${observationId}`, statement);
+
+        if (result.success) {
+            this.loadObservations();
+        }
+
+        return result;
+    }
+    async deleteStatement(observationId:string, statementId: string) {
+
+        const result = await this.put(`observations/deleteStatement/${observationId}/${statementId}`,null);
+
+        if (!result.success) {
+            return result;
+        }
+
+        this.loadObservations();
+
+        return result;
+    }
     async deleteObservation(observation: ObservationModel) {
 
         const result = await this.delete(`observations/${observation.id}`);
@@ -173,15 +195,17 @@ class ObservationsService extends BaseService {
         }
     }
 
-    async getObservation(observationId: string) {
+    async getStatement(observationId: string,statementId: string) {
 
         if (!this.observations) {
             await this.loadObservations();
         }
 
-        return this.observations && this.observations.find(o => o.id === observationId);
-    }
+        const observation = this.observations && this.observations.find(o => o.id === observationId);
+        const statement = observation.observationStatements.find(os => os.id === statementId);
+        return statement;
 
+    }
     async confirmStatement(statementConfirmation: AddObservationStatementConfirmationModel) {
 
         const result = await this.post(`observations/confirmStatement`, statementConfirmation);

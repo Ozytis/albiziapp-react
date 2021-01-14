@@ -152,20 +152,45 @@ namespace Web.Controllers
         [HandleBusinessException, ValidateModel]
         public async Task EditObservationAysnc([FromBody] ObservationEditionModel model)
         {
-          /*  await this.ObservationsManager.EditObservationAsync(
-                new Observation
+          await this.ObservationsManager.EditObservationAsync(
+                new ObservationStatement
                 {
                     Id = model.Id,
                     Genus = model.Genus,
                     Confident = (Confident?) model.IsConfident,
-                    Latitude = model.Latitude,
-                    Longitude = model.Longitude,
                     SpeciesName = model.Species,
                     UserId = this.User.Identity.Name,
-                },
-                 model.Pictures , this.User.Identity.Name);*/
+                }, this.User.Identity.Name);
+        }
+        [HttpPut("editStatement/{observationId}")]
+        [HandleBusinessException, ValidateModel]
+        public async Task EditObservationAysnc([FromBody] ObservationStatementEditionModel model, string observationId)
+        {
+            try
+            {
+                await this.ObservationsManager.EditObservationStatementAsync(
+                    new ObservationStatement
+                    {
+                        CommonGenus = model.CommonGenus,
+                        CommonSpeciesName = model.CommonSpeciesName,
+                        Genus = model.Genus,
+                        SpeciesName = model.Species,
+                        Id = model.Id
+                    }, observationId);
+            }
+            catch (BusinessException be)
+            {
+                await this.UserNotify.SendErrorNotif(this.User.Identity.Name, be.Message);
+                throw be;
+            }
         }
 
+        [HttpPut("deleteStatement/{observationId}/{statementId}")]
+        [HandleBusinessException, ValidateModel]
+        public async Task DeleteObservationStatementAsync(string observationId, string statementId)
+        {
+            await this.ObservationsManager.DeleteObservationStatementAsync(observationId,statementId, this.User.Identity.Name);
+        }
         [HttpDelete("{observationId}")]
         [HandleBusinessException, ValidateModel]
         public async Task DeleteObservationAsync(string observationId)

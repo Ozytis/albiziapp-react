@@ -80,7 +80,7 @@ class SpeciesComponentState {
     currentTab: "description" | "usage" | "habitat" = "description";
 }
 
-@withStyles(styles)
+//@withStyles(styles)
 export class SpeciesInfoComponent extends BaseComponent<SpeciesComponentProps, SpeciesComponentState>{
     constructor(props: SpeciesComponentProps) {
         super(props, "SpeciesPage", new SpeciesComponentState());

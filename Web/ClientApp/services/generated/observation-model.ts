@@ -24,4 +24,5 @@ export interface ObservationModel {
     observationStatements: ObservationStatementModel[];
     treeSize: number;
     observationCommentarys: ObservationCommentaryModel[];
+    statementValidatedId: string;
 }

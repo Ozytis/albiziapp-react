@@ -155,6 +155,8 @@ class ObservationPageState {
     newTreeSize: number = null;
     isAddingCommentary: boolean;
     newCommentary: string="";
+    validatedC: string="";
+    validatedL: string="";
 }
 
 class ObservationPageComponent extends BaseComponent<ObservationPageProps, ObservationPageState>{
@@ -171,6 +173,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         this.isEditAndDeleteEnable();
         this.canAddOrConfirmStatement();
         this.checkTreeSize();
+        this.getValidatedStatement();
     }
 
     async filterObservationStatements() {
@@ -342,7 +345,6 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                 await this.setState({ observation: observation});
                 this.filterObservationStatements();
                 this.checkTreeSize();
-                console.log(this.state.observation)
             }
 
             else {
@@ -455,10 +457,21 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
     }
 
     async confirmGenusStatement(val) {
-        await this.setState({ genusSelectedRadio: val });
+        if (this.state.genusSelectedRadio == val) {
+            await this.setState({ genusSelectedRadio: null, speciesSelectedRadio: null });
+        }
+        else {
+            await this.setState({ genusSelectedRadio: val });
+        }
+        
     }
     async confirmSpeciesStatement(val) {
-        await this.setState({ speciesSelectedRadio: val, genusSelectedRadio: val });
+        if (this.state.speciesSelectedRadio == val) {
+            await this.setState({ speciesSelectedRadio: null, genusSelectedRadio: null });
+        }
+        else {
+            await this.setState({ speciesSelectedRadio: val, genusSelectedRadio: val });
+        }
     }
     async addPicture(value: any) {
 
@@ -529,7 +542,6 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         }
     }
     setDateFormat(date: string) {
-        console.log(date);
         if (date != null) {
             return new Date(date).toLocaleDateString()
         }
@@ -541,6 +553,17 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         await this.setState({ currentTab: val });
         console.log(this.state.currentTab);
     }
+
+    async getValidatedStatement() {
+
+            if (this.state.observation.isIdentified) {
+                const validatedL = this.state.observation.observationStatements.find(x => x.id == this.state.observation.statementValidatedId).speciesName;
+                const validatedC = this.state.observation.observationStatements.find(x => x.id == this.state.observation.statementValidatedId).commonSpeciesName;
+                await this.setState({ validatedC: validatedC,validatedL:validatedL })
+            }
+        
+    }
+
     render() {
 
         const { classes } = this.props;
@@ -551,9 +574,21 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         return (
             <>
                 <Box className={clsx(classes.root)}>
+                    {observation.isIdentified &&
+                        <div style={{ backgroundColor: "#267F00", color: "white", borderRadius: "3px" }}>
+                            <span style={{ marginLeft: "1%" }}>Identification certaine</span>
+                        {this.state.currentTab == "common" &&
+                            <span style={{ float: "right", marginRight: "1%" }}>{this.state.validatedC}</span>
+                            }
+                            {this.state.currentTab == "latin" &&
+                            <span style={{ float: "right", marginRight: "1%" }}>{this.state.validatedL}</span>
+                            }
+                        </div>
+                    }
                     <Box>
                         <div>
-                            <table style={{marginLeft: "auto", marginRight: "auto",border:"solid 1px black", width:"50%", height:"15px", borderRadius:"25px"}}>
+                            <table style={{ marginTop:"2%",marginLeft: "auto", marginRight: "auto", border: "solid 1px black", width: "50%", height: "15px", borderRadius: "25px" }}>
+                                <tbody>
                                 <tr>
                                     <td onClick={() => this.updateCurrentTab("common")}
                                         style={{ textAlign: "center", width: "50%", backgroundColor: this.state.currentTab == "common" ? "green" : "white", color: this.state.currentTab == "common" ? "white" : "black" }}>
@@ -563,7 +598,8 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                         style={{ textAlign: "center", width: "50%", backgroundColor: this.state.currentTab == "latin" ? "green" : "white", color: this.state.currentTab == "latin" ? "white" : "black" }}>
                                         LATIN
                                     </td>
-                                </tr>
+                                    </tr>
+                                    </tbody>
                             </table>
                         </div>
                         <div className={clsx(classes.flex)}>
@@ -609,10 +645,10 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                         <tr>
                                                 <td className={clsx(classes.bold)}>Proposition initiale</td>
                                                 <td className={clsx(classes.score)}>{ firstObservationStatement.totalScore}</td>
-                                                <td><input hidden={this.state.isConfirmating} type="radio" name="confirmationGenus" value={firstObservationStatement.order} checked={firstObservationStatement.order == this.state.genusSelectedRadio} onChange={() => this.confirmGenusStatement(firstObservationStatement.order)} /> </td>
+                                                <td><input hidden={this.state.isConfirmating} type="radio" name="confirmationGenus" value={firstObservationStatement.order} checked={firstObservationStatement.order == this.state.genusSelectedRadio} onClick={() => this.confirmGenusStatement(firstObservationStatement.order)} /> </td>
                                             <td>{firstObservationStatement.commonGenus}</td>
                                                 <td>{firstObservationStatement.commonSpeciesName}</td>
-                                                <td hidden={this.state.isConfirmating}><input type="radio" name="confirmationSpecies" disabled={firstObservationStatement.commonSpeciesName == null} value={firstObservationStatement.order} checked={firstObservationStatement.order == this.state.speciesSelectedRadio} onChange={() => this.confirmSpeciesStatement(firstObservationStatement.order)} /> </td>
+                                                <td hidden={this.state.isConfirmating}><input type="radio" name="confirmationSpecies" disabled={firstObservationStatement.commonSpeciesName == null} value={firstObservationStatement.order} checked={firstObservationStatement.order == this.state.speciesSelectedRadio} onClick={() => this.confirmSpeciesStatement(firstObservationStatement.order)} /> </td>
                                                 <td className={clsx(classes.score)}>{firstObservationStatement.totalScoreSpecies}</td>
                                             </tr>
                                         }
@@ -632,10 +668,10 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                                         <tr key={"CommonObservationStatement-"+ index }>
                                                             <td className={clsx(classes.bold)}>Proposition de la communauté</td>
                                                             <td className={clsx(classes.score)}>{os.totalScore}</td>
-                                                            <td><input hidden={this.state.isConfirmating} type="radio" name="confirmationGenus" value={os.order} checked={os.order == this.state.genusSelectedRadio} onChange={() => this.confirmGenusStatement(os.order)}/> </td>
+                                                            <td><input hidden={this.state.isConfirmating} type="radio" name="confirmationGenus" value={os.order} checked={os.order == this.state.genusSelectedRadio} onClick={() => this.confirmGenusStatement(os.order)}/> </td>
                                                             <td>{os.commonGenus}</td>
                                                             <td>{os.commonSpeciesName}</td>
-                                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmationSpecies" value={os.order} disabled={os.commonSpeciesName == null} onChange={() => this.confirmSpeciesStatement(os.order)} /> </td>
+                                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmationSpecies" value={os.order} disabled={os.commonSpeciesName == null} onClick={() => this.confirmSpeciesStatement(os.order)} /> </td>
                                                             <td className={clsx(classes.score)}>{os.totalScoreSpecies}</td>
                                                         </tr>
                                                     )
@@ -645,10 +681,10 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                                         <tr key={"CommonObservationStatement-" + index}>
                                                             <td></td>
                                                             <td className={clsx(classes.score)}>{os.totalScore}</td>
-                                                            <td><input hidden={this.state.isConfirmating} type="radio" name="confirmationGenus" value={os.order} onChange={() => this.confirmGenusStatement(os.order)}  /> </td>
+                                                            <td><input hidden={this.state.isConfirmating} type="radio" name="confirmationGenus" value={os.order} onClick={() => this.confirmGenusStatement(os.order)}  /> </td>
                                                             <td>{os.commonGenus}</td>
                                                             <td>{os.commonSpeciesName}</td>
-                                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmationSpecies" disabled={os.commonSpeciesName == null} value={os.order} onChange={() => this.confirmSpeciesStatement(os.order)} /> </td>
+                                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmationSpecies" disabled={os.commonSpeciesName == null} value={os.order} onClick={() => this.confirmSpeciesStatement(os.order)} /> </td>
                                                             <td className={clsx(classes.score)}>{os.totalScoreSpecies}</td>
                                                         </tr>
                                                  )
@@ -687,10 +723,10 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                             <tr>
                                                 <td className={clsx(classes.bold)}>Proposition initiale</td>
                                                 <td className={clsx(classes.score)}>{firstObservationStatement.totalScore}</td>
-                                                <td><input hidden={this.state.isConfirmating} type="radio" name="confirmationGenus" value={firstObservationStatement.order} checked={firstObservationStatement.order == this.state.genusSelectedRadio} onChange={() => this.confirmGenusStatement(firstObservationStatement.order)} /> </td>
+                                                <td><input hidden={this.state.isConfirmating} type="radio" name="confirmationGenus" value={firstObservationStatement.order} checked={firstObservationStatement.order == this.state.genusSelectedRadio} onClick={() => this.confirmGenusStatement(firstObservationStatement.order)} /> </td>
                                                 <td>{firstObservationStatement.genus}</td>
                                                 <td>{firstObservationStatement.speciesName}</td>
-                                                <td hidden={this.state.isConfirmating}><input type="radio" name="confirmationSpecies" disabled={firstObservationStatement.speciesName == null} value={firstObservationStatement.order} checked={firstObservationStatement.order == this.state.speciesSelectedRadio} onChange={() => this.confirmSpeciesStatement(firstObservationStatement.order)} /> </td>
+                                                <td hidden={this.state.isConfirmating}><input type="radio" name="confirmationSpecies" disabled={firstObservationStatement.speciesName == null} value={firstObservationStatement.order} checked={firstObservationStatement.order == this.state.speciesSelectedRadio} onClick={() => this.confirmSpeciesStatement(firstObservationStatement.order)} /> </td>
                                                 <td className={clsx(classes.score)}>{firstObservationStatement.totalScoreSpecies}</td>
                                             </tr>
                                         }
@@ -710,10 +746,10 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                                         <tr key={"LatinObservationStatement-" + index}>
                                                             <td className={clsx(classes.bold)}>Proposition de la communauté</td>
                                                             <td className={clsx(classes.score)}>{os.totalScore}</td>
-                                                            <td><input hidden={this.state.isConfirmating} type="radio" name="confirmationGenus" value={os.order} checked={os.order == this.state.genusSelectedRadio} onChange={() => this.confirmGenusStatement(os.order)} /> </td>
+                                                            <td><input hidden={this.state.isConfirmating} type="radio" name="confirmationGenus" value={os.order} checked={os.order == this.state.genusSelectedRadio} onClick={() => this.confirmGenusStatement(os.order)} /> </td>
                                                             <td>{os.genus}</td>
                                                             <td>{os.speciesName}</td>
-                                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmationSpecies" value={os.order} disabled={os.commonSpeciesName == null} onChange={() => this.confirmSpeciesStatement(os.order)} /> </td>
+                                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmationSpecies" value={os.order} disabled={os.commonSpeciesName == null} onClick={() => this.confirmSpeciesStatement(os.order)} /> </td>
                                                             <td className={clsx(classes.score)}>{os.totalScoreSpecies}</td>
                                                         </tr>
                                                     )
@@ -723,10 +759,10 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                                         <tr key={"LatinObservationStatement-" + index}>
                                                             <td></td>
                                                             <td className={clsx(classes.score)}>{os.totalScore}</td>
-                                                            <td><input hidden={this.state.isConfirmating} type="radio" name="confirmationGenus" value={os.order} onChange={() => this.confirmGenusStatement(os.order)} /> </td>
+                                                            <td><input hidden={this.state.isConfirmating} type="radio" name="confirmationGenus" value={os.order} onClick={() => this.confirmGenusStatement(os.order)} /> </td>
                                                             <td>{os.genus}</td>
                                                             <td>{os.speciesName}</td>
-                                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmationSpecies" disabled={os.commonSpeciesName == null} value={os.order} onChange={() => this.confirmSpeciesStatement(os.order)} /> </td>
+                                                            <td hidden={this.state.isConfirmating}><input type="radio" name="confirmationSpecies" disabled={os.commonSpeciesName == null} value={os.order} onClick={() => this.confirmSpeciesStatement(os.order)} /> </td>
                                                             <td className={clsx(classes.score)}>{os.totalScoreSpecies}</td>
                                                         </tr>
                                                     )
@@ -759,7 +795,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                         </table>
                     </Box>
 
-            {   this.state.displayAddAndConfirmButton &&
+            {   this.state.displayAddAndConfirmButton && !observation.isIdentified && 
                     <Box className={clsx(classes.buttonsDiv)}>                        
                             <Button color="secondary" disabled={this.state.isValidated} fullWidth variant="contained" startIcon={<Check />} onClick={() => this.showConfirmation()}>
                                 {t.__("Confirmer")}
@@ -809,7 +845,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                         </Box>
                     }
                     <div className={clsx(classes.trait, classes.center)}> </div>
-                    {this.state.displayAddAndConfirmButton &&
+                    {this.state.displayAddAndConfirmButton && this.state.isConfirmating && !observation.isIdentified &&
                         <Box className={clsx(classes.buttonsDiv)}>
                         <Button color="primary" variant="contained" fullWidth startIcon={<Add />} onClick={() => this.addStatement()}>
                                 {t.__("Ajout d'une propostion")}
@@ -842,7 +878,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                     </Box>
                     <div className={clsx(classes.trait, classes.center)}> </div>
 
-                        {
+                        {/*
                             enableEditAndDeleteButton &&
                             <>
                             <Box className={clsx(classes.buttonsDiv)}>
@@ -854,7 +890,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                   </Button>
                                 </Box>
                             </>
-                        }                       
+                        */}                       
 
                     <Box className={clsx(classes.buttonsDiv)}>
                         <Button color="secondary" variant="contained" fullWidth startIcon={<NearMe />} onClick={async () => { await this.updateLocalStorage(); this.goTo("/map") }}>
