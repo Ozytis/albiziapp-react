@@ -23,7 +23,7 @@ namespace Business.MissionValidation
             {
                 if (endCondition.ActionCount.HasValue)
                 {
-                    var observations = (await this.ObservationsManager.GetUserIdentifyObservations(User.OsmId)).Where(o => o.UpdateDate >= User.MissionProgress.StartDate);
+                    var observations = await this.ObservationsManager.GetUserIdentifyObservations(User.OsmId, User.MissionProgress.StartDate);
                      count = observations.Count();
 
                     if (count < endCondition.ActionCount.Value)
@@ -35,8 +35,8 @@ namespace Business.MissionValidation
                 if (endCondition.Time.HasValue)
                 {
                     var maxDate = DateTime.UtcNow.AddMinutes(-endCondition.Time.Value);
-
-                    var observations = (await this.ObservationsManager.GetUserIdentifyObservations(User.OsmId)).Where(o => o.UpdateDate >= new DateTime(Math.Max(User.MissionProgress.StartDate.Ticks, maxDate.Ticks)));
+                    var date = new DateTime(Math.Max(User.MissionProgress.StartDate.Ticks, maxDate.Ticks));
+                    var observations = await this.ObservationsManager.GetUserIdentifyObservations(User.OsmId, date);
                      count = observations.Count();
 
                     //todo check code existant mini requis

@@ -62,22 +62,22 @@ namespace Business
         {
             List<string> ids = new List<string>();
             //ids.Add(obs.UserId);
-            ids.AddRange(obs.ObservationStatements.Select(s => s.UserId)); 
-         
+            ids.AddRange(obs.ObservationStatements.Select(s => s.UserId));
+
             return ids.Distinct().ToArray();
         }
-        public async Task<IEnumerable<Observation>> GetUserVerifyObservations(string userId)
+
+        public async Task<IEnumerable<Observation>> GetUserVerifyObservations(string userId, DateTime date)
         {
-            //TODO ajouter code, pour statement confirmation...
             return await this.DataContext.Observations.Find(obs => obs.ObservationStatements.Count > 0 && obs.ObservationStatements[0].UserId != userId &&
-            (obs.UserId == userId || obs.ObservationStatements != null && obs.ObservationStatements.Any(x => x.UserId == userId))).ToListAsync();
+            (obs.ObservationStatements != null && (obs.ObservationStatements.Any(x => (x.UserId == userId && x.Date >= date) || (x.ObservationStatementConfirmations != null && x.ObservationStatementConfirmations.Any(c => c.UserId == userId && c.Date >= date)))))).ToListAsync();
         }
 
-        public async Task<IEnumerable<Observation>> GetUserIdentifyObservations(string userId)
+        public async Task<IEnumerable<Observation>> GetUserIdentifyObservations(string userId, DateTime date)
         {
-            //TODO ajouter code, pour statement confirmation...
-            return await this.DataContext.Observations.Find(obs => obs.IsIdentified && obs.ObservationStatements.Count > 0 && obs.ObservationStatements[0].UserId != userId &&
-            (obs.UserId == userId || obs.ObservationStatements != null && obs.ObservationStatements.Any(x => x.UserId == userId))).ToListAsync();
+            //TODO ajouter code, pour statement confirmation... REWORK
+            return await this.DataContext.Observations.Find(obs => obs.ObservationStatements.Count > 0 && obs.ObservationStatements[0].UserId != userId &&
+            (obs.ObservationStatements != null && (obs.ObservationStatements.Any(x => (x.UserId == userId && x.Date >= date) || (x.ObservationStatementConfirmations != null && x.ObservationStatementConfirmations.Any(c => c.UserId == userId && c.Date >= date)))))).ToListAsync();
         }
 
         public async Task<Observation> GetUserObservationbyId(string observationId)
@@ -214,7 +214,9 @@ namespace Business
             await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
             await this.CalculateKnowledegePoints(observationId, statementId, confirmation.Id);
             await this.CheckObservationIsIdentify(existingObservation.Id);
-
+            User user = await this.UsersManager.SelectAsync(userId);
+            var validator = await MissionValidator.GetValidatorFromActivity(this.ServiceProvider, user);
+            await validator.UpdateActivityProgression();
             //TODO voir calcul de points
         }
 
@@ -229,7 +231,7 @@ namespace Business
 
             var statement = new ObservationStatement();
             statement.Id = Guid.NewGuid().ToString("N");
-           // User user = await this.UsersManager.SelectAsync(newStatement.UserId);
+            // User user = await this.UsersManager.SelectAsync(newStatement.UserId);
             statement.UserId = userId;
             statement.Date = DateTime.UtcNow;
 
@@ -265,6 +267,9 @@ namespace Business
             await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
             await this.CalculateKnowledegePoints(observationId, statement.Id, null);
             await this.CheckObservationIsIdentify(existingObservation.Id);
+            User user = await this.UsersManager.SelectAsync(userId);
+            var validator = await MissionValidator.GetValidatorFromActivity(this.ServiceProvider, user);
+            await validator.UpdateActivityProgression();
         }
         public async Task AddPictures(string observationId, string[] pictures)
         {
@@ -274,7 +279,7 @@ namespace Business
                 throw new BusinessException("Ce relevé n'existe pas");
             }
 
-            foreach(string pic in pictures?.Where(p => !string.IsNullOrEmpty(p)))
+            foreach (string pic in pictures?.Where(p => !string.IsNullOrEmpty(p)))
             {
                 existingObservation.Pictures.Add(await this.FileManager.SaveDataUrlAsFileAsync("observations", pic));
             }
@@ -563,8 +568,8 @@ namespace Business
             var count = data.Count;
             var species = await this.SpeciesManager.GetSpeciesByNameAsync(speciesName);
             //TODO voir si on add +1 si besoin
-            var expertise = (count * species.Difficult * species.Rarity) +1;
-        
+            var expertise = (count * species.Difficult * species.Rarity) + 1;
+
             return (int)Math.Min(expertise, 50);
         }
         public async Task<int> CalculateUserGenusExpertise(string userId, string genus)
@@ -578,8 +583,8 @@ namespace Business
             //TODO voir si on add +1 si besoin
             var genusDifficult = await this.SpeciesManager.CalculDifficultGenus(genus);
             var genusRarity = await this.SpeciesManager.CalculRarityGenus(genus);
-            var expertise = (count * genusDifficult * genusRarity) +1;
-        
+            var expertise = (count * genusDifficult * genusRarity) + 1;
+
             return (int)Math.Min(expertise, 50);
         }
         public async Task UpdateTreeSize(string observationId, int treeSize)
@@ -608,7 +613,7 @@ namespace Business
             commentary.Commentary = newCommentary;
             User currentUser = await this.UsersManager.SelectAsync(userId);
             commentary.UserName = currentUser.Name;
-            if(existingObservation.ObservationCommentarys == null)
+            if (existingObservation.ObservationCommentarys == null)
             {
                 existingObservation.ObservationCommentarys = new List<ObservationCommentary>();
             }

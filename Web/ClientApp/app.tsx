@@ -36,10 +36,6 @@ class AppState {
     user: UserModel;
 }
 
-export const screenVars = {
-    height: window.innerHeight,
-    width: window.innerWidth
-}
 
 class App extends BaseComponent<AppProps, AppState>{
    
