@@ -29,7 +29,7 @@
     "type": 2,
     "option": "NONE",
     "instructions": {
-      "long": "Vérifiez 3 relevés d'un autre utilisateur (cercle vert clignotant)",
+      "long": "Vérifiez 3 relevés d'un autre utilisateur",
       "short": "Vérifiez relevés"
     },
     "endConditions": [
@@ -42,7 +42,7 @@
     "type": 4,
     "option": "NONE",
     "instructions": {
-      "long": "Identifiez 3 relevés d'expert (cercle bleu clignotant)",
+      "long": "Identifiez 3 relevés d'expert",
       "short": "Identifiez relevés experts"
     },
     "endConditions": [
