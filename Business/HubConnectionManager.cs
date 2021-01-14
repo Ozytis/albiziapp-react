@@ -10,6 +10,13 @@ namespace Business
         // Stores the identifiers in a hashset to avoid storing duplicate connection ids
         private static readonly ConcurrentDictionary<string, HashSet<string>> userMap = new ConcurrentDictionary<string, HashSet<string>>();
 
+        public HubPositionManager HubPositionManager { get; set; }
+
+        public HubConnectionManager(HubPositionManager hubPositionManager)
+        {
+            this.HubPositionManager = hubPositionManager;
+        }
+
         // Gets the users who are connected to the hub
         public IEnumerable<string> OnlineUsers { get { return userMap.Keys; } }
 

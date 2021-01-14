@@ -20,17 +20,19 @@ namespace Web.Controllers
     [Authorize]
     public class ObservationsController : ControllerBase
     {
-        public ObservationsController(ObservationsManager observationsManager, UsersManager userManager,FileManager fileManager, IUserNotify userNotify)
+        public ObservationsController(ObservationsManager observationsManager, UsersManager userManager,FileManager fileManager, IUserNotify userNotify, IUserPosition UserPosition)
         {
             this.ObservationsManager = observationsManager;
             this.FileManager = fileManager;
             this.UserNotify = userNotify;
             this.UsersManager = userManager;
+            this.UserPosition = UserPosition;
         }
 
         public FileManager FileManager { get; }
 
         public IUserNotify UserNotify { get; }
+        public IUserPosition UserPosition { get; }
 
         public ObservationsManager ObservationsManager { get; }
 
@@ -40,6 +42,15 @@ namespace Web.Controllers
         public async Task<IEnumerable<ObservationModel>> GetAllObservations()
         {
             IEnumerable<Observation> observations = await this.ObservationsManager.GetAllObservations();
+            var userIds = observations.SelectMany(o => this.ObservationsManager.GetAllUserIdForObservation(o)).Distinct().ToArray();
+            var users = (await this.UsersManager.GetUsersByOsmIds(userIds)).ToArray();
+            return observations.Select(observation => observation.ToObservationModel(users));
+        }
+
+        [HttpGet("near/{latitude}/{longitude}")]
+        public async Task<IEnumerable<ObservationModel>> GetNearestObservations(double latitude,double longitude)
+        {
+            IEnumerable<Observation> observations = await this.ObservationsManager.GetNearestObservations(latitude,longitude);
             var userIds = observations.SelectMany(o => this.ObservationsManager.GetAllUserIdForObservation(o)).Distinct().ToArray();
             var users = (await this.UsersManager.GetUsersByOsmIds(userIds)).ToArray();
             return observations.Select(observation => observation.ToObservationModel(users));
@@ -69,8 +80,10 @@ namespace Web.Controllers
         public async Task CreateObservationAysnc([FromBody] ObservationCreationModel model)
         {
 
-            await this.ObservationsManager.CreateObservationAsync( model.Species,model.Genus, this.User.Identity.Name,(Confident?)model.IsConfident,model.Latitude,model.Longitude,
+            var observation = await this.ObservationsManager.CreateObservationAsync( model.Species,model.Genus, this.User.Identity.Name,(Confident?)model.IsConfident,model.Latitude,model.Longitude,
                   model.Pictures );
+            await this.UserPosition.SendRefresh( observation.Coordinates.Coordinates.Latitude, observation.Coordinates.Coordinates.Longitude);
+
         }
 
         [HttpPut("setTreeSize/{observationId}/{treeSize}")]

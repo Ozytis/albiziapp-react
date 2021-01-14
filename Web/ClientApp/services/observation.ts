@@ -15,7 +15,10 @@ class ObservationsService extends BaseService {
     async getUserObservations(userId: string) {
         return await this.get<ObservationModel[]>(`users/${userId}/observations`);
     }
- 
+
+    async getNearestObservations(latitude: number, longitude: number) {
+        return await this.get<ObservationModel[]>(`observations/near/${latitude}/${longitude}`);
+    }
 
     constructor() {
         super();

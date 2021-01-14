@@ -16,6 +16,7 @@ import { ActivityModel } from "../../services/generated/activity-model";
 import { MissionProgressionModel } from "../../services/generated/mission-progression-model";
 import { NearMe, ZoomOutMapSharp, MapRounded } from "@material-ui/icons";
 import { MapPosition } from "../../components/mapPosition";
+import * as signalR from "@microsoft/signalr";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -70,18 +71,19 @@ class MapPageState {
 }
 
 class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
+
+    hub: signalR.HubConnection;
+
     constructor(props: MapPageProps) {
         super(props, "MapPage", new MapPageState());
     }
 
     async componentDidMount() {
-        console.log("CDM");
-        navigator.geolocation.getCurrentPosition(async (position) => {
-
+        navigator.geolocation.getCurrentPosition(async (position) => {            
             await this.setState({
                 userPosition: position
             });
-
+            this.loadObservations();
             this.positionWatcher = navigator.geolocation.watchPosition(async (position: Position) => {
                 await this.setState({
                     userPosition: position
@@ -96,9 +98,18 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             });
         });
 
-        ObservationsApi.registerObservationsListener(() => this.loadObservations());
+        this.hub = new signalR.HubConnectionBuilder()
+            .withUrl("/positionhub")
+            .build();
+        this.hub.start();
 
-        await this.loadObservations();
+
+        this.hub.on("Refresh",  async () =>  {
+            var obs = await ObservationsApi.getNearestObservations(this.state.userPosition.coords.latitude,this.state.userPosition.coords.longitude);
+            this.setState({observations:obs})
+        });
+
+        
         
         var missions = await MissionsApi.getMissions();
         var userMissions = await AuthenticationApi.getUserMission();
@@ -140,11 +151,8 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
     }
 
     async loadObservations() {
-        const observations = await ObservationsApi.getObservations();
-
-        if (!this.unmounted) {
-            await this.setState({ observations: observations });
-        }
+        var obs = await ObservationsApi.getNearestObservations(this.state.userPosition.coords.latitude, this.state.userPosition.coords.longitude);
+        this.setState({ observations: obs })
     }
 
     unmounted = false;
@@ -157,9 +165,6 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         if (this.positionWatcher) {
             navigator.geolocation.clearWatch(this.positionWatcher);
         }
-
-        ObservationsApi.unregisterObservationsListener(() => this.loadObservations());
-
 
     }
 
@@ -205,6 +210,15 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
         var now = new Date();
         localStorage.setItem("mapPosition", JSON.stringify({ Latitude: lat, Longitude: lng, Zoom: zoom, Date: now } as MapPosition));
+        if (this.hub.state == signalR.HubConnectionState.Connected) {
+            this.hub.send("SetPosition", lat, lng);
+        }
+
+        if (zoom >= 13) {
+            const observations = await ObservationsApi.getNearestObservations(lat, lng);
+            await this.setState({ observations: observations });
+        }
+        else await this.setState({ observations: null });
     }
 
     getOppacity(observation: ObservationModel) {

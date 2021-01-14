@@ -7,6 +7,7 @@ using Entities.Enums;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Bson.IO;
 using MongoDB.Driver;
+using MongoDB.Driver.GeoJsonObjectModel;
 using Ozytis.Common.Core.Utilities;
 using System;
 using System.Collections.Generic;
@@ -43,6 +44,14 @@ namespace Business
         {
             return await this.DataContext.Observations.Find(_ => true).ToListAsync();
         }
+        public async Task<IEnumerable<Observation>> GetNearestObservations(double latitude, double longitude)
+        {
+            var collection = this.DataContext.Observations;
+            var point = GeoJson.Point(GeoJson.Geographic(longitude, latitude));            
+            var filter = Builders<Observation>.Filter.Near(o => o.Coordinates, point, 15 * 1000);
+
+            return await collection.Find(filter).ToListAsync();
+        }
 
         public async Task<IEnumerable<Observation>> GetUserObservations(string userId)
         {
@@ -52,7 +61,7 @@ namespace Business
         public string[] GetAllUserIdForObservation(Observation obs)
         {
             List<string> ids = new List<string>();
-            ids.Add(obs.UserId);
+            //ids.Add(obs.UserId);
             ids.AddRange(obs.ObservationStatements.Select(s => s.UserId)); 
          
             return ids.Distinct().ToArray();
@@ -79,7 +88,7 @@ namespace Business
         {
             return await this.DataContext.Observations.Find(obs => obs.Id == observationId).FirstOrDefaultAsync();
         }
-        public async Task<Observation> CreateObservationAsync(string speciesName, string genus, string userid, Confident? confident, decimal latitude, decimal longitude, string[] pictures)
+        public async Task<Observation> CreateObservationAsync(string speciesName, string genus, string userid, Confident? confident, double latitude, double longitude, string[] pictures)
         {
             using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
             Observation newObservation = new Observation();
@@ -99,8 +108,9 @@ namespace Business
                 statement.UserId = user.OsmId;
                 newObservation.AuthorName = user?.Name;
                 newObservation.ObservationStatements = new List<ObservationStatement>();
-                newObservation.Latitude = latitude;
-                newObservation.Longitude = longitude;
+
+                newObservation.Coordinates = new GeoJsonPoint<GeoJson2DGeographicCoordinates>(new GeoJson2DGeographicCoordinates(longitude, latitude));
+               
 
                 if (!string.IsNullOrEmpty(genus))
                 {

@@ -35,89 +35,36 @@ namespace Web.Hubs
             return base.OnDisconnectedAsync(exception);
         }
 
-        public async Task<Task> SendNotif(string userName, string notifContent)
+        public async Task SendNotif(string userName, string notifContent)
         {
-            HashSet<string> connections = ConnectionManager.GetConnections(userName);
-
-            try
-            {
-                if (connections != null && connections.Count > 0)
-                {
-                    foreach (var conn in connections)
-                    {
-                        
-                        try
-                        {
-                            await _context.Clients.Client(conn).SendAsync("ReceivedNotif", notifContent);
-                        }
-                        catch
-                        {
-                            throw new Exception("No connections found");
-                        }
-                    }
-                }
-                return Task.CompletedTask;
-            }
-            catch
-            {
-                throw new Exception("ERROR");
-            }
+            await this.SendNotif("ReceivedNotif", userName, notifContent);           
         }
 
-        public async Task<Task> SendErrorNotif(string userName, string notifContent)
+        public async Task SendErrorNotif(string userName, string notifContent)
         {
-            HashSet<string> connections = ConnectionManager.GetConnections(userName);
-
-            try
-            {
-                if (connections != null && connections.Count > 0)
-                {
-                    foreach (var conn in connections)
-                    {
-
-                        try
-                        {
-                            await _context.Clients.Client(conn).SendAsync("ErrorNotif", notifContent);
-                        }
-                        catch
-                        {
-                            throw new Exception("No connections found");
-                        }
-                    }
-                }
-                return Task.CompletedTask;
-            }
-            catch
-            {
-                throw new Exception("ERROR");
-            }
+            await this.SendNotif("ErrorNotif", userName, notifContent);          
         }
-        public async Task<Task> SendInfoNotif(string userName, string notifContent)
+        public async Task SendInfoNotif(string userName, string notifContent)
+        {
+            await this.SendNotif("InfoNotif", userName, notifContent);            
+        }
+
+        private async Task SendNotif(string level, string userName, string notifContent)
         {
             HashSet<string> connections = ConnectionManager.GetConnections(userName);
-
-            try
+            if (connections != null && connections.Count > 0)
             {
-                if (connections != null && connections.Count > 0)
+                foreach (var conn in connections)
                 {
-                    foreach (var conn in connections)
+                    try
                     {
-
-                        try
-                        {
-                            await _context.Clients.Client(conn).SendAsync("InfoNotif", notifContent);
-                        }
-                        catch
-                        {
-                            throw new Exception("No connections found");
-                        }
+                        await _context.Clients.Client(conn).SendAsync(level, notifContent);
+                    }
+                    catch
+                    {
+                        throw new Exception("No connections found");
                     }
                 }
-                return Task.CompletedTask;
-            }
-            catch
-            {
-                throw new Exception("ERROR");
             }
         }
     }

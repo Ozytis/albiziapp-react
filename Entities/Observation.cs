@@ -1,5 +1,6 @@
 ﻿using Entities.Enums;
 using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Driver.GeoJsonObjectModel;
 using System;
 using System.Collections.Generic;
 
@@ -20,10 +21,8 @@ namespace Entities
 
         public DateTime Date { get; set; }
 
+        public GeoJsonPoint<GeoJson2DGeographicCoordinates> Coordinates { get; set; }
 
-        public decimal Latitude { get; set; }
-
-        public decimal Longitude { get; set; }
 
         public string TelaBotanicaTaxon { get; set; }
 

@@ -156,7 +156,8 @@ class ObservationPageState {
     isAddingCommentary: boolean;
     newCommentary: string="";
     validatedC: string="";
-    validatedL: string="";
+    validatedL: string = "";
+    myObservation: ObservationStatementModel;
 }
 
 class ObservationPageComponent extends BaseComponent<ObservationPageProps, ObservationPageState>{
@@ -177,11 +178,15 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
     }
 
     async filterObservationStatements() {
-        const os = this.state.observation.observationStatements;        
+        const os = this.state.observation.observationStatements;
+        const cu = this.state.currentUser;
         const fot = os.find(x => x.order = 1);
             this.setState({ firstObservationStatement: fot }); 
             const filteredOs = os.filter(x => x.order != 1);
         this.setState({ filteredObservationStatements: filteredOs });
+        const myObs = os.find(x => x.userId == cu);
+        this.setState({ myObservation: myObs });
+
     }
 
     async checkTreeSize() {
@@ -567,7 +572,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
     render() {
 
         const { classes } = this.props;
-        const { observation, enableEditAndDeleteButton, filteredObservationStatements, firstObservationStatement } = this.state;
+        const { observation, enableEditAndDeleteButton, filteredObservationStatements, firstObservationStatement, myObservation } = this.state;
         if (!observation) {
             return <>Chargement</>;
         }
@@ -652,17 +657,21 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                                 <td className={clsx(classes.score)}>{firstObservationStatement.totalScoreSpecies}</td>
                                             </tr>
                                         }
-                                        <tr className={clsx(classes.trait)}>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                        </tr>
                                         {
-                                            filteredObservationStatements && filteredObservationStatements.map((os, index) => {
+                                            filteredObservationStatements &&
+                                            <tr className={clsx(classes.trait)}>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        }
+                                        {
+                                            filteredObservationStatements && filteredObservationStatements.map((os, index) => {                                       
+                                        
                                                 if (index == 0) {
                                                     return (
                                                         <tr key={"CommonObservationStatement-"+ index }>
@@ -689,7 +698,30 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                                         </tr>
                                                  )
                                                 }}
-                                        )}
+                                            )}
+                                        {
+                                            myObservation &&
+                                            <tr className={clsx(classes.trait)}>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>}
+                                        {
+                                            myObservation &&
+                                            <tr>
+                                                <td className={clsx(classes.bold)}>Ma proposition</td>
+                                                <td className={clsx(classes.score)}>{myObservation.totalScore}</td>
+                                                <td></td>
+                                                <td>{myObservation.commonGenus}</td>
+                                                <td>{myObservation.commonSpeciesName}</td>
+                                                <td></td>
+                                                <td className={clsx(classes.score)}>{myObservation.totalScoreSpecies}</td>
+                                            </tr>
+                                        }
                                     </tbody>
                                 </table>
                             </>
@@ -730,6 +762,8 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                                 <td className={clsx(classes.score)}>{firstObservationStatement.totalScoreSpecies}</td>
                                             </tr>
                                         }
+                                        {
+                                            filteredObservationStatements && filteredObservationStatements.map((os, index) => {
                                         <tr className={clsx(classes.trait)}>
                                             <td></td>
                                             <td></td>
@@ -739,8 +773,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                             <td></td>
                                             <td></td>
                                         </tr>
-                                        {
-                                            filteredObservationStatements && filteredObservationStatements.map((os, index) => {
+                                        
                                                 if (index == 0) {
                                                     return (
                                                         <tr key={"LatinObservationStatement-" + index}>
@@ -769,6 +802,31 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                                 }
                                             }
                                             )}
+                                        {
+                                            myObservation &&
+
+                                            <tr className={clsx(classes.trait)}>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        }
+                                        {
+                                            myObservation &&
+                                            <tr>
+                                                <td className={clsx(classes.bold)}>Ma proposition</td>
+                                                <td className={clsx(classes.score)}>{myObservation.totalScore}</td>
+                                                <td></td>
+                                                <td>{myObservation.genus}</td>
+                                                <td>{myObservation.speciesName}</td>
+                                                <td></td>
+                                                <td className={clsx(classes.score)}>{myObservation.totalScoreSpecies}</td>
+                                            </tr>
+                                        }
                                     </tbody>
                                 </table>
                                 </>

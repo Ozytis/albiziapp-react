@@ -47,7 +47,9 @@ namespace Web
             services.AddScoped<TitlesManager>();
             services.AddSignalR();
             services.AddSingleton<HubConnectionManager>();
+            services.AddSingleton<HubPositionManager>();
             services.AddSingleton<IUserNotify, NotifyHub>();
+            services.AddSingleton<IUserPosition, PositionHub>();
             services.AddSwaggerGen();
         }
 
@@ -83,6 +85,7 @@ namespace Web
                 endpoints.MapControllers();
                 endpoints.MapFallbackToFile("index.html");
                 endpoints.MapHub<NotifyHub>("/notifyhub");
+                endpoints.MapHub<PositionHub>("/positionhub");
             });
         }
 

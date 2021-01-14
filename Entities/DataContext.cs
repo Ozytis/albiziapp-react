@@ -8,6 +8,10 @@ namespace Entities
         {
             this.MongoClient = new MongoClient(config.ConnectionString);
             this.Database = this.MongoClient.GetDatabase(config.Database);
+
+            var observationsCollection = this.Observations;
+            var model = new CreateIndexModel<Observation>(Builders<Observation>.IndexKeys.Geo2DSphere(o => o.Coordinates));
+            observationsCollection.Indexes.CreateOne(model);
         }
 
         public IMongoCollection<User> Users

@@ -5,11 +5,11 @@ namespace Common
 {
     public interface IUserNotify
     {
-        public Task<Task> SendNotif(string username, string notifContent);
+        public Task SendNotif(string username, string notifContent);
 
-        public Task<Task> SendErrorNotif(string username, string notifContent);
+        public Task SendErrorNotif(string username, string notifContent);
 
-        public Task<Task> SendInfoNotif(string username, string notifContent);
+        public Task SendInfoNotif(string username, string notifContent);
 
     }
 }

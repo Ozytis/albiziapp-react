@@ -134,22 +134,6 @@ class App extends BaseComponent<AppProps, AppState>{
                 notify();
             });
 
-            try {
-                await hubConnection.start();
-            }
-            catch (err) {
-                console.error(err);
-            };
-
-        }
-
-        if (currentUser) {
-
-            var hubConnection = new signalR.HubConnectionBuilder()
-                .withUrl("/notifyhub")
-                .build();
-
-
             hubConnection.on("ErrorNotif", function (notifContent: string) {
 
                 const notify = () => toast.error(notifContent, {
@@ -177,22 +161,6 @@ class App extends BaseComponent<AppProps, AppState>{
                 ReactDOM.render(element, document.getElementById('toasterror'));
                 notify();
             });
-
-            try {
-                await hubConnection.start();
-            }
-            catch (err) {
-                console.error(err);
-            };
-
-        }
-
-        if (currentUser) {
-
-            var hubConnection = new signalR.HubConnectionBuilder()
-                .withUrl("/notifyhub")
-                .build();
-
 
             hubConnection.on("InfoNotif", function (notifContent: string) {
 
@@ -230,6 +198,8 @@ class App extends BaseComponent<AppProps, AppState>{
             };
 
         }
+
+        
     }
 
     appHistory: BrowserHistory;

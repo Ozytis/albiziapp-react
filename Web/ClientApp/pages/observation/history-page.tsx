@@ -112,7 +112,6 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
 
     async isEditAndDeleteEnable() {
         const os = this.state.myObservation;
-        console.log(os);
         if (os && !os.observationStatementConfirmations) {
             await this.setState({ enableEditAndDeleteButton: true })
         }
