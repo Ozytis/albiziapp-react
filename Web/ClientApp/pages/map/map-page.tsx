@@ -101,14 +101,14 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         this.hub = new signalR.HubConnectionBuilder()
             .withUrl("/positionhub")
             .build();
-        this.hub.start();
+        
 
 
-        this.hub.on("Refresh",  async () =>  {
+        this.hub.on("Refresh", async () => {
             var obs = await ObservationsApi.getNearestObservations(this.state.userPosition.coords.latitude,this.state.userPosition.coords.longitude);
             this.setState({observations:obs})
         });
-
+        this.hub.start();
         
         
         var missions = await MissionsApi.getMissions();
