@@ -911,7 +911,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                         </Box>
                     }  
                     <Box className={clsx(classes.top)}>
-                        <table className={clsx(classes.center)}>
+                        <table className={clsx(classes.center)} style={{width:"90%"}}>
                             <tbody>
                                 <tr>
                                     <td style={{ width: "20%" }}>Hauteur</td>
@@ -927,12 +927,17 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                     <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isMoreThan10m ? "green" : "white", color: this.state.isMoreThan10m ? "white" : "black"  }} onClick={() => this.setTreeSize(3)} >
                                         + de 10m
                                 </td>
-                                    {this.state.isUpdatingTreeSize &&
-                                        <td onClick={() => this.updateTreeSize()}>{<Check />}</td>
-                                    }
                                 </tr>
                             </tbody>
                         </table>
+                        {
+                            this.state.isUpdatingTreeSize &&
+                        <Box className={clsx(classes.buttonsDiv)}>
+                            <Button color="primary" variant="contained" fullWidth startIcon={<Check />} onClick={() => this.updateTreeSize()}>
+                                {t.__("Valider la nouvelle taille")}
+                            </Button>                           
+                            </Box>
+                        }
                     </Box>
                     <div className={clsx(classes.trait, classes.center)}> </div>
 

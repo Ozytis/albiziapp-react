@@ -99,7 +99,6 @@ namespace Business
                 newObservation.Id = Guid.NewGuid().ToString("N");
                 newObservation.Pictures = new List<string>();
                 newObservation.Date = DateTime.UtcNow;
-                newObservation.TreeSize = TreeSize.MoreThan10m;
 
                 var statement = new ObservationStatement();
                 statement.Id = Guid.NewGuid().ToString("N");
