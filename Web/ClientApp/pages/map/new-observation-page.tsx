@@ -17,12 +17,9 @@ import { ObservationsApi } from "../../services/observation";
 import { SpeciesApi } from "../../services/species-service";
 import { t } from "../../services/translation-service";
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { SpeciesPage } from "../species/species-page";
-import { SpeciesInfoPage } from "../species/species-info-page";
 import { SpeciesInfoComponent } from "../species/species-info-component";
 import { StringHelper } from "../../utils/string-helper";
 import { MapPosition } from "../../components/mapPosition";
-import { ScreenVars } from "../../app";
 
 const styles = (theme: Theme) => createStyles({
     root: {        
@@ -64,6 +61,19 @@ const styles = (theme: Theme) => createStyles({
         color: theme.palette.primary.contrastText,
         zIndex: 9999
     },
+    center: {
+        marginLeft: "auto",
+        marginRight: "auto"
+    },
+    tabConfiance: {
+        width: "20%",
+        border: "solid 1px black",
+        textAlign: "center",
+        cursor: "pointer"
+    },
+    top: {
+        marginTop: "2%"
+    },
 });
 
 interface NewObservationPageProps extends RouteComponentProps, IPropsWithAppContext, WithStyles<typeof styles> {
@@ -87,6 +97,11 @@ class NewObservationPageState {
     selectedCommonSpecies: SpeciesModel;
     selectedspecies: SpeciesModel;
     showModalSpecied = false;
+    isLessThan2m: boolean;
+    isBetween2And5m: boolean;
+    isBetween5And10m: boolean;
+    isMoreThan10m: boolean;  
+    newTreeSize: number = null;
 }
 
 class NewObservationPageComponent extends BaseComponent<NewObservationPageProps, NewObservationPageState>{
@@ -228,6 +243,45 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         await this.clearConfident();
     }
 
+    async setTreeSize(level: number) {
+
+        if (level == 0) {
+            if (this.state.isLessThan2m) {
+                await this.setState({ isLessThan2m: false, newTreeSize: null})
+            }
+            else if (!this.state.isLessThan2m) {
+                await this.setState({ isLessThan2m: true, isBetween2And5m: false, isBetween5And10m: false, isMoreThan10m: false, newTreeSize: 0 })
+            }
+        }
+
+        if (level == 1) {
+            if (this.state.isBetween2And5m) {
+                await this.setState({ isBetween2And5m: false, newTreeSize: null})
+            }
+            else if (!this.state.isBetween2And5m) {
+                await this.setState({ isBetween2And5m: true, isLessThan2m: false, isBetween5And10m: false, isMoreThan10m: false, newTreeSize: 1 })
+            }
+        }
+
+        if (level == 2) {
+            if (this.state.isBetween5And10m) {
+                await this.setState({ isBetween5And10m: false, newTreeSize: null})
+            }
+            else if (!this.state.isBetween5And10m) {
+                await this.setState({ isBetween5And10m: true, isLessThan2m: false, isBetween2And5m: false, isMoreThan10m: false, newTreeSize: 2 })
+            }
+        }
+        if (level == 3) {
+            if (this.state.isMoreThan10m) {
+                await this.setState({ isMoreThan10m: false, newTreeSize: null})
+            }
+            else if (!this.state.isMoreThan10m) {
+                await this.setState({ isMoreThan10m: true, isLessThan2m: false, isBetween2And5m: false, isBetween5And10m: false, newTreeSize: 3 })
+            }
+        }
+
+    }
+
 
 
     async process() {
@@ -240,6 +294,8 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
             localStorage.setItem("mapPosition", JSON.stringify({ Latitude: this.state.model.latitude, Longitude: this.state.model.longitude, Zoom: 18, Date: now } as MapPosition));
 
             await this.setState({ isProcessing: true, errors: [] });
+
+            this.state.model.treeSize = this.state.newTreeSize;
 
             const result = await ObservationsApi.createObservation(this.state.model);
 
@@ -406,21 +462,28 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                             <a style={{ color: 'black' }} onClick={() => { this.goToSpeciesPage(); }}>Voir la fiche de l'espèce </a>
                         }
                     </FormControl>
-                    {this.showConfident() &&
-                        <>
-                            <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                                {t.__("Confiance")}
-                            </Typography>
 
-
-                            <RadioGroup value={model.isConfident} onChange={(event) => { this.updateModel("isConfident", event.target.value) }} >
-                                <FormControlLabel value={0} control={<Radio checked={model.isConfident == 0} />} label={t.__("Peu confiant")} className={clsx(classes.label)} />
-                                <FormControlLabel value={1} control={<Radio checked={model.isConfident == 1} />} label={t.__("Moyennement confiant")} className={clsx(classes.label)} />
-                                <FormControlLabel value={2} control={<Radio checked={model.isConfident == 2} />} label={t.__("Confiant")} className={clsx(classes.label)} />
-                            </RadioGroup>
-                        </>
-                    }
-
+                    <Box className={clsx(classes.top)}>
+                        <table className={clsx(classes.center)} style={{ width: "90%",color: "black" }}>
+                            <tbody>
+                                <tr>
+                                    <td style={{ width: "20%" }}>Hauteur</td>
+                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isLessThan2m ? "green" : "white", color: this.state.isLessThan2m ? "white" : "black" }} onClick={() => this.setTreeSize(0)}>
+                                        - de 2m
+                                    </td>
+                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isBetween2And5m ? "green" : "white", color: this.state.isBetween2And5m ? "white" : "black" }} onClick={() => this.setTreeSize(1)}>
+                                        2m à 5m
+                                </td>
+                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isBetween5And10m ? "green" : "white", color: this.state.isBetween5And10m ? "white" : "black" }} onClick={() => this.setTreeSize(2)} >
+                                        5m à 10m
+                                </td>
+                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isMoreThan10m ? "green" : "white", color: this.state.isMoreThan10m ? "white" : "black" }} onClick={() => this.setTreeSize(3)} >
+                                        + de 10m
+                                </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </Box>
                     <Typography variant="h6" className={clsx(classes.sectionHeading)}>
                         {t.__("Photographie")}
                     </Typography>

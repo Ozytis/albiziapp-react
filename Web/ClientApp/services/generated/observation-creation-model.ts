@@ -11,6 +11,7 @@ export class ObservationCreationModel {
     species = "";
     latitude: number = null;
     longitude: number = null;
+    treeSize: number = null;
 
     validate() {
         const errors: string[] = [];

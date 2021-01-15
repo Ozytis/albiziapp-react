@@ -81,7 +81,7 @@ namespace Web.Controllers
         {
 
             var observation = await this.ObservationsManager.CreateObservationAsync( model.Species,model.Genus, this.User.Identity.Name,(Confident?)model.IsConfident,model.Latitude,model.Longitude,
-                  model.Pictures );
+                  model.Pictures, model?.TreeSize);
             await this.UserPosition.SendRefresh( observation.Coordinates.Coordinates.Latitude, observation.Coordinates.Coordinates.Longitude);
 
         }

@@ -88,7 +88,7 @@ namespace Business
         {
             return await this.DataContext.Observations.Find(obs => obs.Id == observationId).FirstOrDefaultAsync();
         }
-        public async Task<Observation> CreateObservationAsync(string speciesName, string genus, string userid, Confident? confident, double latitude, double longitude, string[] pictures)
+        public async Task<Observation> CreateObservationAsync(string speciesName, string genus, string userid, Confident? confident, double latitude, double longitude, string[] pictures, int? treeSize)
         {
             using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
             Observation newObservation = new Observation();
@@ -109,7 +109,7 @@ namespace Business
                 newObservation.ObservationStatements = new List<ObservationStatement>();
 
                 newObservation.Coordinates = new GeoJsonPoint<GeoJson2DGeographicCoordinates>(new GeoJson2DGeographicCoordinates(longitude, latitude));
-               
+                newObservation.TreeSize = (TreeSize?)treeSize;
 
                 if (!string.IsNullOrEmpty(genus))
                 {
