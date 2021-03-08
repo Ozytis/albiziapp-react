@@ -1,5 +1,5 @@
-import { Box, Button, createStyles, Icon,Tab, Tabs, Theme, WithStyles, withStyles} from "@material-ui/core";
-import { Check, Delete, Edit, NearMe, Cancel, Add } from "@material-ui/icons";
+import { Box, Button, createStyles, Icon, Theme, WithStyles, withStyles} from "@material-ui/core";
+import { Check, Delete, NearMe, Cancel, Add } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -13,9 +13,7 @@ import { AuthenticationApi } from "../../services/authentication-service";
 import { MapPosition } from "../../components/mapPosition";
 import { ObservationStatementModel } from "../../services/generated/observation-statement-model";
 import { AddObservationStatementConfirmationModel } from "../../services/generated/add-observation-statement-confirmation-model";
-import { filter } from "lodash";
 import { PhotoFormItem } from "../../components/photo-form-item";
-import { ObservationCommentaryModel } from "../../services/generated/observation-commentary-model";
 
 const styles = (theme: Theme) => createStyles({
     root: {

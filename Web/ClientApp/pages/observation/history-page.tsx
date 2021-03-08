@@ -67,7 +67,6 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
     }
 
     async componentDidMount() {
-        console.log("cdm");
 
         const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
         const currentUser = await AuthenticationApi.getCurrentUser();
@@ -75,11 +74,7 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
         this.filterObservationStatements();
         this.getUserObservation();
         this.isEditAndDeleteEnable();
-    }
-
-
-    componentWillReceiveProps() {
-        console.log("cwrp");
+        console.log(this.props.history);
     }
 
     async filterObservationStatements() {
@@ -91,7 +86,6 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
     }
 
     setDateFormat(date: string) {
-        console.log(date);
         if (date != null) {
             return new Date(date).toLocaleDateString()
         }
@@ -112,7 +106,8 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
 
     async isEditAndDeleteEnable() {
         const os = this.state.myObservation;
-        if (os && !os.observationStatementConfirmations) {
+        const o = this.state.observation;
+        if (os && !os.observationStatementConfirmations && o.observationStatements[(o.observationStatements.length - 1)].id == this.state.myObservation.id) {
             await this.setState({ enableEditAndDeleteButton: true })
         }
         else {
@@ -132,15 +127,31 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
         }
 
         await this.setState({ isDeleting: true });
-        const result = await ObservationsApi.deleteStatement(this.state.observation.id, this.state.myObservation.id);
-        await this.setState({ isDeleting: false });
+        var result;
+        if (this.state.observation.observationStatements.length <= 1 && this.state.observation.observationStatements[0].id == this.state.myObservation.id) {
+            result = await ObservationsApi.deleteStatement(this.state.observation.id, this.state.myObservation.id, true);
+            await this.setState({ isDeleting: false });
 
-        if (result.success) {
-            const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
-            await this.setState({ observation: observation, observationStatements: observation.observationStatements });
-            this.filterObservationStatements();
-            this.getUserObservation();
+            if (result.success) {
+                this.props.history.replace({
+                    pathname: "/map"
+                })
+            }
         }
+        else {
+            result = await ObservationsApi.deleteStatement(this.state.observation.id, this.state.myObservation.id, false);
+            await this.setState({ isDeleting: false });
+
+            if (result.success) {
+                const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
+                await this.setState({ observation: observation, observationStatements: observation.observationStatements });
+                this.filterObservationStatements();
+                this.getUserObservation();
+            }
+        }
+
+
+       
     }
 
     checkIsIdentified(statementId:string) {

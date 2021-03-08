@@ -198,11 +198,16 @@ namespace Web.Controllers
             }
         }
 
-        [HttpPut("deleteStatement/{observationId}/{statementId}")]
+        [HttpPut("deleteStatement/{observationId}/{statementId}/{deleteObservation}")]
         [HandleBusinessException, ValidateModel]
-        public async Task DeleteObservationStatementAsync(string observationId, string statementId)
+        public async Task DeleteObservationStatementAsync(string observationId, string statementId, bool deleteObservation)
         {
             await this.ObservationsManager.DeleteObservationStatementAsync(observationId,statementId, this.User.Identity.Name);
+            if (deleteObservation)
+            {
+               await this.DeleteObservationAsync(observationId);
+            }
+            
         }
         [HttpDelete("{observationId}")]
         [HandleBusinessException, ValidateModel]

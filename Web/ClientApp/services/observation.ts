@@ -112,9 +112,9 @@ class ObservationsService extends BaseService {
 
         return result;
     }
-    async deleteStatement(observationId:string, statementId: string) {
+    async deleteStatement(observationId: string, statementId: string, deleteObservation: boolean) {
 
-        const result = await this.put(`observations/deleteStatement/${observationId}/${statementId}`,null);
+        const result = await this.put(`observations/deleteStatement/${observationId}/${statementId}/${deleteObservation}`,null);
 
         if (!result.success) {
             return result;

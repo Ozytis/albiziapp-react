@@ -1,12 +1,9 @@
-import { Box, createStyles, Icon, Tab, Tabs, Theme, WithStyles, withStyles } from "@material-ui/core";
-import clsx from "clsx";
+import { createStyles,Theme, WithStyles, withStyles } from "@material-ui/core";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
 import { BaseComponent } from "../../components/base-component";
-import { SpeciesInfoModel } from "../../services/generated/species-info-model";
 import { SpeciesApi } from "../../services/species-service";
-import { t } from "../../services/translation-service";
 import { SpeciesInfoComponent } from "./species-info-component";
 
 const styles = (theme: Theme) => createStyles({
@@ -45,12 +42,6 @@ class SpeciesInfoPageComponent extends BaseComponent<SpeciesPageProps, SpeciesPa
 
 
     render() {
-
-        const { classes } = this.props;
-
-
-
-
         return (
             <>
                 {this.state.speciesId != null && this.state.speciesId.length > 0 &&
@@ -59,7 +50,5 @@ class SpeciesInfoPageComponent extends BaseComponent<SpeciesPageProps, SpeciesPa
             </>
         )
     }
-
 }
-
 export const SpeciesInfoPage = withStyles(styles, { withTheme: true })(withAppContext(withRouter(SpeciesInfoPageComponent)));
