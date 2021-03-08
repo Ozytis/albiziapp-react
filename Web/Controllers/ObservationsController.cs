@@ -208,7 +208,9 @@ namespace Web.Controllers
         [HandleBusinessException, ValidateModel]
         public async Task DeleteObservationAsync(string observationId)
         {
+            var observation = await this.ObservationsManager.GetObservationbyId(observationId);
             await this.ObservationsManager.DeleteObservationAsync(observationId, this.User.Identity.Name);
+            await this.UserPosition.SendRefresh(observation.Coordinates.Coordinates.Latitude, observation.Coordinates.Coordinates.Longitude);
         }
 
         [HttpPut("validate/{observationId}")]

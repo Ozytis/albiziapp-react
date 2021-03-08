@@ -122,7 +122,6 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                 missionProgression: userMissions.missionProgression
             });
         }
-
         await this.setPosition();
     }
 

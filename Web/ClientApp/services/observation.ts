@@ -225,14 +225,14 @@ class ObservationsService extends BaseService {
         const observations = await this.getUserObservations(userId);
 
         const species = await SpeciesApi.getAllSpecies();
-
-        return observations.map(o => o.observationStatements[0])
+        
+        return observations.map(o => o.observationStatements[0]).filter(os => os != null)
             .map(o => o.speciesName)
             .filter((species, index, self) => self.indexOf(species) === index)
             .map(speciesName => {
                 return {
                     species: species.find(s => s.speciesName === speciesName),
-                    nbOfViews: observations.map(o => o.observationStatements[0]).filter(o => o.speciesName === speciesName).length
+                    nbOfViews: observations.map(o => o.observationStatements[0]).filter(o => o != null &&  o.speciesName === speciesName).length
                 }
             }).filter(o => o.species != null)
             .sort((s1, s2) => s1.species.speciesName.localeCompare(s2.species.speciesName));

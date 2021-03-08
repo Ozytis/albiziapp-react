@@ -71,7 +71,7 @@ class ObservationsPageComponent extends BaseComponent<ObservationsPageProps, Obs
             <Box className={clsx(classes.root)}>
                 <List>
                     {
-                        this.state.observations && this.state.observations.map(observation => {
+                        this.state.observations && this.state.observations.filter(o => o.observationStatements[0] != null).map(observation => {
                             return (
                                 <ListItem key={observation.id} onClick={() => this.goTo(`observation/${observation.id}`)} className={clsx(classes.card)}>
                                     <ListItemText primary={observation.observationStatements[0].speciesName} secondary={new Date(observation.observationStatements[0].date).toLocaleString()} />

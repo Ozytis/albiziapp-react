@@ -439,7 +439,8 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         const fot = this.state.firstObservationStatement;
         const os = this.state.filteredObservationStatements;
         const cu = this.state.currentUser;
-        if (fot.userId == cu && os.length == 0 && fot .observationStatementConfirmations == undefined) {
+        console.log(this.state.observation.userId);
+        if (this.state.observation.userId == cu && os.length == 0 && (fot.observationStatementConfirmations == undefined || fot.observationStatementConfirmations.length == 0)) {
             await this.setState({ enableEditAndDeleteButton: true})
         }
         else {
@@ -453,7 +454,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         const fot = this.state.firstObservationStatement;
         const res = os.find(x => x.userId === cu);
         const osc = os.find(x => x.observationStatementConfirmations != null && x.observationStatementConfirmations.find(sc => sc.userId == cu));
-        if (res == undefined && osc == undefined && fot.userId !=cu) {
+        if (res == undefined && osc == undefined && (fot == null || fot.userId !=cu)) {
             await this.setState({ displayAddAndConfirmButton: true })
         }
         else {
@@ -941,26 +942,25 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                     </Box>
                     <div className={clsx(classes.trait, classes.center)}> </div>
 
-                        {/*
-                            enableEditAndDeleteButton &&
-                            <>
-                            <Box className={clsx(classes.buttonsDiv)}>
-                                <Button color="primary" variant="contained" fullWidth startIcon={<Edit />} onClick={() => this.editObservation()}>
-                                     {t.__("Modifier")}
-                                 </Button>
-                                <Button color="secondary" variant="contained" fullWidth startIcon={<Delete />} onClick={() => this.remove()}>
-                                     {t.__("Supprimer")}
-                                  </Button>
-                                </Box>
-                            </>
-                        */}                       
+                                
 
                     <Box className={clsx(classes.buttonsDiv)}>
                         <Button color="secondary" variant="contained" fullWidth startIcon={<NearMe />} onClick={async () => { await this.updateLocalStorage(); this.goTo("/map") }}>
                             {t.__("Voir sur la map")}
                         </Button>
                     </Box>
-                    <div className={clsx(classes.trait, classes.center)}> </div>
+                    <div className={clsx(classes.trait, classes.center)}>   </div>
+                   
+                    {enableEditAndDeleteButton &&
+                        <>
+                            <Box className={clsx(classes.buttonsDiv)}>
+                                <Button color="secondary" variant="contained" fullWidth startIcon={<Delete />} onClick={() => this.remove()}>
+                                    {t.__("Supprimer")}
+                                </Button>
+                            </Box>
+                        </>
+                    }
+           
                     {//observation.observationCommentarys &&
                         <Box>
                             <div style={{ marginTop: "2%", marginLeft: "3%", fontWeight:"bold", textDecoration:"underline" }}>
@@ -980,6 +980,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                             })
 
                             }
+                          
                             {this.state.isAddingCommentary && 
                                 <textarea className={clsx(classes.textArea)} value={this.state.newCommentary} onChange={(value) => this.updateCommentary(value.target.value)} />
                             }                           
