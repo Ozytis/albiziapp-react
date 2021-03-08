@@ -185,7 +185,7 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
                     {
                         <div className="photo-form-item-button text-center m-2" onClick={() => this.openModale()}>
                             <Icon className={clsx("fas fa-camera", this.props.classes.cameraIcon)} />
-                            <input type="file" accept="image/*"
+                            <input type="file" accept=".jpg, .jpeg, .png"
                                 capture="camera" ref={input => this.control = input} onChange={(e) => this.onFileSelected(e.target.files)}
                                 className={clsx(this.props.classes.input)}
                             />
@@ -240,7 +240,7 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
                                     </Button>
                                     <div className="photo-form-item-button text-center m-2" >
 
-                                        <input type="file" accept="image/*" ref={input => this.controlPicker = input} onChange={(e) => this.onFileSelected(e.target.files)}
+                                        <input type="file" accept=".jpg, .jpeg, .png" ref={input => this.controlPicker = input} onChange={(e) => this.onFileSelected(e.target.files)}
                                             className={clsx(this.props.classes.input)}
                                         />
                                     </div>

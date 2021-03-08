@@ -70,7 +70,7 @@ const styles = (theme: Theme) => createStyles({
     }
 });
 
-interface SpeciesComponentProps extends  WithStyles<typeof styles> {
+interface SpeciesComponentProps extends RouteComponentProps, IPropsWithAppContext, WithStyles<typeof styles> {
     speciesId?: string;
 }
 
@@ -81,7 +81,7 @@ class SpeciesComponentState {
 }
 
 //@withStyles(styles)
-export class SpeciesInfoComponent extends BaseComponent<SpeciesComponentProps, SpeciesComponentState>{
+export class SpeciesInfoPageComponent extends BaseComponent<SpeciesComponentProps, SpeciesComponentState>{
     constructor(props: SpeciesComponentProps) {
         super(props, "SpeciesPage", new SpeciesComponentState());
     }
@@ -226,4 +226,4 @@ export class SpeciesInfoComponent extends BaseComponent<SpeciesComponentProps, S
 }
 //export default withStyles(styles)(SpeciesInfoComponent);
 
-//export const SpeciesInfoPage = withStyles(styles, { withTheme: true })(withAppContext(withRouter(SpeciesInfoPageComponent)));
+export const SpeciesInfoComponent = withStyles(styles, { withTheme: true })(withAppContext(withRouter(SpeciesInfoPageComponent)));

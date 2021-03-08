@@ -43,22 +43,30 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
 
     async componentDidMount() {
         console.log("CDM AP");
-        
+
         const species = await ObservationsApi.getUserArboretum(AuthenticationApi.user.osmId);
         await this.setState({ species: species });
-       
+
     }
 
     render() {
 
         const { classes } = this.props;
         const { species } = this.state;
-        
+
 
         return (
             <Box>
+                <div>
+                    {
+                        species && species.length == 0 &&
+                        <p className="m-auto" style={{ width: "fit-content" }}>Il vous faut faire au moins un releve avec un genre</p>
+                    }
+
+                </div>
+
                 <Box>
-                    <ToastContainer                        
+                    <ToastContainer
                         position="bottom-center"
                         autoClose={5000}
                         hideProgressBar={false}
@@ -70,25 +78,16 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
                         pauseOnHover
                     />
                 </Box>
-                 <Box className={clsx(classes.root)}>
-                {
+                <Box className={clsx(classes.root)}>
+                    {
                         species && species.map(arboretum => {
                             return (arboretum.species != null ?
-                            <ArboretumCard key={arboretum.species.id} species={arboretum.species} nbOfViews={arboretum.nbOfViews} /> : <></>
-                        )
-                    })
-                    } 
-                    <Box>
-                    {
-                        species && species.length ==0 &&
-
-                        t.__("Il vous faut faire au moins un releve avec un genre")
-                        
+                                <ArboretumCard key={arboretum.species.id} species={arboretum.species} nbOfViews={arboretum.nbOfViews} /> : <></>
+                            )
+                        })
                     }
-
-                    </Box>
                 </Box>
-               
+
             </Box>
         )
     }

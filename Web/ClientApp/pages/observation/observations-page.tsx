@@ -9,13 +9,11 @@ import { AuthenticationApi } from "../../services/authentication-service";
 import { ChevronRight } from "@material-ui/icons";
 import { ObservationModel } from "../../services/generated/observation-model";
 
-// eslint-disable-next-line
 const styles = (theme: Theme) => createStyles({
     root: {
         marginBottom: "15%",
     },
     card: {
-        //color: theme.palette.common.white,
         cursor: "pointer",        
     }
 });
@@ -42,7 +40,7 @@ class ObservationsPageComponent extends BaseComponent<ObservationsPageProps, Obs
     async loadObservations() {
 
         const observations = await ObservationsApi.getUserObservations(AuthenticationApi.user.osmId);
-
+        console.log(observations);
 
         if (!this.unmounted) {
             await this.setState({ observations: observations });
@@ -85,6 +83,13 @@ class ObservationsPageComponent extends BaseComponent<ObservationsPageProps, Obs
                         })
                     }
                 </List>
+                
+                <Box>
+                    {
+                    this.state.observations == null || this.state.observations.length == 0 &&                    
+                        <p className="m-auto" style={{ width: "fit-content" }}> Vous n'avez fait encore aucun relevé </p>
+                    }
+                </Box>
             </Box>
         )
     }

@@ -225,7 +225,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
             }
         } else {
             model.species = null;
-            await this.setState({ model: model,  selectedCommonSpecies: null,  selectedGenus: null, selectedCommonGenus: null, selectedspecies: null });
+            await this.setState({ model: model,  selectedCommonSpecies: null, selectedspecies: null });
         }
         await this.clearConfident();
     }
@@ -238,7 +238,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
             await this.setState({ model: model, selectedspecies : species });
         } else {
             model.species = null;
-            await this.setState({ model: model, selectedspecies: null });
+            await this.setState({ model: model, selectedCommonSpecies: null, selectedspecies: null });
         }       
         await this.clearConfident();
     }
