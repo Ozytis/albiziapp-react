@@ -20,6 +20,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import { SpeciesInfoComponent } from "../species/species-info-component";
 import { StringHelper } from "../../utils/string-helper";
 import { MapPosition } from "../../components/mapPosition";
+import { Confident } from "../../services/generated/confident";
 
 const styles = (theme: Theme) => createStyles({
     root: {        
@@ -102,6 +103,9 @@ class NewObservationPageState {
     isBetween5And10m: boolean;
     isMoreThan10m: boolean;  
     newTreeSize: number = null;
+    isLowConfident: boolean;
+    isMediumConfident: boolean;
+    isHighConfident: boolean;   
 }
 
 class NewObservationPageComponent extends BaseComponent<NewObservationPageProps, NewObservationPageState>{
@@ -115,7 +119,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                 pathname: "/map"
             })
         }
-
+        this.updateConfident("low");
         AuthenticationApi.refreshUser();
 
         this.listener = SpeciesApi.registerSpeciesListener(() => this.refreshSpecies());
@@ -209,7 +213,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         } else {
             model.genus = null;
             model.species = null;
-            await this.setState({ model: model,  selectedGenus: null, selectedCommonSpecies: null,selectedspecies : null });
+            await this.setState({ model: model, selectedGenus: null, selectedCommonGenus: null, selectedCommonSpecies: null,selectedspecies : null });
         }
         await this.clearConfident();
     }
@@ -219,7 +223,9 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         const species = this.state.species.filter(g => g.commonSpeciesName === commonSpecies);
         if (species != null && species.length > 0) {
             model.species = species[0].speciesName;
-            await this.setState({ model: model, selectedCommonSpecies : species[0] });
+            const genus = this.state.genus.find(g => g.genus === species[0].genus);
+            model.genus = genus.genus;
+            await this.setState({ model: model, selectedCommonSpecies: species[0], selectedGenus: genus, selectedCommonGenus: genus, selectedspecies: species[0]  });
             if (species.length == 1) {
                 this.updateSpecies(species[0].speciesName);
             }
@@ -235,7 +241,9 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         const species = this.state.species.find(g => g.speciesName === speciesName);
         if (species != null) {
             model.species = species.speciesName;
-            await this.setState({ model: model, selectedspecies : species });
+            const genus = this.state.genus.find(g => g.genus === species[0].genus);
+            model.genus = genus.genus;
+            await this.setState({ model: model, selectedspecies: species, selectedGenus: genus, selectedCommonGenus: genus, selectedCommonSpecies:species });
         } else {
             model.species = null;
             await this.setState({ model: model, selectedCommonSpecies: null, selectedspecies: null });
@@ -281,9 +289,46 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         }
 
     }
+    async updateConfident(level: string) {
+        const model = this.state.model;
+        if (level == "low") {
+           /* if (this.state.isLowConfident) {
+                model.isConfident = null;
+                await this.setState({ isLowConfident: false })
+            }
+            else*/
+            if (!this.state.isLowConfident) {
+                model.isConfident = Confident.low;
+                await this.setState({ isLowConfident: true, isMediumConfident: false, isHighConfident: false })
+            }
+        }
 
+        if (level == "medium") {
+            /*if (this.state.isMediumConfident) {
+                model.isConfident = null;
+                await this.setState({ isMediumConfident: false })
+            }
+            else*/
+                if (!this.state.isMediumConfident) {
+                model.isConfident = Confident.medium;
+                await this.setState({ isMediumConfident: true, isLowConfident: false, isHighConfident: false })
+            }
+        }
 
+        if (level == "high") {
+           /* if (this.state.isHighConfident) {
+                model.isConfident = null;
+                await this.setState({ isHighConfident: false })
+            }
+            else */
+            if (!this.state.isHighConfident) {
+                model.isConfident = Confident.high;
+                await this.setState({ isHighConfident: true, isLowConfident: false, isMediumConfident: false })
+            }
+        }
+        await this.setState({model:model})
 
+    }
     async process() {
         if (!this.props.match.params["observationid"]) {
             if (this.state.isProcessing || !await Confirm(t.__("Etes vous sûr de vouloir valider ce relevé ?"))) {
@@ -462,7 +507,9 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                             <a style={{ color: 'black' }} onClick={() => { this.goToSpeciesPage(); }}>Voir la fiche de l'espèce </a>
                         }
                     </FormControl>
-
+                    <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                        {t.__("Hauteur de l'arbre")}
+                    </Typography>
                     <Box className={clsx(classes.top)}>
                         <table className={clsx(classes.center)} style={{ width: "90%",color: "black" }}>
                             <tbody>
@@ -487,9 +534,29 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                     <Typography variant="h6" className={clsx(classes.sectionHeading)}>
                         {t.__("Photographie")}
                     </Typography>
-
                     <PhotoFormItem label={t.__("Prendre une photo")} value={model.pictures} onAdd={val => this.addPicture(val)} onDelete={index => this.deletePicture(index)} />
 
+                    <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                        {t.__("Confiance")}
+                    </Typography>
+                    <div>
+                        <table className={clsx(classes.center)}>
+                            <tbody>
+                                <tr>
+                                    <td style={{ width: "20%" }}>Confiance</td>
+                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isLowConfident ? "green" : "white", color: this.state.isLowConfident ? "white" : "black" }} onClick={() => this.updateConfident("low")}>
+                                        Faible
+                                    </td>
+                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isMediumConfident ? "green" : "white", color: this.state.isMediumConfident ? "white" : "black" }} onClick={() => this.updateConfident("medium")}>
+                                        Moyen
+                                </td>
+                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isHighConfident ? "green" : "white", color: this.state.isHighConfident ? "white" : "black" }} onClick={() => this.updateConfident("high")} >
+                                        Haute
+                                </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                     <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.process()}>
                         <Loader loading={this.state.isProcessing} usualIcon="check" />
                         {t.__("Valider")}

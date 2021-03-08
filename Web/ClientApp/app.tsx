@@ -159,7 +159,6 @@ class App extends BaseComponent<AppProps, AppState>{
             });
 
             hubConnection.on("InfoNotif", function (notifContent: string) {
-
                 const notify = () => toast.info(notifContent, {
                     position: toast.POSITION.TOP_CENTER,
                     autoClose: 7000,

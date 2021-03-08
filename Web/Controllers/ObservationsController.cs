@@ -79,10 +79,16 @@ namespace Web.Controllers
         [HandleBusinessException, ValidateModel]
         public async Task CreateObservationAysnc([FromBody] ObservationCreationModel model)
         {
-
-            var observation = await this.ObservationsManager.CreateObservationAsync( model.Species,model.Genus, this.User.Identity.Name,(Confident?)model.IsConfident,model.Latitude,model.Longitude,
-                  model.Pictures, model?.TreeSize);
-            await this.UserPosition.SendRefresh( observation.Coordinates.Coordinates.Latitude, observation.Coordinates.Coordinates.Longitude);
+            try
+            {
+                var observation = await this.ObservationsManager.CreateObservationAsync(model.Species, model.Genus, this.User.Identity.Name, (Entities.Enums.Confident)model.IsConfident, model.Latitude, model.Longitude,
+                      model.Pictures, model?.TreeSize);
+                await this.UserPosition.SendRefresh(observation.Coordinates.Coordinates.Latitude, observation.Coordinates.Coordinates.Longitude);
+            }
+            catch(BusinessException ex)
+            {
+                await this.UserNotify.SendErrorNotif(this.User.Identity.Name, ex.Message);
+            }
 
         }
 
@@ -170,7 +176,7 @@ namespace Web.Controllers
                 {
                     Id = model.Id,
                     Genus = model.Genus,
-                    Confident = (Confident?) model.IsConfident,
+                    Confident = (Entities.Enums.Confident?) model.IsConfident,
                     SpeciesName = model.Species,
                     UserId = this.User.Identity.Name,
                 }, this.User.Identity.Name);
@@ -217,7 +223,21 @@ namespace Web.Controllers
             await this.ObservationsManager.DeleteObservationAsync(observationId, this.User.Identity.Name);
             await this.UserPosition.SendRefresh(observation.Coordinates.Coordinates.Latitude, observation.Coordinates.Coordinates.Longitude);
         }
+        [HttpDelete("deleteAll")]
+        [HandleBusinessException, ValidateModel]
+        public async Task DeleteAllObservationsAsync()
+        {
+            try
+            {
+                await this.ObservationsManager.DeleteAllObservations();
+                await this.UserNotify.SendInfoNotif(this.User.Identity.Name, "Les données ont bien été supprimer");
+            }
+            catch(BusinessException be)
+            {
+                await this.UserNotify.SendErrorNotif(this.User.Identity.Name, be.Message);
+            }
 
+        }
         [HttpPut("validate/{observationId}")]
         [HandleBusinessException, ValidateModel]
         public async Task ValidateObservationAsync(string observationId)

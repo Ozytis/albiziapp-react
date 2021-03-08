@@ -1,5 +1,5 @@
 import { AppBar, createStyles, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Theme, Toolbar, Typography, withStyles, WithStyles } from "@material-ui/core";
-import { AccountTree, Book, Eco, ExitToApp, Search, SupervisorAccount, VerticalAlignBottom, ArrowBack } from "@material-ui/icons";
+import { AccountTree, Book, Eco, ExitToApp, SupervisorAccount, ArrowBack, ClearAll } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -21,7 +21,9 @@ import { DeterminationKeyPageConfig } from "../pages/determination-key/determina
 import { TitlePageConfig } from "../pages/score/title-page-config";
 import { SpeciesPageConfig } from "../pages/species/species-page-config";
 import { ObservationsPageConfig } from "../pages/observation/observations-page-config";
+import { ObservationsApi } from "../services/observation";
 import { TrophyPageConfig } from "../pages/score/trophy-page-config";
+import { Confirm } from "./confirm";
 
 const styles = (theme: Theme) => createStyles({
     menu: {
@@ -123,7 +125,12 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
         }
 
     }
-
+    async DeleteAllObservations() {
+        if (!await Confirm("Voulez vous effacer tous les relevés existant?")) {
+            return;
+        }
+        await ObservationsApi.deleteAllObservations();
+    }
     hideBackButton() {
         const routes = this.props.appContext.routes.map(route => route.routes).reduce((a, b) => a.concat(b), []);
         const matched = matchRoutes(routes, this.props.location.pathname)[0];  
@@ -231,13 +238,21 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                                     </ListItemIcon>
                                     <ListItemText primary={t.__("Gestion des utilisateurs")} />
                                 </ListItem>
-                            }
+                        }
+                        {this.state.isUserAdmin &&
+                            <ListItem button onClick={() => this.DeleteAllObservations()}>
+                            <ListItemIcon>
+                                <ClearAll />
+                                </ListItemIcon>
+                                <ListItemText primary={t.__("Supprimer tous les relevés")} />
+                            </ListItem>
+                        }
                             <ListItem button onClick={() => this.logOut()}>
                                 <ListItemIcon>
                                     <ExitToApp />
                                 </ListItemIcon>
                                 <ListItemText primary={t.__("Me déconnecter")} />
-                            </ListItem>
+                        </ListItem>
                         </List>
                     </Drawer>
                 }

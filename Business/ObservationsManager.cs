@@ -88,7 +88,11 @@ namespace Business
         {
             return await this.DataContext.Observations.Find(obs => obs.Id == observationId).FirstOrDefaultAsync();
         }
-        public async Task<Observation> CreateObservationAsync(string speciesName, string genus, string userid, Confident? confident, double latitude, double longitude, string[] pictures, int? treeSize)
+        public async Task DeleteAllObservations()
+        {
+            await this.DataContext.Observations.DeleteManyAsync(x => x.Id != null);
+        }
+        public async Task<Observation> CreateObservationAsync(string speciesName, string genus, string userid, Entities.Enums.Confident confident, double latitude, double longitude, string[] pictures, int? treeSize)
         {
             using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
             Observation newObservation = new Observation();
@@ -110,6 +114,7 @@ namespace Business
 
                 newObservation.Coordinates = new GeoJsonPoint<GeoJson2DGeographicCoordinates>(new GeoJson2DGeographicCoordinates(longitude, latitude));
                 newObservation.TreeSize = (TreeSize?)treeSize;
+                
 
                 if (!string.IsNullOrEmpty(genus))
                 {
@@ -392,7 +397,7 @@ namespace Business
                     {
                         pointHistory.Add(new PointHistory { Point = 2, Type = (int)KnowledgePoint.ValidateSameSpecies, Date = currentDate });
                     }
-                    if (statement.Confident.HasValue && statement.Confident.Value == Confident.High)
+                    if (statement.Confident.HasValue && statement.Confident.Value == Entities.Enums.Confident.High)
                     {
                         pointHistory.Add(new PointHistory { Point = 2, Type = (int)KnowledgePoint.ObservationConfident, Date = currentDate });
                     }
@@ -427,7 +432,7 @@ namespace Business
                                 speciesPnToP0Isvalid = true;
                             }
 
-                            if (statement.Confident.HasValue && statement.Confident.Value == Confident.High)
+                            if (statement.Confident.HasValue && statement.Confident.Value == Entities.Enums.Confident.High)
                             {
                                 pointHistoryP0.Add(new PointHistory { Point = 2, Type = (int)KnowledgePoint.ObservationConfident, Date = currentDate });
                             }

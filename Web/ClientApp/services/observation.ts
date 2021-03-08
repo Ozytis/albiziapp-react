@@ -247,7 +247,17 @@ class ObservationsService extends BaseService {
         const result = await this.post(`observations/infoNotif/${userId}/${error}`, null);
         return result;
     }
+    async deleteAllObservations() {
+        const result = await this.delete(`observations/deleteAll`);
 
+        if (!result.success) {
+            return result;
+        }
+
+        this.loadObservations();
+
+        return result;
+    }
    }
 
 export const ObservationsApi = new ObservationsService();

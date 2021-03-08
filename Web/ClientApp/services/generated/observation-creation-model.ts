@@ -6,7 +6,7 @@
 
 export class ObservationCreationModel {
     genus = "";
-    isConfident: number = null;
+    isConfident = 0;
     pictures: string[] = null;
     species = "";
     latitude: number = null;
@@ -15,6 +15,10 @@ export class ObservationCreationModel {
 
     validate() {
         const errors: string[] = [];
+
+        if (undefined == this.isConfident) {
+            errors.push("Choisissez votre confiance");
+        }
 
         return errors;
     }

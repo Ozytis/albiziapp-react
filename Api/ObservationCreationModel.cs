@@ -1,9 +1,12 @@
-﻿namespace Api
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Api
 {
     [GenerateClass]
     public class ObservationCreationModel
     {
         public string Genus { get; set; }
+        [Required(ErrorMessage = "Choisissez votre confiance")]
 
         public int? IsConfident { get; set; }
 
