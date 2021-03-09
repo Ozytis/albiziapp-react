@@ -91,6 +91,16 @@ class ObservationsService extends BaseService {
 
         return result;
     }
+    async updateIsCertain(observationId: string,userName : string) {
+
+        const result = await this.put<ObservationModel>(`observations/isCertain/${observationId}/${userName}`, null);
+
+        if (result.success) {
+            this.loadObservations();
+        }
+
+        return result;
+    }
 
     async editObservation(observation: ObservationEditionModel) {
 

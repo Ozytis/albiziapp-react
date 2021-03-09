@@ -133,6 +133,7 @@ class AuthenticationService extends BaseService {
     }
     async editUser(user: UserEditionModel) {
         const result = await this.put<UserEditionModel>(`users`, user);
+        await this.refreshUser();
         return result;
     }
 }

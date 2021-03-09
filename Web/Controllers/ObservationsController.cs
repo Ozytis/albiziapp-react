@@ -203,7 +203,20 @@ namespace Web.Controllers
                 throw be;
             }
         }
-
+        [HttpPut("isCertain/{observationId}/{userName}")]
+        [HandleBusinessException, ValidateModel]
+        public async Task SetObservationToCertainAysnc(string observationId, string userName)
+        {
+            try
+            {
+                await this.ObservationsManager.SetObservationToCertainAysnc(observationId, userName);
+            }
+            catch (BusinessException be)
+            {
+                await this.UserNotify.SendErrorNotif(this.User.Identity.Name, be.Message);
+                throw be;
+            }
+        }
         [HttpPut("deleteStatement/{observationId}/{statementId}/{deleteObservation}")]
         [HandleBusinessException, ValidateModel]
         public async Task DeleteObservationStatementAsync(string observationId, string statementId, bool deleteObservation)

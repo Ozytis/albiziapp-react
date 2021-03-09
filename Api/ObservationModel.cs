@@ -39,6 +39,8 @@ namespace Api
         public ObservationCommentaryModel[] ObservationCommentarys { get; set; }
 
         public string StatementValidatedId { get; set; }
+        public bool IsCertain { get; set; }
 
+        public string IsCertainBy { get; set; }
     }
 }

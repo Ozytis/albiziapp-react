@@ -14,7 +14,7 @@ import { t } from "../../services/translation-service";
 import { MissionsApi } from "../../services/missions-service";
 import { ActivityModel } from "../../services/generated/activity-model";
 import { MissionProgressionModel } from "../../services/generated/mission-progression-model";
-import { NearMe, ZoomOutMapSharp, MapRounded } from "@material-ui/icons";
+import { NearMe, ZoomOutMapSharp, MapRounded, Layers } from "@material-ui/icons";
 import { MapPosition } from "../../components/mapPosition";
 import * as signalR from "@microsoft/signalr";
 
@@ -301,9 +301,11 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                 {
                     <Button style={{
                         position: "absolute",
-                        top: "9%",
+                        top: "10%",
                         right: "3%",
-                        padding: "10px",
+                        padding: "4px",
+                        minWidth: 0,
+                        width:"auto",
                         zIndex: 400,
                         backgroundColor: "#f4f4f4",
                         color: "black",
@@ -318,9 +320,11 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                 {
                     <Button style={{
                         position: "absolute",
-                        top: "16%",
+                        top: "15%",
                         right: "3%",
-                        padding: "10px",
+                        padding: "4px",
+                        minWidth: 0,
+                        width: "auto",
                         zIndex: 400,
                         backgroundColor: "#f4f4f4",
                         color: "black",
@@ -328,7 +332,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                     }}
                         onClick={() => this.changeLayer()}
                     >
-                        <MapRounded />
+                        <Layers />
                     </Button>
 
                 }

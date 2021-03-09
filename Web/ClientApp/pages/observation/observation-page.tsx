@@ -1,4 +1,4 @@
-import { Box, Button, createStyles, Icon, Theme, WithStyles, withStyles} from "@material-ui/core";
+import { Box, Button, createStyles, Icon, Theme, WithStyles, withStyles, Switch} from "@material-ui/core";
 import { Check, Delete, NearMe, Cancel, Add } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
@@ -14,6 +14,7 @@ import { MapPosition } from "../../components/mapPosition";
 import { ObservationStatementModel } from "../../services/generated/observation-statement-model";
 import { AddObservationStatementConfirmationModel } from "../../services/generated/add-observation-statement-confirmation-model";
 import { PhotoFormItem } from "../../components/photo-form-item";
+import { UserRole } from "../../services/generated/user-role";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -95,7 +96,7 @@ const styles = (theme: Theme) => createStyles({
         cursor:"pointer"
     },
     top: {
-        marginTop: "2%"
+        padding:"1%"
     },
     paper: {
         padding: theme.spacing(2),
@@ -105,7 +106,7 @@ const styles = (theme: Theme) => createStyles({
     trait: {
         borderBottom: "1px solid black",
         width: "95%",
-        marginTop: "2%"
+        //marginTop: "2%"
     },
     score: {
         fontSize: "small",
@@ -156,6 +157,10 @@ class ObservationPageState {
     validatedC: string="";
     validatedL: string = "";
     myObservation: ObservationStatementModel;
+    currentUserRole: UserRole;
+    currentUserName: string;
+    isCertain: boolean = false;
+
 }
 
 class ObservationPageComponent extends BaseComponent<ObservationPageProps, ObservationPageState>{
@@ -167,7 +172,8 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
         const currentUser = await AuthenticationApi.getCurrentUser();
         console.log(observation);
-        await this.setState({ observation: observation, currentUser: currentUser.osmId });   
+
+        await this.setState({ observation: observation, currentUser: currentUser.osmId, currentUserRole: currentUser.role, currentUserName: currentUser.name , isCertain: observation.isCertain });   
         this.filterObservationStatements();
         this.isEditAndDeleteEnable();
         this.canAddOrConfirmStatement();
@@ -567,6 +573,13 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
             }
         
     }
+    async updateIsCertain() {
+        if (!await Confirm("Voulez-vous indiquer ce relevé comme certain?")) {
+            return;
+        }
+        await this.setState({ isCertain: true });
+        await ObservationsApi.updateIsCertain(this.state.observation.id, this.state.currentUserName);
+    }
 
     render() {
 
@@ -574,6 +587,18 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         const { observation, enableEditAndDeleteButton, filteredObservationStatements, firstObservationStatement, myObservation } = this.state;
         if (!observation) {
             return <>Chargement</>;
+        }
+
+        let isCertain;
+        if (!this.state.isCertain) {
+            isCertain =
+                <Button color="primary" variant="contained" fullWidth startIcon={<Check />} onClick={() => this.updateIsCertain()}>
+                    {t.__("Indiquer comme certain")}
+                </Button>;
+            
+        }
+        else {
+            isCertain =  t.__("Vous avez indiquer le relevé comme certain") ;            
         }
         return (
             <>
@@ -614,11 +639,11 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                 }
                                 )
                             </span>
-                            {/*<span>
-                                <span className={clsx(classes.bold)}>Fiabilité:</span>
-                               15%
+                            {this.state.isCertain &&
+                                <span>
+                                <span className={clsx(classes.bold)}>CERTAIN</span>
                             </span>
-                            */}
+                            }
                         </div>
                         
                     {
@@ -833,7 +858,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
 
                     </Box>
 
-                    <Box className={clsx(classes.top)} hidden={this.state.isConfirmating}  >
+                    <Box className={clsx(classes.top)} hidden={this.state.isConfirmating} >
                         <table className={clsx(classes.center)}>
                           <tbody>
                             <tr>
@@ -853,17 +878,31 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                     </Box>
 
             {   this.state.displayAddAndConfirmButton && !observation.isIdentified && 
-                    <Box className={clsx(classes.buttonsDiv)}>                        
+                        <Box className={clsx(classes.buttonsDiv)}>                        
                             <Button color="secondary" disabled={this.state.isValidated} fullWidth variant="contained" startIcon={<Check />} onClick={() => this.showConfirmation()}>
                                 {t.__("Confirmer")}
                             </Button> 
                         </Box>
                     }
                     {!this.state.isConfirmating &&
-                        <Box className={clsx(classes.buttonsDiv)} >
+                        <Box className={clsx(classes.buttonsDiv)}>
                             <Button color="default" variant="contained" fullWidth startIcon={<Cancel />} onClick={() => { this.hideConfirmation() }}>
                                 {t.__("Annuler")}
                             </Button>
+                        </Box>
+                    }
+                        <div className={clsx(classes.trait, classes.center)}> </div>
+                    {
+                        this.state.currentUserRole === UserRole.expert && !this.state.observation.isCertain && 
+
+                        <Box className={clsx(classes.top)}>
+                            {isCertain}
+                            </Box>
+                    }
+                    {this.state.observation.isCertain &&
+                        <Box className={clsx(classes.top)} style={{textAlign:"center"}}>
+                            {t.__("Le relevé a été rendu certain par : " + this.state.observation.isCertainBy)}
+
                         </Box>
                     }
                     <Box className={clsx(classes.slider, classes.top)} onTouchEnd={(e) => this.endSwipe(e)} onTouchStart={(e) => this.startSwipe(e)}>

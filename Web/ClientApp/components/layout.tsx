@@ -1,5 +1,5 @@
-import { AppBar, createStyles, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Theme, Toolbar, Typography, withStyles, WithStyles } from "@material-ui/core";
-import { AccountTree, Book, Eco, ExitToApp, SupervisorAccount, ArrowBack, ClearAll } from "@material-ui/icons";
+import { AppBar, createStyles, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Theme, Toolbar, Typography, withStyles, WithStyles, Switch } from "@material-ui/core";
+import { AccountTree, Book, Eco, ExitToApp, SupervisorAccount, ArrowBack, ClearAll, VerifiedUser } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -24,6 +24,8 @@ import { ObservationsPageConfig } from "../pages/observation/observations-page-c
 import { ObservationsApi } from "../services/observation";
 import { TrophyPageConfig } from "../pages/score/trophy-page-config";
 import { Confirm } from "./confirm";
+import { UserRole } from "../services/generated/user-role";
+import { UserEditionModel } from "../services/generated/user-edition-model";
 
 const styles = (theme: Theme) => createStyles({
     menu: {
@@ -52,6 +54,8 @@ class LayoutState {
     isUserAdmin = false;
     isUserConnected = false;
     user: UserModel;
+    uem = new UserEditionModel();
+    isExpert: boolean;
 }
 
 class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
@@ -70,6 +74,7 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
         const user = await AuthenticationApi.getCurrentUser();
         this.setState({ isUserAdmin: isUserAdmin, user: user });
         this.isConnected();
+        this.CheckRole();
     }
 
     async componentWillUnmount() {
@@ -130,6 +135,35 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
             return;
         }
         await ObservationsApi.deleteAllObservations();
+    }
+    async CheckRole() {
+        if (this.state.user.role == UserRole.expert) {
+            await this.setState({ isExpert: true });
+        }
+        else {
+           await this.setState({ isExpert: false });
+        }
+    }
+    async BecomeExpert() {
+        
+        this.state.uem.name = this.state.user.name;
+        this.state.uem.osmId = this.state.user.osmId;
+        if (this.state.user.role == UserRole.expert) {
+            if (!await Confirm("Voulez vous quitter le rôle expert?")) {
+                return;
+            }
+            this.state.uem.role = UserRole.none;
+        }
+        else {
+            if (!await Confirm("Voulez vous passer en mode expert?")) {
+                return;
+            }
+            this.state.uem.role = UserRole.expert;
+        }
+        await AuthenticationApi.editUser(this.state.uem);
+        const user = await AuthenticationApi.getCurrentUser();
+        await this.setState({ user: user });
+        await this.CheckRole();
     }
     hideBackButton() {
         const routes = this.props.appContext.routes.map(route => route.routes).reduce((a, b) => a.concat(b), []);
@@ -246,14 +280,20 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                                 </ListItemIcon>
                                 <ListItemText primary={t.__("Supprimer tous les relevés")} />
                             </ListItem>
-                        }
+                        }    
                             <ListItem button onClick={() => this.logOut()}>
                                 <ListItemIcon>
                                     <ExitToApp />
                                 </ListItemIcon>
                                 <ListItemText primary={t.__("Me déconnecter")} />
                         </ListItem>
-                        </List>
+                    </List>
+                    <List style={{ marginTop: "auto", marginRight:"auto"}}>
+                        <ListItem>
+                                <Switch onChange={() => this.BecomeExpert()} checked={this.state.isExpert} color="primary"/>                           
+                            <ListItemText primary={t.__("Expert")} />
+                        </ListItem>
+                    </List>
                     </Drawer>
                 }
 

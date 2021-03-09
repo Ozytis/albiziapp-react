@@ -36,5 +36,8 @@ namespace Entities
 
         public List<ObservationCommentary> ObservationCommentarys { get; set; }
 
+        public bool IsCertain { get; set; }
+        public string IsCertainBy { get; set; }
+
     }
 }

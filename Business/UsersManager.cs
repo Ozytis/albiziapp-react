@@ -44,7 +44,8 @@ namespace Business
             existing = new User
             {
                 OsmId = osmId,
-                Name = userName
+                Name = userName,
+                Role = Entities.Enums.UserRole.NONE
             };
 
             await this.DataContext.Users.InsertOneAsync(existing);

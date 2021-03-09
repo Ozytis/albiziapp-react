@@ -25,4 +25,6 @@ export interface ObservationModel {
     treeSize: number;
     observationCommentarys: ObservationCommentaryModel[];
     statementValidatedId: string;
+    isCertain: boolean;
+    isCertainBy: string;
 }

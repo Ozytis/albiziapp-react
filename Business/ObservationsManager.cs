@@ -601,6 +601,18 @@ namespace Business
             existingObservation.TreeSize = (TreeSize?)treeSize;
 
             await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
+        } 
+        public async Task SetObservationToCertainAysnc(string observationId, string userName)
+        {
+            var existingObservation = await this.GetUserObservationbyId(observationId);
+            if (existingObservation == null)
+            {
+                throw new BusinessException("Ce relevé n'existe pas");
+            }
+            existingObservation.IsCertain = true;
+            existingObservation.IsCertainBy = userName;
+
+            await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
         }
 
         public async Task AddCommentary(string observationId, string newCommentary, string userId)

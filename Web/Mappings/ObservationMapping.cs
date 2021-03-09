@@ -26,7 +26,9 @@ namespace Web.Mappings
                 ObservationStatements = observation.ObservationStatements.Select(s => s.ToObservationStatementModel(users)).ToArray(),
                 TreeSize = (int?)observation.TreeSize,
                 ObservationCommentarys = observation.ObservationCommentarys?.Select(s => s.ToObservationCommentaryModel()).ToArray(),
-                StatementValidatedId = observation.StatementValidatedId
+                StatementValidatedId = observation.StatementValidatedId,
+                IsCertain = observation.IsCertain,
+                IsCertainBy = observation.IsCertainBy
 
             };
         }
