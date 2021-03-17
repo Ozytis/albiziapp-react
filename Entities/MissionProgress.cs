@@ -8,8 +8,6 @@ namespace Entities
     {
         public string MissionId { get; set; }
 
-        public string ActivityId { get; set; }
-
         public DateTime StartDate { get; set; }
 
         public int? Progression { get; set; }

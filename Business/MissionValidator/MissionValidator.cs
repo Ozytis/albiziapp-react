@@ -20,18 +20,19 @@ namespace Business.MissionValidation
             var observationManager = serviceProvider.GetService<ObservationsManager>();
             var missionsManager = serviceProvider.GetService<MissionsManager>();
             var userManager = serviceProvider.GetService<UsersManager>();
-            var activity = (await missionsManager.GetAllMissionsAsync()).FirstOrDefault(m => m.Id == user.MissionProgress.MissionId).Activities.FirstOrDefault(a => a.Id == user.MissionProgress.ActivityId);
-            switch (activity.Type)
-            {
-                case ActivityType.Identify:
-                    return new IdentifyMissionValidator(activity, user, observationManager, missionsManager, userManager);
-                case ActivityType.Inventory:
-                    return new InventoryMissionValidator(activity, user, observationManager, missionsManager, userManager);
-                case ActivityType.Verify:
-                    return new VerifyMissionValidator(activity, user, observationManager, missionsManager, userManager);
-                default:
-                    throw new BusinessException("Cannot find type of activity");
-            }
+            //var activity = (await missionsManager.GetAllMissionsAsync()).FirstOrDefault(m => m.Id == user.MissionProgress.MissionId).Activities.FirstOrDefault(a => a.Id == user.MissionProgress.ActivityId);
+            //switch (activity.Type)
+            //{
+            //    case ActivityType.Identify:
+            //        return new IdentifyMissionValidator(activity, user, observationManager, missionsManager, userManager);
+            //    case ActivityType.Inventory:
+            //        return new InventoryMissionValidator(activity, user, observationManager, missionsManager, userManager);
+            //    case ActivityType.Verify:
+            //        return new VerifyMissionValidator(activity, user, observationManager, missionsManager, userManager);
+            //    default:
+            //        throw new BusinessException("Cannot find type of activity");
+            //}
+            return null;
         }
 
         public MissionsManager MissionsManager { get; }
@@ -40,13 +41,12 @@ namespace Business.MissionValidation
 
         public UsersManager UsersManager { get; }
 
-        public Activity Activity { get; set; }
+
 
         public User User { get; set; }
 
-        protected MissionValidator(Activity activity,User user, ObservationsManager observationsManager,MissionsManager missionsManager,UsersManager usersManager)
-        {
-            this.Activity = activity;
+        protected MissionValidator(User user, ObservationsManager observationsManager,MissionsManager missionsManager,UsersManager usersManager)
+        {          
             this.User = user;
             this.ObservationsManager = observationsManager;
             this.MissionsManager = missionsManager;
@@ -55,7 +55,7 @@ namespace Business.MissionValidation
 
         public async Task ValidateActivity()
         {
-            await this.UsersManager.EndCurrentActivity(this.User.OsmId);
+            //await this.UsersManager.EndCurrentActivity(this.User.OsmId);
         }
 
 

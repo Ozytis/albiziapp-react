@@ -9,7 +9,7 @@ namespace Business.MissionValidation
 {
     public class IdentifyMissionValidator : MissionValidator, IMissionValidator
     {
-        public IdentifyMissionValidator(Activity activity, User user, ObservationsManager observationsManager, MissionsManager missionsManager, UsersManager usersManager) : base(activity, user, observationsManager, missionsManager, usersManager)
+        public IdentifyMissionValidator(User user, ObservationsManager observationsManager, MissionsManager missionsManager, UsersManager usersManager) : base( user, observationsManager, missionsManager, usersManager)
         {
 
         }
@@ -17,9 +17,9 @@ namespace Business.MissionValidation
         public async Task<bool> UpdateActivityProgression()
         {
             bool conditionsCompleted = true;
-            var opts = Activity.Options;
+            
             int count = 0;
-            foreach (var endCondition in this.Activity.EndConditions)
+            /*foreach (var endCondition in this.Activity.EndConditions)
             {
                 if (endCondition.ActionCount.HasValue)
                 {
@@ -57,7 +57,8 @@ namespace Business.MissionValidation
                 //todo updateMissionProgression
             }
 
-            return conditionsCompleted;
+            return conditionsCompleted;*/
+            return false;
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Business.MissionValidation
 {
     public class InventoryMissionValidator : MissionValidator, IMissionValidator
     {
-        public InventoryMissionValidator(Activity activity, User user, ObservationsManager observationsManager, MissionsManager missionsManager,UsersManager usersManager) : base(activity, user, observationsManager, missionsManager,usersManager)
+        public InventoryMissionValidator(User user, ObservationsManager observationsManager, MissionsManager missionsManager,UsersManager usersManager) : base(user, observationsManager, missionsManager,usersManager)
         {
 
         }
@@ -17,7 +17,7 @@ namespace Business.MissionValidation
         public async Task<bool> UpdateActivityProgression()
         {
             bool conditionsCompleted = true;
-            var opts = Activity.Options;
+            /*var opts = Activity.Options;
             var isDifferentGenis = opts?.Contains("DIFFERENTGENUS") ?? false;
             var count = 0;
             foreach (var endCondition in this.Activity.EndConditions)
@@ -68,8 +68,10 @@ namespace Business.MissionValidation
                 await this.UpdateProgression(count);
                 //todo updateMissionProgression
             }
-
+       
             return conditionsCompleted;
+                 */
+            return false;
         }
 
     }

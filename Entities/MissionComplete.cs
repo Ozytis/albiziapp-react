@@ -10,14 +10,7 @@ namespace Entities
 
         public DateTime? CompletedDate { get; set; }
 
-        public ActivityComplete[] ActivitiesCompleted { get; set; }
-        
     }
 
-    public class ActivityComplete
-    {
-        public string IdActivity { get; set; }
-
-        public DateTime? CompletedDate { get; set; }
-    }
+ 
 }

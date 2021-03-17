@@ -138,7 +138,7 @@ namespace Business
             {
                 return;
             }
-            var trophies = await this.TrophiesManager.GetTrophiesBySuccessActivitiesCount(user.MissionCompleted?.Sum(x => x.ActivitiesCompleted.Count()) ?? 0);
+            /*var trophies = await this.TrophiesManager.GetTrophiesBySuccessActivitiesCount(user.MissionCompleted?.Sum(x => x.ActivitiesCompleted.Count()) ?? 0);
             if (trophies != null && trophies.Count > 0)
             {
                 if (user.Trophies == null)
@@ -153,7 +153,7 @@ namespace Business
                 }
 
                 await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
-            }
+            }*/
 
 
             await this.UserNotify.SendNotif(userId, "Vous avez debloqué un nouveau trophée !");
@@ -172,7 +172,7 @@ namespace Business
             user.MissionProgress = progress;
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
         }
-
+        /*
         public async Task EndCurrentActivity(string userId)
         {
             var user = await this.SelectAsync(userId);
@@ -276,7 +276,7 @@ namespace Business
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
 
         }
-
+        */
 
 
         public bool IsUserAdmin(User user)

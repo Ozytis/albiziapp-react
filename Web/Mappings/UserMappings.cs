@@ -25,7 +25,7 @@ namespace Web.Mappings
             {
                 model.MissionProgression = new MissionProgressionModel
                 {
-                    ActivityId = user.MissionProgress.ActivityId,
+                   // ActivityId = user.MissionProgress.ActivityId,
                     MissionId = user.MissionProgress.MissionId,
                     Progression = user.MissionProgress.Progression,
                     StartDate = user.MissionProgress.StartDate
@@ -39,7 +39,7 @@ namespace Web.Mappings
                 {
                     IdMission = mc.IdMission,
                     CompletedDate = mc.CompletedDate,
-                    ActivitiesCompleted = mc.ActivitiesCompleted?.Select(ac => new ActivityCompleteModel { CompletedDate = ac.CompletedDate, IdActivity = ac.IdActivity }).ToArray()
+                   // ActivitiesCompleted = mc.ActivitiesCompleted?.Select(ac => new ActivityCompleteModel { CompletedDate = ac.CompletedDate, IdActivity = ac.IdActivity }).ToArray()
                 }).ToArray();
             }
 

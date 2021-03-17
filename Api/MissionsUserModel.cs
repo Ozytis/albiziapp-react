@@ -10,13 +10,6 @@ namespace Api
 
         public DateTime? CompletedDate { get; set; }
 
-        public ActivityCompleteModel[] ActivitiesCompleted { get; set; }
     }
 
-    public class ActivityCompleteModel
-    {
-        public string IdActivity { get; set; }
-
-        public DateTime? CompletedDate { get; set; }
-    }
 }

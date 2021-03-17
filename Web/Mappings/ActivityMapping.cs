@@ -6,7 +6,7 @@ namespace Web.Mappings
 {
     public static class ActivityMapping
     {
-        public static ActivityModel ToActivityModel(this Activity activity)
+       /* public static ActivityModel ToActivityModel(this Activity activity)
         {
             return new ActivityModel
             {
@@ -17,6 +17,6 @@ namespace Web.Mappings
                 Order = activity.Order,
                 EndConditions = activity.EndConditions?.Select(ec => new ActivityEndConditionModel { ActionCount = ec.ActionCount, Time = ec.Time }).ToArray(),
             };
-        }
+        }*/
     }
 }
