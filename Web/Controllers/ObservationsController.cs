@@ -225,9 +225,9 @@ namespace Web.Controllers
             if (deleteObservation)
             {
                await this.DeleteObservationAsync(observationId);
-            }
-            
+            }            
         }
+
         [HttpDelete("{observationId}")]
         [HandleBusinessException, ValidateModel]
         public async Task DeleteObservationAsync(string observationId)

@@ -26,7 +26,7 @@ const styles = (theme: Theme) => createStyles({
         minWidth: "100vw",
     },
     map: {
-        
+
         width: "100vw",
         maxWidth: "100vw",
         position: "relative",
@@ -66,7 +66,7 @@ class MapPageState {
     isLayerOn: boolean;
     layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxNativeZoom: 19,
-        maxZoom : 21
+        maxZoom: 21
     });
 }
 
@@ -79,7 +79,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
     }
 
     async componentDidMount() {
-        navigator.geolocation.getCurrentPosition(async (position) => {            
+        navigator.geolocation.getCurrentPosition(async (position) => {
             await this.setState({
                 userPosition: position
             });
@@ -101,16 +101,16 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         this.hub = new signalR.HubConnectionBuilder()
             .withUrl("/positionhub")
             .build();
-        
+
 
 
         this.hub.on("Refresh", async () => {
-            var obs = await ObservationsApi.getNearestObservations(this.state.userPosition.coords.latitude,this.state.userPosition.coords.longitude);
-            this.setState({observations:obs})
+            var obs = await ObservationsApi.getNearestObservations(this.state.userPosition.coords.latitude, this.state.userPosition.coords.longitude);
+            this.setState({ observations: obs })
         });
         this.hub.start();
-        
-        
+
+
         var missions = await MissionsApi.getMissions();
         var userMissions = await AuthenticationApi.getUserMission();
         var currentMission = missions.find(m => m.id == userMissions.missionProgression.missionId);
@@ -192,7 +192,11 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         if (document.location.host.indexOf("localhost") > -1 || document.location.host.indexOf("192.168.1.") > -1) {
             return "//wxs.ign.fr/choisirgeoportail/geoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/jpeg&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}"
         } else {
-            return "//wxs.ign.fr/3urbr0dt1qgjytxdkbt6z3cq/geoportail/wmts?service=WMTS&request=GetTile&version=1.0.0&tilematrixset=PM&tilematrix={z}&tilecol={x}&tilerow={y}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&format=image/jpeg&style=normal";
+            if (document.location.host.indexOf("albiziapp.ozytis.fr") > -1) {
+                return "//wxs.ign.fr/3urbr0dt1qgjytxdkbt6z3cq/geoportail/wmts?service=WMTS&request=GetTile&version=1.0.0&tilematrixset=PM&tilematrix={z}&tilecol={x}&tilerow={y}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&format=image/jpeg&style=normal";
+            } else if (document.location.host.indexOf("albiziapp2.ozytis.fr") > -1) {
+                return "//wxs.ign.fr/5ts1y3n87hinjyxnu8j9l9ev/geoportail/wmts?service=WMTS&request=GetTile&version=1.0.0&tilematrixset=PM&tilematrix={z}&tilecol={x}&tilerow={y}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&format=image/jpeg&style=normal";
+            }
         }
     }
 
@@ -258,7 +262,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                     <Map
                         ref={this.state.mapRef}
                         className={clsx(classes.map)}
-                        style={{ "height": window.innerHeight -180+"px" }}
+                        style={{ "height": window.innerHeight - 180 + "px" }}
                         center={position}
                         zoom={21}
                         zoomSnap={0.5}
@@ -305,7 +309,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         right: "3%",
                         padding: "4px",
                         minWidth: 0,
-                        width:"auto",
+                        width: "auto",
                         zIndex: 400,
                         backgroundColor: "#f4f4f4",
                         color: "black",
