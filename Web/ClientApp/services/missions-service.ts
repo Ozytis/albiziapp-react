@@ -1,5 +1,5 @@
 import { BaseService } from "./base-service";
-import { MissionModel } from "./generated/mission-model";
+import { MissionModel } from "./models/mission-model";
 
 
 class MissionsService extends BaseService {

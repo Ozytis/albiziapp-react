@@ -19,6 +19,7 @@
     <None Remove="ClientApp\pages\score\title-page.tsx" />
     <None Remove="ClientApp\pages\score\trophy-page.tsx" />
     <None Remove="ClientApp\pages\species\species-info-component.tsx" />
+    <None Remove="ClientApp\services\models\mission-model.ts" />
     <None Remove="ClientApp\services\titles-service.ts" />
     <None Remove="ClientApp\utils\string-helper.ts" />
   </ItemGroup>
@@ -77,6 +78,7 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="ClientApp\pages\score\exploration-points-page.tsx" />
     <TypeScriptCompile Include="ClientApp\pages\species\species-info-component.tsx" />
+    <TypeScriptCompile Include="ClientApp\services\models\mission-model.ts" />
     <TypeScriptCompile Include="ClientApp\services\titles-service.ts" />
     <TypeScriptCompile Include="ClientApp\utils\string-helper.ts" />
   </ItemGroup>

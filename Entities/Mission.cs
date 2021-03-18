@@ -5,6 +5,8 @@ using System.Text;
 
 namespace Entities
 {
+    [BsonDiscriminator(Required = true, RootClass = true)]
+    [BsonKnownTypes(typeof(NewObservationMission), typeof(IdentificationMission), typeof(VerificationMission))]
     public abstract class Mission
     {
         [BsonId]

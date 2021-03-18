@@ -30,7 +30,7 @@ namespace Web.Mappings
             model.Title = mission.Title;
             model.Description = mission.Description;
             model.EndingCondition = mission.EndingCondition?.ToEndingConditionModel();
-            model.RestrictedArea = mission.RestrictedArea.ToRestrictedAreaModel();
+            model.RestrictedArea = mission.RestrictedArea?.ToRestrictedAreaModel();
 
             return model;
 
@@ -51,6 +51,7 @@ namespace Web.Mappings
             model.Restriction = mission.Restriction?.ToRestrictionModel();
             return model;
         }
+
         public static IdentificationMissionModel ToIdentificationMissionModel(this IdentificationMission mission)
         {
             var model = new IdentificationMissionModel();
@@ -84,7 +85,7 @@ namespace Web.Mappings
             {
                 return new CircleAreaModel()
                 {
-                    Center = ((CircleArea)restrictedArea).Center.ToCoordinateModel(),
+                    Center = ((CircleArea)restrictedArea).Center?.ToCoordinateModel(),
                     Radius = ((CircleArea)restrictedArea).Radius
 
                 };
@@ -93,7 +94,7 @@ namespace Web.Mappings
             {
                 return new PolygonAreaModel()
                 {
-                    Polygon = ((PolygonArea)restrictedArea).Polygon.Coordinates.Exterior.Positions.Select(x => new CoordinateModel { Latitude =  x.Latitude,Longitude = x.Longitude }).ToArray()
+                    Polygon = ((PolygonArea)restrictedArea).Polygon?.Coordinates.Exterior.Positions.Select(x => new CoordinateModel { Latitude =  x.Latitude,Longitude = x.Longitude }).ToArray()
                 };
             }
         }
