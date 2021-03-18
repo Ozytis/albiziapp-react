@@ -272,15 +272,13 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                                     </ListItemIcon>
                                     <ListItemText primary={t.__("Gestion des utilisateurs")} />
                                 </ListItem>
-                        }
-                        {this.state.isUserAdmin &&
+                        }                       
                             <ListItem button onClick={() => this.DeleteAllObservations()}>
                             <ListItemIcon>
                                 <ClearAll />
                                 </ListItemIcon>
                                 <ListItemText primary={t.__("Supprimer tous les relevés")} />
                             </ListItem>
-                        }    
                             <ListItem button onClick={() => this.logOut()}>
                                 <ListItemIcon>
                                     <ExitToApp />
