@@ -12,5 +12,7 @@ namespace Entities
 
         public int? Progression { get; set; }
 
+        public MissionProgressionHistory[] History { get; set; }
+
     }
 }

@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace Business.MissionValidation
 {
-    public class VerifyMissionValidator : MissionValidator, IMissionValidator
+    public class VerifyMissionValidator : MissionValidator<VerificationMission>, IMissionValidator
     {
-        public VerifyMissionValidator( User user, ObservationsManager observationsManager, MissionsManager missionsManager, UsersManager usersManager) : base(user, observationsManager, missionsManager, usersManager)
+        public VerifyMissionValidator(VerificationMission mission, User user, ObservationsManager observationsManager, MissionsManager missionsManager, UsersManager usersManager) : base(mission,user, observationsManager, missionsManager, usersManager)
         {
 
         }
 
-        public async Task<bool> UpdateActivityProgression()
+        public async Task<bool> UpdateMissionProgression(Observation observation, ObservationStatement statement, ActionType? type)
         {
             bool conditionsCompleted = true;
             /* var opts = Activity.Options;           
