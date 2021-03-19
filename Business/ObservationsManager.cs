@@ -171,7 +171,7 @@ namespace Business
 
 
                 var validator = await MissionValidatorFactory.GetValidator(this.ServiceProvider, user);
-                await validator.UpdateMissionProgression(newObservation, statement,ActionType.CreateObservation);
+                await validator?.UpdateMissionProgression(newObservation, statement,ActionType.CreateObservation);
 
             }
             catch
@@ -225,7 +225,7 @@ namespace Business
             await this.CheckObservationIsIdentify(existingObservation.Id);
             User user = await this.UsersManager.SelectAsync(userId);
             var validator = await MissionValidatorFactory.GetValidator(this.ServiceProvider, user);
-            await validator.UpdateMissionProgression(existingObservation,statement,ActionType.ConfirmStatement);
+            await validator?.UpdateMissionProgression(existingObservation,statement,ActionType.ConfirmStatement);
             //TODO voir calcul de points
         }
 
@@ -278,7 +278,7 @@ namespace Business
             await this.CheckObservationIsIdentify(existingObservation.Id);
             User user = await this.UsersManager.SelectAsync(userId);
             var validator = await MissionValidatorFactory.GetValidator(this.ServiceProvider, user);
-            await validator.UpdateMissionProgression(existingObservation, statement,ActionType.CreateStatement);
+            await validator?.UpdateMissionProgression(existingObservation, statement,ActionType.CreateStatement);
         }
         public async Task AddPictures(string observationId, string[] pictures)
         {

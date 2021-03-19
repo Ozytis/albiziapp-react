@@ -188,7 +188,7 @@ namespace DataMigrator
             //MissionCreationModel model = new MissionCreationModel();
             //model.Order = 1;
             //model.Activities = activities.ToArray();
-            string json =""//; JsonConvert.SerializeObject(model);
+            string json = "";//; JsonConvert.SerializeObject(model);
             using (WebClient webClient = new WebClient())
             {
                 webClient.Headers.Add("Accept", "text/json");

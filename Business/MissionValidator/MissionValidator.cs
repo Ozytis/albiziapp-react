@@ -37,7 +37,7 @@ namespace Business.MissionValidation
             }
             else
             {
-                throw new BusinessException("Cannot find type of activity");
+                return null;
             }
         }
     }
