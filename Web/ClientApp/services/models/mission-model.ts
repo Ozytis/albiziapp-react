@@ -6,6 +6,7 @@ export interface MissionModel {
     description: string;
     endingCondition: EndingCondition;
     restrictedArea: RestrictedArea;
+    missionType: string;
 }
 
 export class VerificationMissionModel implements MissionModel {
@@ -17,6 +18,7 @@ export class VerificationMissionModel implements MissionModel {
     unreliableObservation: boolean;
     observationWithPics: boolean;
     restriction: Restriction;
+    missionType: string;
 }
 
 export class IdentificationMissionModel implements MissionModel {
@@ -27,6 +29,7 @@ export class IdentificationMissionModel implements MissionModel {
     description: string;
     restriction: Restriction;
     observationIdentified: string[];
+    missionType: string;
 }
 
 export class NewObservationMissionModel implements MissionModel {
@@ -37,6 +40,7 @@ export class NewObservationMissionModel implements MissionModel {
     description: string;
     type: NewObservationMissionType;
     value: string;
+    missionType: string;
 }
 
 export enum NewObservationMissionType {

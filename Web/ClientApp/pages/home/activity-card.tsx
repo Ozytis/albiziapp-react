@@ -25,6 +25,7 @@ interface ActivityCardProps extends WithStyles<typeof styles>, RouteComponentPro
     mission: MissionModel;
     completion: number;
     active: boolean;
+    end?: boolean;
     onChange?: () => Promise<any>;
 
 }

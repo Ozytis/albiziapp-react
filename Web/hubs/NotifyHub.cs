@@ -48,7 +48,6 @@ namespace Web.Hubs
         {
             await this.SendNotif("InfoNotif", userName, notifContent);            
         }
-
         private async Task SendNotif(string level, string userName, string notifContent)
         {
             HashSet<string> connections = ConnectionManager.GetConnections(userName);

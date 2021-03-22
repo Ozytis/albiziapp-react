@@ -14,6 +14,11 @@ import { ObservationsApi } from "../../services/observation";
 import { SpeciesApi } from "../../services/species-service";
 import { t } from "../../services/translation-service";
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { ObservationModel } from "../../services/generated/observation-model";
+import { UserModel } from "../../services/generated/user-model";
+import * as signalR from "@microsoft/signalr";
+import { toast, ToastContainer } from "react-toastify";
+import ReactDOM from "react-dom";
 
 const styles = (theme: Theme) => createStyles({
     root: {        
@@ -137,8 +142,7 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
             ObservationsApi.setNextObservationCoordinates(null);
             await this.props.history.replace({
                 pathname: "/map"
-            });
-        
+            });        
     }
 
     async updateCommonGenus(commonGenus: string) {
@@ -210,6 +214,50 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
         if (element != null) {
             element.blur();  
         }      
+    }
+    async checkIdentification() {
+        this.sendNotify("test");
+        const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
+        if (observation.genus == this.state.model.genus) {
+            if (observation.speciesName == this.state.model.species) {
+                
+            }
+        }
+    }
+    async sendNotify(notifContent: string) {
+        var hubConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/notifyhub")
+            .build();
+        hubConnection.on("SendNotif", function () {
+
+            const notify = () => toast.success(notifContent, {
+                position: toast.POSITION.BOTTOM_CENTER,
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+            console.log("1");
+            const element =
+                <div onLoad={notify}>
+                    <ToastContainer position="bottom-center"
+                        autoClose={5000}
+                        hideProgressBar={false}
+                        newestOnTop={false}
+                        closeOnClick
+                        rtl={false}
+                        pauseOnFocusLoss
+                        draggable
+                        pauseOnHover />
+                </div>;
+            console.log(element);
+            console.log(document.getElementById('toast'));
+
+            ReactDOM.render(element, document.getElementById('toast'));
+            notify();
+        });
     }
     
     render() {
@@ -308,7 +356,7 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
                         
                     </FormControl>
                     
-                    <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)}>
+                    <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.checkIdentification()}>
                         <Loader loading={this.state.isProcessing} usualIcon="check" />
                         {t.__("Valider")}
                     </Button>
@@ -317,7 +365,6 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
                         <Undo />
                         {t.__("Annuler")}
                     </Button>
-
                 </Box>                
             </>
         )

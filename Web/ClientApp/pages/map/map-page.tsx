@@ -256,13 +256,29 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         }
         
     }
-    checkIfObservationIsInMission(observationId: string) {
-        const mission = this.state.currentMission as IdentificationMissionModel;
-        if (mission != null && mission.observationIdentified != null && mission.observationIdentified.length>0) {
-            console.log(mission);
-            return true;
+    checkIfObservationIsInMission(observation: ObservationModel) {
+        if (this.state.currentMission != null) {
+            if (this.state.currentMission.missionType == "IdentificationMissionModel") {
+                console.log("ok");
+                const mission = this.state.currentMission as IdentificationMissionModel;
+                if (mission != null) {
+                    if (mission.observationIdentified != null && mission.observationIdentified.length > 0) {
+                        if (mission.observationIdentified.includes(observation.id)) {
+                            return true;
+                        }
+                        else {
+                            return false;
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            }
+            else if (this.state.currentMission.missionType == "IdentificationMissionModel") {
+
+            }
         }
-        return true;
     }
 
     render() {
@@ -305,12 +321,12 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                                 return (
                                     <Circle
                                         key={observation.id}
-                                        fillOpacity={this.checkIfObservationIsInMission(observation.id) ? 0 : this.getOppacity(observation)}
+                                        fillOpacity={this.checkIfObservationIsInMission(observation) ? 0 : this.getOppacity(observation)}
                                         center={{ lat: observation.latitude, lng: observation.longitude }}
                                         radius={6}
-                                        color={this.checkIfObservationIsInMission(observation.id) ? "red" : this.getColor(observation)}
+                                        color={this.checkIfObservationIsInMission(observation) ? "red" : this.getColor(observation)}
                                         className={clsx(classes.imageClignote)}
-                                        onclick={this.checkIfObservationIsInMission(observation.id) ? (() => this.props.history.push({ pathname: `/new-identification-mission/${observation.id}` })) : (() => this.props.history.push({ pathname: `/observation/${observation.id}` }))}
+                                        onclick={this.checkIfObservationIsInMission(observation) ? (() => this.props.history.push({ pathname: `/new-identification-mission/${observation.id}` })) : (() => this.props.history.push({ pathname: `/observation/${observation.id}` }))}
                                     />
                                 )
                             })

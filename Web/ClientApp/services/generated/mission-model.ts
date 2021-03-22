@@ -12,4 +12,5 @@ export interface MissionModel {
     restrictedArea: RestrictedAreaModel;
     title: string;
     description: string;
+    missionType: string;
 }
