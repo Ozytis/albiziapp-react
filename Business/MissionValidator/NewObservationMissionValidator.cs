@@ -32,13 +32,14 @@ namespace Business.MissionValidation
                 return false;
             }
 
-            var missionProgressHistory = User.MissionProgress.History.ToList() ?? new List<MissionProgressionHistory>();
+            var missionProgressHistory = User.MissionProgress.History?.ToList() ?? new List<MissionProgressionHistory>();
             var observationsFromHistory = await this.ObservationsManager.GetObservationsByIds(missionProgressHistory.Select(x => x.ObservationId).ToArray());
             //Si on arrive la alors nous avons forcement un statement...
             if (missionProgressHistory.Any(h => h.ObservationId == observation.Id))
             {
                 return false;
             }
+
             switch (this.Mission.Type)
             {
                 case NewObservationMissionType.DifferentGenders:
@@ -67,6 +68,7 @@ namespace Business.MissionValidation
                     break;
             }
 
+
             missionProgressHistory.Add(new MissionProgressionHistory
             {
                 ObservationId = observation.Id,
@@ -91,7 +93,7 @@ namespace Business.MissionValidation
 
             if (conditionsCompleted)
             {
-                await this.ValidateActivity();
+                await this.UsersManager.EndCurrentMission(userId:this.User.OsmId,missionProgressHistory.ToArray());
             }
             else
             {

@@ -193,6 +193,7 @@ namespace Business
             };
 
             missionsCompleted.Add(missionComplete);
+            user.MissionCompleted = missionsCompleted.ToArray();
             user.MissionProgress = null;
 
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
