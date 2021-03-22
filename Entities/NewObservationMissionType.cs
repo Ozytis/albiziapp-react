@@ -6,6 +6,7 @@ namespace Entities
 {
     public enum NewObservationMissionType
     {
+        All = -1,
         DifferentGenders = 0,
         DifferentSpecies = 1,
         ExactGender = 2,

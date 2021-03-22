@@ -172,23 +172,23 @@ namespace DataMigrator
             JsonSerializer serializer = new JsonSerializer();
 
             int order = 1;
-            List<ActivityCreationModel> activities = new List<ActivityCreationModel>();
-            while (jsonReader.Read())
-            {
-                if (jsonReader.TokenType == JsonToken.StartObject)
-                {
+            //List<ActivityCreationModel> activities = new List<ActivityCreationModel>();
+            //while (jsonReader.Read())
+            //{
+            //    if (jsonReader.TokenType == JsonToken.StartObject)
+            //    {
 
-                    ActivityCreationModel key = serializer.Deserialize<ActivityCreationModel>(jsonReader);
-                    key.Order = order;
-                    activities.Add(key);
-                    order++;
-                    Console.WriteLine(key.Instructions.Long);
-                }
-            }
-            MissionCreationModel model = new MissionCreationModel();
-            model.Order = 1;
-            model.Activities = activities.ToArray();
-            string json = JsonConvert.SerializeObject(model);
+            //        ActivityCreationModel key = serializer.Deserialize<ActivityCreationModel>(jsonReader);
+            //        key.Order = order;
+            //        activities.Add(key);
+            //        order++;
+            //        Console.WriteLine(key.Instructions.Long);
+            //    }
+            //}
+            //MissionCreationModel model = new MissionCreationModel();
+            //model.Order = 1;
+            //model.Activities = activities.ToArray();
+            string json = "";//; JsonConvert.SerializeObject(model);
             using (WebClient webClient = new WebClient())
             {
                 webClient.Headers.Add("Accept", "text/json");

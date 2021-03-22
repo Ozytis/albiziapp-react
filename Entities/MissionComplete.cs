@@ -8,6 +8,10 @@ namespace Entities
     {
         public string IdMission { get; set; }
 
+        public DateTime StartDate { get; set; }
+
+        public MissionProgressionHistory[] History { get; set; }
+
         public DateTime? CompletedDate { get; set; }
 
     }
