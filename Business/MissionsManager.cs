@@ -82,16 +82,32 @@ namespace Business
         {
             var mission = new IdentificationMission();
             mission.Id = Guid.NewGuid().ToString("N");
-            mission.Title = "Identifier des relevés spécifiques";
-            mission.Description = "Identifier des relevés spécifiques";
+            mission.Title = "Identifier des relevés spécifiques dans une zone";
+            mission.Description = "Identifier des relevés spécifiques dans une zone";
             mission.EndingCondition = new NumberOfActions
             {
                 Number = 2,
             };
-            string[] tab = new string[] { "f05810b268a942eebd6c1909e7688ea6", "afb46627a0314cdc95d0edda8f510cc2" };
-            mission.ObservationIdentified = tab;
-            mission.RestrictedArea = null;
+           // string[] tab = new string[] { "f05810b268a942eebd6c1909e7688ea6", "afb46627a0314cdc95d0edda8f510cc2" };
+            //mission.ObservationIdentified = tab;
+            mission.RestrictedArea = new PolygonArea
+            {
+                Polygon = GeoJson.Polygon(new GeoJson2DGeographicCoordinates(-0.574204, 48.019921), new GeoJson2DGeographicCoordinates(-0.573883, 48.01395),
+               new GeoJson2DGeographicCoordinates(-0.588023, 48.015214), new GeoJson2DGeographicCoordinates(-0.587873, 48.021041),
+                new GeoJson2DGeographicCoordinates(-0.574204, 48.019921))
+            };
             await this.CreateMissionAsync(mission);
+        } 
+        public async Task AddCompleteMission(User user)
+        {
+            if(user == null)
+            {
+                return;
+            }
+            var completeMission = new MissionComplete { IdMission = "0fbae5829539411e9bad8f90397c0738", StartDate = DateTime.Now, CompletedDate = DateTime.Now };
+
+            user.MissionCompleted = new MissionComplete[]{completeMission};
+            await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
         }
 
         }

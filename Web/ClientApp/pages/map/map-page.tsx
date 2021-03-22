@@ -117,7 +117,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         var missions = await MissionsApi.getMissions();
         var userMissions = await AuthenticationApi.getUserMission();
         var currentMission = missions.find(m => m.id == userMissions.missionProgression?.missionId);
-        await this.setState({ currentMission : currentMission});
+        await this.setState({ currentMission: currentMission });
         await this.setPosition();
         this.setZoneForMission();
     }
@@ -250,32 +250,51 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             const model = mission.restrictedArea as CircleAreaModel;
             await this.setState({ circle: model });
         }
-        else   {
+        else {
             const model = mission.restrictedArea as PolygonArea;
             await this.setState({ polygon: model });
         }
-        
+
     }
     checkIfObservationIsInMission(observation: ObservationModel) {
         if (this.state.currentMission != null) {
             if (this.state.currentMission.missionType == "IdentificationMissionModel") {
-                console.log("ok");
                 const mission = this.state.currentMission as IdentificationMissionModel;
-                if (mission != null) {
-                    if (mission.observationIdentified != null && mission.observationIdentified.length > 0) {
-                        if (mission.observationIdentified.includes(observation.id)) {
-                            return true;
-                        }
-                        else {
-                            return false;
-                        }
+                if (mission.observationIdentified != null && mission.observationIdentified.length > 0) {
+                    if (mission.observationIdentified.includes(observation.id)) {
+                        return true;
                     }
                     else {
                         return false;
                     }
                 }
+                if (mission.restrictedArea != null) {
+                    if ((mission.restrictedArea as CircleAreaModel).center != null) {
+                        console.log("identification dans une zone cicrulaire");
+                        const circle = mission.restrictedArea as CircleAreaModel;
+
+                    }
+                    else {
+                        console.log("identification dans une zone polygonale");
+                        const polygon = mission.restrictedArea as PolygonArea;
+                        if (!(observation.latitude < Math.min.apply(Math, polygon.polygon.map(function (o) { return o.latitude; })) || observation.latitude > Math.max.apply(Math, polygon.polygon.map(function (o) { return o.latitude; }))
+                            || observation.longitude < Math.min.apply(Math, polygon.polygon.map(function (o) { return o.longitude; })) || observation.longitude > Math.max.apply(Math, polygon.polygon.map(function (o) { return o.longitude; }))))
+                        {
+                            console.log("dans la zone");
+                            return true;
+                        }
+                        else {
+                            console.log("pas dans la zone");
+                            return false;
+                        }
+
+                    }
+                }
+                else {
+                    return false;
+                }
             }
-            else if (this.state.currentMission.missionType == "IdentificationMissionModel") {
+            else if (this.state.currentMission.missionType == "") {
 
             }
         }
@@ -332,7 +351,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                             })
                         }
                         {
-                            this.state.circle && 
+                            this.state.circle &&
                             <Circle
                                 center={[this.state.circle.center.latitude, this.state.circle.center.longitude]}
                                 radius={this.state.circle.radius}
@@ -348,7 +367,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                                 stroke-opacity={0.5}
                                 color={"orange"}
                                 fillOpacity={0}
-                                
+
                             />
                         }
                     </Map>
@@ -398,10 +417,10 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         <Icon className="fas fa-sync fa-spin fa-fw" /> {t.__("Chargement...")}
                     </Box>
                 }
-                    <Box className={clsx(classes.missionBox)}>
+                <Box className={clsx(classes.missionBox)}>
                     {this.state.currentMission != null && this.state.currentMission != undefined ? (<div>{this.state.currentMission.description}</div>) : (<div>Aucune mission séléctionnée</div>)}
-                    </Box>
-                
+                </Box>
+
 
             </Box>
         )
