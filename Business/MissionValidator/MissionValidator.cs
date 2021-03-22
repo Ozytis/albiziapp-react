@@ -63,15 +63,13 @@ namespace Business.MissionValidation
             this.UsersManager = usersManager;
         }
 
-        public async Task ValidateActivity()
-        {
-            // await this.UsersManager.EndCurrentActivity(this.User.OsmId);
-        }
-
+      
+ 
         public async Task UpdateProgression(MissionProgressionHistory[] historyToUpdate)
         {
             var missionProgress = this.User.MissionProgress;
             missionProgress.Progression = historyToUpdate.Count();
+            missionProgress.History = historyToUpdate;
             await this.UsersManager.UpdateMissionProgression(this.User.OsmId, missionProgress);
         }
 
@@ -83,7 +81,7 @@ namespace Business.MissionValidation
                 {
                     CircleArea cirleArea = (CircleArea)this.Mission.RestrictedArea;
                     double distance = GeoHelper.CalculateDistance(new Position(cirleArea.Center.Coordinates.Latitude, cirleArea.Center.Coordinates.Longitude), new Position(observation.Coordinates.Coordinates.Latitude, observation.Coordinates.Coordinates.Longitude));
-                    return distance > cirleArea.Radius;
+                    return distance < cirleArea.Radius;
                 }
                 else
                 {
