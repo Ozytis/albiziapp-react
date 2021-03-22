@@ -27,12 +27,14 @@ class ActivitiesTabComponent extends BaseComponent<ActivitiesTabProps, Activitie
     async refreshMissions() {
         const missions = await MissionsApi.getMissions();
 
-        var userMissions = await AuthenticationApi.getUserMission();    
+        var userMissions = await AuthenticationApi.getUserMission();  
+        
         await this.setPersistantState({
             currentMission: missions.find(m => m.id == userMissions.missionProgression?.missionId),
-            currentActivityId: userMissions.missionProgression?.activityId,
+            currentActivityId: userMissions.missionProgression?.missionId,
             missionProgress: userMissions
         });
+        console.log(userMissions);
         await this.setState({ missions: missions });
     }
 
@@ -46,7 +48,7 @@ class ActivitiesTabComponent extends BaseComponent<ActivitiesTabProps, Activitie
                         const completion = this.state.missionProgress?.missionProgression?.progression ?? 0;
                         
                         return (
-                            <ActivityCard completion={completion} key={index} mission={mission} active={this.state.currentActivityId == mission.id} />
+                            <ActivityCard completion={completion} key={index} mission={mission} active={this.state.currentActivityId == mission.id} onChange={()=> this.refreshMissions()}/>
                         )
                     })
                 }

@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Api
 {
+
     public class MissionProgressionModel
     {
         public string MissionId { get; set; }

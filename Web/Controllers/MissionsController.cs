@@ -5,6 +5,7 @@ using Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Ozytis.Common.Core.Web.WebApi;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,20 +17,23 @@ namespace Web.Controllers
     [Route("api/[controller]")]
     public class MissionsController : ControllerBase
     {
-        public MissionsController(MissionsManager missionsManager/*,NotifyHub notifyHub*/)
+        public MissionsController(MissionsManager missionsManager, UsersManager usersManager/*,NotifyHub notifyHub*/)
         {
             this.MissionsManager = missionsManager;
+            this.UsersManager = usersManager;
             //this.NotifyHub = notifyHub;
         }
 
         public MissionsManager MissionsManager { get; }
+        public UsersManager UsersManager { get; }
 
 
         [HttpGet("create")]
         [AllowAnonymous]
         public async Task CreateMission()
         {
-            await this.MissionsManager.GenerateMission();
+            //await this.MissionsManager.GenerateMission();
+            await this.MissionsManager.GenerateIdentificationMission();
         }
 
         //public NotifyHub NotifyHub { get; }
@@ -62,6 +66,21 @@ namespace Web.Controllers
 
             return missions.Select(mission => mission.ToMissionModel());
         }
-
+        [HttpPost("startMission")]
+        [AllowAnonymous]
+        public async Task StartMission([FromBody] MissionProgressionModel model)
+        {
+            MissionProgress mp = new MissionProgress();
+            if(model.MissionId != null)
+            {
+                mp.MissionId = model.MissionId;
+                mp.StartDate = DateTime.Now;
+            }
+            else
+            {
+                mp = null;
+            }
+            await this.UsersManager.StartMissionAsync(mp, this.User.Identity.Name);
+        }
     }
 }

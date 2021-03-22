@@ -11,9 +11,7 @@ namespace Business
     {
         public MissionsManager(DataContext dataContext) : base(dataContext)
         {
-
         }
-
         public async Task<IEnumerable<Mission>> GetAllMissionsAsync()
         {
             return await this.DataContext.Missions.Find(_ => true)/*.SortBy( m => m.Order)*/.ToListAsync();
@@ -80,6 +78,21 @@ namespace Business
             mission2.Type = NewObservationMissionType.DifferentSpecies;
             await this.CreateMissionAsync(mission2);
         }
+        public async Task GenerateIdentificationMission()
+        {
+            var mission = new IdentificationMission();
+            mission.Id = Guid.NewGuid().ToString("N");
+            mission.Title = "Identifier des relevés spécifiques";
+            mission.Description = "Identifier des relevés spécifiques";
+            mission.EndingCondition = new NumberOfActions
+            {
+                Number = 2,
+            };
+            string[] tab = new string[] { "f05810b268a942eebd6c1909e7688ea6", "afb46627a0314cdc95d0edda8f510cc2" };
+            mission.ObservationIdentified = tab;
+            mission.RestrictedArea = null;
+            await this.CreateMissionAsync(mission);
+        }
 
+        }
     }
-}

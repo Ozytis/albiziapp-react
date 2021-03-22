@@ -8,4 +8,3 @@ export interface MissionsCompleteModel {
     idMission: string;
     completedDate: string;
 }
-

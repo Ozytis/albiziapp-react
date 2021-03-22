@@ -1,8 +1,8 @@
 import { Box, createStyles, Icon, Theme, WithStyles, withStyles, Button, Dialog, DialogActions } from "@material-ui/core";
 import clsx from "clsx";
-import L, { LatLng } from "leaflet";
+import L, { LatLng, latLng } from "leaflet";
 import React, { createRef, Component } from "react";
-import { Circle, Map, Marker, TileLayer, LayerGroup } from "react-leaflet";
+import { Circle, Map, Marker, TileLayer, LayerGroup, Polygon } from "react-leaflet";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
 import { BaseComponent } from "../../components/base-component";
@@ -12,11 +12,13 @@ import { ObservationModel } from "../../services/generated/observation-model";
 import { ObservationsApi } from "../../services/observation";
 import { t } from "../../services/translation-service";
 import { MissionsApi } from "../../services/missions-service";
-import { ActivityModel } from "../../services/generated/activity-model";
 import { MissionProgressionModel } from "../../services/generated/mission-progression-model";
 import { NearMe, ZoomOutMapSharp, MapRounded, Layers } from "@material-ui/icons";
 import { MapPosition } from "../../components/mapPosition";
 import * as signalR from "@microsoft/signalr";
+import { MissionModel, CircleAreaModel, PolygonArea, IdentificationMissionModel } from "../../services/models/mission-model";
+import { CoordinateModel } from "../../services/generated/coordinate-model";
+import { orange } from "@material-ui/core/colors";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -59,7 +61,7 @@ interface MapPageProps extends RouteComponentProps, IPropsWithAppContext, WithSt
 class MapPageState {
     userPosition: Position = null;
     observations: ObservationModel[];
-    currentActivity: ActivityModel;
+    currentMission: MissionModel;
     missionProgression: MissionProgressionModel;
     zoomLevel: number = 0;
     mapRef = createRef<Map>();
@@ -68,6 +70,8 @@ class MapPageState {
         maxNativeZoom: 19,
         maxZoom: 21
     });
+    circle: CircleAreaModel;
+    polygon: PolygonArea;
 }
 
 class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
@@ -110,19 +114,12 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         });
         this.hub.start();
 
-
         var missions = await MissionsApi.getMissions();
         var userMissions = await AuthenticationApi.getUserMission();
-        var currentMission = missions.find(m => m.id == userMissions.missionProgression.missionId);
-        var currentActivityId = userMissions.missionProgression.activityId;
-        if (currentMission != null && currentActivityId != null) {
-            var activity = currentMission.activities.find(a => a.id == currentActivityId);
-            await this.setState({
-                currentActivity: activity,
-                missionProgression: userMissions.missionProgression
-            });
-        }
+        var currentMission = missions.find(m => m.id == userMissions.missionProgression?.missionId);
+        await this.setState({ currentMission : currentMission});
         await this.setPosition();
+        this.setZoneForMission();
     }
 
     async setPosition() {
@@ -247,6 +244,26 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
     }
 
+    async setZoneForMission() {
+        const mission = this.state.currentMission;
+        if ((mission.restrictedArea as CircleAreaModel).center != null) {
+            const model = mission.restrictedArea as CircleAreaModel;
+            await this.setState({ circle: model });
+        }
+        else   {
+            const model = mission.restrictedArea as PolygonArea;
+            await this.setState({ polygon: model });
+        }
+        
+    }
+    checkIfObservationIsInMission(observationId: string) {
+        const mission = this.state.currentMission as IdentificationMissionModel;
+        if (mission != null && mission.observationIdentified != null && mission.observationIdentified.length>0) {
+            console.log(mission);
+            return true;
+        }
+        return true;
+    }
 
     render() {
 
@@ -288,17 +305,36 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                                 return (
                                     <Circle
                                         key={observation.id}
-                                        fillOpacity={this.getOppacity(observation)}
+                                        fillOpacity={this.checkIfObservationIsInMission(observation.id) ? 0 : this.getOppacity(observation)}
                                         center={{ lat: observation.latitude, lng: observation.longitude }}
                                         radius={6}
-                                        color={this.getColor(observation)}
+                                        color={this.checkIfObservationIsInMission(observation.id) ? "red" : this.getColor(observation)}
                                         className={clsx(classes.imageClignote)}
-                                        onclick={() => this.props.history.push({ pathname: `/observation/${observation.id}` })}
+                                        onclick={this.checkIfObservationIsInMission(observation.id) ? (() => this.props.history.push({ pathname: `/new-identification-mission/${observation.id}` })) : (() => this.props.history.push({ pathname: `/observation/${observation.id}` }))}
                                     />
                                 )
                             })
                         }
-
+                        {
+                            this.state.circle && 
+                            <Circle
+                                center={[this.state.circle.center.latitude, this.state.circle.center.longitude]}
+                                radius={this.state.circle.radius}
+                                stroke-opacity={0.5}
+                                color={"orange"}
+                                fillOpacity={0}
+                            />
+                        }
+                        {
+                            this.state.polygon &&
+                            <Polygon
+                                positions={this.state.polygon.polygon.map(p => latLng(p.latitude, p.longitude))}
+                                stroke-opacity={0.5}
+                                color={"orange"}
+                                fillOpacity={0}
+                                
+                            />
+                        }
                     </Map>
 
                 }
@@ -346,13 +382,10 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         <Icon className="fas fa-sync fa-spin fa-fw" /> {t.__("Chargement...")}
                     </Box>
                 }
-                {this.state.currentActivity != null &&
-                    <Box className={clsx(classes.missionBox)}>{this.state.currentActivity.instructions.long}
-                        {this.state.currentActivity.endConditions && this.state.currentActivity.endConditions.length > 0 && this.state.currentActivity.endConditions[0] && this.state.currentActivity.endConditions[0].actionCount != null &&
-                            <div>{this.state.missionProgression.progression ?? 0}/{this.state.currentActivity.endConditions[0].actionCount}</div>
-                        }
+                    <Box className={clsx(classes.missionBox)}>
+                    {this.state.currentMission != null && this.state.currentMission != undefined ? (<div>{this.state.currentMission.description}</div>) : (<div>Aucune mission séléctionnée</div>)}
                     </Box>
-                }
+                
 
             </Box>
         )

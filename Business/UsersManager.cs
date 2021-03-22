@@ -322,5 +322,26 @@ namespace Business
 
             return oldUser;
         }
+        public async Task StartMissionAsync(MissionProgress mission, string userId)
+        {
+            using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
+
+            try
+            {
+                session.StartTransaction();
+
+                User user = await this.SelectAsync(userId);
+
+                user.MissionProgress = mission;
+
+                await this.DataContext.Users.FindOneAndReplaceAsync(x => x.Id == user.Id, user);
+
+            }
+            catch
+            {
+                await session.AbortTransactionAsync();
+                throw;
+            }
+        }
     }
 }
