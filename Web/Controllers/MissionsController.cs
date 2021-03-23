@@ -34,8 +34,9 @@ namespace Web.Controllers
         {
             //await this.MissionsManager.GenerateMission();
             //await this.MissionsManager.GenerateIdentificationMission();
-            User user = await this.UsersManager.SelectAsync(this.User.Identity.Name);
-            await this.MissionsManager.AddCompleteMission(user);
+            // User user = await this.UsersManager.SelectAsync(this.User.Identity.Name);
+            //await this.MissionsManager.AddCompleteMission(user);
+            await this.MissionsManager.GenerateIdentificationCircleMission();
         }
 
         //public NotifyHub NotifyHub { get; }

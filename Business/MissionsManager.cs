@@ -109,6 +109,22 @@ namespace Business
             user.MissionCompleted = new MissionComplete[]{completeMission};
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
         }
-
+        public async Task GenerateIdentificationCircleMission()
+        {
+            var mission = new IdentificationMission();
+            mission.Id = Guid.NewGuid().ToString("N");
+            mission.Title = "Identifier des relevés spécifiques dans une zone circulaire";
+            mission.Description = "Identifier des relevés spécifiques dans une zone circulaire";
+            mission.EndingCondition = new NumberOfActions
+            {
+                Number = 2,
+            };
+            mission.RestrictedArea = new CircleArea
+            {
+                Center = new GeoJsonPoint<GeoJson2DGeographicCoordinates>(new GeoJson2DGeographicCoordinates(-0.7595157623291017, 48.0699066369019)),
+                Radius = 1000,
+            };
+            await this.CreateMissionAsync(mission);
         }
+    }
     }

@@ -270,24 +270,15 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                 }
                 if (mission.restrictedArea != null) {
                     if ((mission.restrictedArea as CircleAreaModel).center != null) {
-                        console.log("identification dans une zone cicrulaire");
                         const circle = mission.restrictedArea as CircleAreaModel;
-
+                        var cir = L.circle(latLng(circle.center.latitude, circle.center.longitude), circle.radius);
+                        var circleCenterPoint = cir.getLatLng();
+                        return circleCenterPoint.distanceTo(latLng(observation.latitude, observation.longitude)) <= circle.radius;
                     }
                     else {
-                        console.log("identification dans une zone polygonale");
                         const polygon = mission.restrictedArea as PolygonArea;
-                        if (!(observation.latitude < Math.min.apply(Math, polygon.polygon.map(function (o) { return o.latitude; })) || observation.latitude > Math.max.apply(Math, polygon.polygon.map(function (o) { return o.latitude; }))
-                            || observation.longitude < Math.min.apply(Math, polygon.polygon.map(function (o) { return o.longitude; })) || observation.longitude > Math.max.apply(Math, polygon.polygon.map(function (o) { return o.longitude; }))))
-                        {
-                            console.log("dans la zone");
-                            return true;
-                        }
-                        else {
-                            console.log("pas dans la zone");
-                            return false;
-                        }
-
+                        var poly = L.polygon(polygon.polygon.map(p => latLng(p.latitude, p.longitude)));
+                        return this.isMarkerInsidePolygon(observation.latitude, observation.longitude, poly);
                     }
                 }
                 else {
@@ -299,7 +290,28 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             }
         }
     }
+    isMarkerInsidePolygon(lat,lng, poly) {
+        var polyPoints = poly.getLatLngs();
+        var x = lat
+        var y = lng;
+        var inside = false;
 
+        for (var ii = 0; ii < poly.getLatLngs().length; ii++) {
+            var polyPoints = poly.getLatLngs()[ii];
+            for (var i = 0, j = polyPoints.length - 1; i < polyPoints.length; j = i++) {
+                var xi = polyPoints[i].lat, yi = polyPoints[i].lng;
+                var xj = polyPoints[j].lat, yj = polyPoints[j].lng;
+
+                var intersect = ((yi > y) != (yj > y))
+                    && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+                if (intersect) inside = !inside;
+            }
+        }
+
+        console.log(inside);
+        return inside;
+    }
+    
     render() {
 
         const { classes } = this.props;
