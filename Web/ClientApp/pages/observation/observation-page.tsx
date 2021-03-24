@@ -170,7 +170,8 @@ class ObservationPageState {
     currentUserName: string;
     isCertain: boolean = false;
     certainStatementId: string = "";
-    isMakingCertain: boolean=true;
+    isMakingCertain: boolean = true;
+    validatedStatementId :string = "";
 
 }
 
@@ -186,7 +187,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
 
         await this.setState({ observation: observation, currentUser: currentUser.osmId, currentUserRole: currentUser.role, currentUserName: currentUser.name, isCertain: observation.isCertain }); 
         if (observation.statementValidatedId != (null && "")){
-            await this.setState({ certainStatementId: observation.statementValidatedId });
+            await this.setState({ validatedStatementId: observation.statementValidatedId });
         }
         this.filterObservationStatements();
         this.isEditAndDeleteEnable();
@@ -711,7 +712,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                         </tr>
                                         {
                                             firstObservationStatement &&
-                                            <tr className={this.state.certainStatementId == firstObservationStatement.id ? clsx(classes.certain) : ""}>
+                                            <tr className={this.state.validatedStatementId == firstObservationStatement.id ? clsx(classes.certain) : ""}>
                                                 <td className={clsx(classes.bold)}>Proposition initiale</td>
                                                 <td className={clsx(classes.score)}>{firstObservationStatement.totalScore}</td>
                                                 <td><input hidden={this.state.isMakingCertain} type="radio" name="certainStatement" value={firstObservationStatement.id} checked={firstObservationStatement.id == this.state.certainStatementId} onClick={() => this.setState({ certainStatementId: firstObservationStatement.id })} /> </td>
@@ -740,7 +741,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                         
                                                 if (index == 0) {
                                                     return (
-                                                        <tr key={"CommonObservationStatement-" + index} className={this.state.certainStatementId == os.id ? clsx(classes.certain) : ""}>
+                                                        <tr key={"CommonObservationStatement-" + index} className={this.state.validatedStatementId == os.id ? clsx(classes.certain) : ""}>
                                                             <td className={clsx(classes.bold)}>Proposition de la communauté</td>
                                                             <td className={clsx(classes.score)}>{os.totalScore}</td>
                                                             <td><input hidden={this.state.isMakingCertain} type="radio" name="certainStatement" value={os.id} checked={os.id == this.state.certainStatementId} onClick={() => this.setState({ certainStatementId: os.id })} /> </td>
@@ -754,7 +755,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                                 }
                                                 else {
                                                     return (
-                                                        <tr key={"CommonObservationStatement-" + index} className={this.state.certainStatementId == os.id ? clsx(classes.certain) : ""}>
+                                                        <tr key={"CommonObservationStatement-" + index} className={this.state.validatedStatementId == os.id ? clsx(classes.certain) : ""}>
                                                             <td></td>
                                                             <td className={clsx(classes.score)}>{os.totalScore}</td>
                                                             <td><input hidden={this.state.isMakingCertain} type="radio" name="certainStatement" value={os.id} checked={os.id == this.state.certainStatementId} onClick={() => this.setState({ certainStatementId: os.id })} /> </td>
@@ -826,7 +827,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                         </tr>
                                         {
                                             firstObservationStatement &&
-                                            <tr className={this.state.certainStatementId == firstObservationStatement.id ? clsx(classes.certain) : ""}>
+                                            <tr className={this.state.validatedStatementId == firstObservationStatement.id ? clsx(classes.certain) : ""}>
                                                 <td className={clsx(classes.bold)}>Proposition initiale</td>
                                                 <td className={clsx(classes.score)}>{firstObservationStatement.totalScore}</td>
                                                 <td><input hidden={this.state.isMakingCertain} type="radio" name="certainStatement" value={firstObservationStatement.id} checked={firstObservationStatement.id == this.state.certainStatementId} onClick={() => this.setState({ certainStatementId: firstObservationStatement.id })} /> </td>
@@ -855,7 +856,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                             filteredObservationStatements && filteredObservationStatements.map((os, index) => {
                                                 if (index == 0) {
                                                     return (
-                                                        <tr key={"LatinObservationStatement-" + index} className={this.state.certainStatementId == os.id ? clsx(classes.certain) : ""}>
+                                                        <tr key={"LatinObservationStatement-" + index} className={this.state.validatedStatementId == os.id ? clsx(classes.certain) : ""}>
                                                             <td className={clsx(classes.bold)}>Proposition de la communauté</td>
                                                             <td className={clsx(classes.score)}>{os.totalScore}</td>
                                                             <td><input hidden={this.state.isMakingCertain} type="radio" name="certainStatement" value={os.id} checked={os.id == this.state.certainStatementId} onClick={() => this.setState({ certainStatementId: os.id })} /> </td>
@@ -869,7 +870,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                                 }
                                                 else {
                                                     return (
-                                                        <tr key={"LatinObservationStatement-" + index} className={this.state.certainStatementId == os.id ? clsx(classes.certain) : ""}>
+                                                        <tr key={"LatinObservationStatement-" + index} className={this.state.validatedStatementId == os.id ? clsx(classes.certain) : ""}>
                                                             <td></td>
                                                             <td className={clsx(classes.score)}>{os.totalScore}</td>
                                                             <td><input hidden={this.state.isMakingCertain} type="radio" name="certainStatement" value={os.id} checked={os.id == this.state.certainStatementId} onClick={() => this.setState({ certainStatementId: firstObservationStatement.id })} /> </td>

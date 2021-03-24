@@ -205,12 +205,14 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
         }      
     }
     async checkIdentification() {
-        console.log("test");
         const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
-        console.log(observation);
-        if (observation.genus == this.state.model.genus) {
-            if (observation.speciesName == this.state.model.species) {
+        const statement = observation.observationStatements.find(x => x.id == observation.statementValidatedId);
+        if (statement.genus == this.state.model.genus) {
+            if (statement.speciesName == this.state.model.species) {
                 console.log("Bonne identification");
+            }
+            else {
+                console.log("Mauvaise identification");
             }
         }
         else {

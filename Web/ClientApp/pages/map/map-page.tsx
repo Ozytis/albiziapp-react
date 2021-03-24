@@ -257,7 +257,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
     }
     checkIfObservationIsInMission(observation: ObservationModel) {
-        if (this.state.currentMission != null) {
+        if (this.state.currentMission != null && observation.isCertain) {
             if (this.state.currentMission.missionType == "IdentificationMissionModel") {
                 const mission = this.state.currentMission as IdentificationMissionModel;
                 if (mission.observationIdentified != null && mission.observationIdentified.length > 0) {
@@ -307,8 +307,6 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                 if (intersect) inside = !inside;
             }
         }
-
-        console.log(inside);
         return inside;
     }
     
@@ -346,6 +344,27 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         <Marker
                             position={{ lat: this.state.userPosition.coords.latitude, lng: this.state.userPosition.coords.longitude }}
                         />
+                        {
+                            this.state.circle &&
+                            <Circle
+                                center={[this.state.circle.center.latitude, this.state.circle.center.longitude]}
+                                radius={this.state.circle.radius}
+                                stroke-opacity={0.5}
+                                color={"orange"}
+                                fillOpacity={0}
+                                interactive={false}
+                            />
+                        }
+                        {
+                            this.state.polygon &&
+                            <Polygon
+                                positions={this.state.polygon.polygon.map(p => latLng(p.latitude, p.longitude))}
+                                stroke-opacity={0.5}
+                                color={"orange"}
+                                fillOpacity={0}
+
+                            />
+                        }
 
                         {
                             this.state.observations && this.state.observations.map((observation) => {
@@ -358,29 +377,10 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                                         color={this.checkIfObservationIsInMission(observation) ? "red" : this.getColor(observation)}
                                         className={clsx(classes.imageClignote)}
                                         onclick={this.checkIfObservationIsInMission(observation) ? (() => this.props.history.push({ pathname: `/new-identification-mission/${observation.id}` })) : (() => this.props.history.push({ pathname: `/observation/${observation.id}` }))}
+                                        
                                     />
                                 )
                             })
-                        }
-                        {
-                            this.state.circle &&
-                            <Circle
-                                center={[this.state.circle.center.latitude, this.state.circle.center.longitude]}
-                                radius={this.state.circle.radius}
-                                stroke-opacity={0.5}
-                                color={"orange"}
-                                fillOpacity={0}
-                            />
-                        }
-                        {
-                            this.state.polygon &&
-                            <Polygon
-                                positions={this.state.polygon.polygon.map(p => latLng(p.latitude, p.longitude))}
-                                stroke-opacity={0.5}
-                                color={"orange"}
-                                fillOpacity={0}
-
-                            />
                         }
                     </Map>
 
