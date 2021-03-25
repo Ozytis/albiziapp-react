@@ -19,6 +19,7 @@ import { UserModel } from "../../services/generated/user-model";
 import * as signalR from "@microsoft/signalr";
 import { toast, ToastContainer } from "react-toastify";
 import ReactDOM from "react-dom";
+import { NotifyHelper } from "../../utils/notify-helper";
 
 const styles = (theme: Theme) => createStyles({
     root: {        
@@ -126,7 +127,6 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
     }
 
     async goBack() {
-        console.log("byyyyyyyyyyyyyyye");
             ObservationsApi.setNextObservationCoordinates(null);
             await this.props.history.replace({
                 pathname: "/map"
@@ -188,7 +188,6 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
         const species = this.state.species.find(g => g.speciesName === speciesName);
         if (species != null) {
             model.species = species.speciesName;
-            console.log(species);
             const genus = this.state.genus.find(g => g.genus === species.genus);
             model.genus = genus.genus;
             await this.setState({ model: model, selectedspecies: species, selectedGenus: genus, selectedCommonGenus: genus, selectedCommonSpecies:species });
@@ -209,16 +208,18 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
         const statement = observation.observationStatements.find(x => x.id == observation.statementValidatedId);
         if (statement.genus == this.state.model.genus) {
             if (statement.speciesName == this.state.model.species) {
-                console.log("Bonne identification");
+                NotifyHelper.sendNotif("Bonne identification");
+
             }
             else {
-                console.log("Mauvaise identification");
+                NotifyHelper.sendErrorNotif("Mauvaise identification");
             }
         }
         else {
-            console.log("Mauvaise identification");
+            NotifyHelper.sendErrorNotif("Mauvaise identification");
         }
     }
+    
     render() {
 
         const { classes } = this.props;

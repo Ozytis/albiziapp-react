@@ -1,7 +1,7 @@
 import { Box, createStyles, Icon, Theme, WithStyles, withStyles, Button, Dialog, DialogActions } from "@material-ui/core";
 import clsx from "clsx";
 import L, { LatLng, latLng } from "leaflet";
-import React, { createRef, Component } from "react";
+import React, { createRef, Component, useState, useEffect } from "react";
 import { Circle, Map, Marker, TileLayer, LayerGroup, Polygon } from "react-leaflet";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
@@ -16,9 +16,10 @@ import { MissionProgressionModel } from "../../services/generated/mission-progre
 import { NearMe, ZoomOutMapSharp, MapRounded, Layers } from "@material-ui/icons";
 import { MapPosition } from "../../components/mapPosition";
 import * as signalR from "@microsoft/signalr";
-import { MissionModel, CircleAreaModel, PolygonArea, IdentificationMissionModel } from "../../services/models/mission-model";
+import { MissionModel, CircleAreaModel, PolygonArea, IdentificationMissionModel, VerificationMissionModel, RestrictionType, NumberOfActions, TimeLimit } from "../../services/models/mission-model";
 import { CoordinateModel } from "../../services/generated/coordinate-model";
 import { orange } from "@material-ui/core/colors";
+import { NotifyHelper } from "../../utils/notify-helper";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -39,12 +40,14 @@ const styles = (theme: Theme) => createStyles({
     },
     missionBox: {
         height: "60px",
-        backgroundColor: theme.palette.primary.dark,
+        backgroundColor: "#267F00",
         color: theme.palette.secondary.contrastText,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        padding: "1%",
+        verticalAlign :"middle"
     },
     imageClignote: {
         animationDuration: ".8s",
@@ -72,12 +75,15 @@ class MapPageState {
     });
     circle: CircleAreaModel;
     polygon: PolygonArea;
+    minutes: number ;
+    seconds: number ;
+    myInterval: number;
 }
 
 class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
     hub: signalR.HubConnection;
-
+    myInterval: number;
     constructor(props: MapPageProps) {
         super(props, "MapPage", new MapPageState());
     }
@@ -94,7 +100,6 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                 })
             });
         }, async () => {
-            console.log("MAP ERROR");
             await this.setState({
                 userPosition: {
                     coords: ({ latitude: 48.085834, longitude: -0.757896 } as any)
@@ -117,11 +122,36 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         var missions = await MissionsApi.getMissions();
         var userMissions = await AuthenticationApi.getUserMission();
         var currentMission = missions.find(m => m.id == userMissions.missionProgression?.missionId);
-        await this.setState({ currentMission: currentMission });
+        var missionProgression = userMissions.missionProgression;
+        await this.setState({ currentMission: currentMission, missionProgression:missionProgression });
         await this.setPosition();
         this.setZoneForMission();
-    }
 
+
+
+        if (currentMission != null && missionProgression != null) {
+            if (currentMission.endingCondition.endingConditionType == "TimeLimitModel") {
+                const timeLimit = this.state.currentMission.endingCondition as TimeLimit;
+
+                const start = new Date(missionProgression.startDate);
+                const now = new Date();
+                var timer = timeLimit.minutes;
+                timer = timer * 60;
+                var secRestante = (now.getHours() * 60 + now.getMinutes() * 60 + now.getSeconds()) - (start.getHours() * 60 + start.getMinutes() * 60 + start.getSeconds());
+                secRestante = timer - secRestante;
+                if (secRestante > 0) {
+                    secRestante = secRestante / 60;
+                    var minRestante = Math.trunc(secRestante);
+                    await this.setState({ minutes: minRestante, seconds: Math.round(secRestante) });
+                    await this.setState({ minutes: 0, seconds: 5 });
+                    this.timer();
+                }
+                else {
+                    NotifyHelper.sendInfoNotif("Le temps de la mission est écoulé");
+                }
+            }
+        }
+    }
     async setPosition() {
 
         var lastPos: MapPosition = JSON.parse(localStorage.getItem("mapPosition"));
@@ -136,7 +166,6 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                 var date = new Date(lastPos.Date as any);
                 if (date >= now) {
                     await this.state.mapRef.current.leafletElement.setView([lastPos.Latitude, lastPos.Longitude], lastPos.Zoom);
-                    console.log([lastPos.Latitude, lastPos.Longitude], lastPos.Zoom);
                 }
                 else {
 
@@ -161,7 +190,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         if (this.positionWatcher) {
             navigator.geolocation.clearWatch(this.positionWatcher);
         }
-
+        clearTimeout(this.myInterval)
     }
 
     async onMapClicked(e: { latlng: LatLng }) {
@@ -246,19 +275,20 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
     async setZoneForMission() {
         const mission = this.state.currentMission;
-        if ((mission.restrictedArea as CircleAreaModel).center != null) {
-            const model = mission.restrictedArea as CircleAreaModel;
-            await this.setState({ circle: model });
+        if (mission.restrictedArea != null) {
+            if ((mission.restrictedArea as CircleAreaModel).center != null) {
+                const model = mission.restrictedArea as CircleAreaModel;
+                await this.setState({ circle: model });
+            }
+            else {
+                const model = mission.restrictedArea as PolygonArea;
+                await this.setState({ polygon: model });
+            }
         }
-        else {
-            const model = mission.restrictedArea as PolygonArea;
-            await this.setState({ polygon: model });
-        }
-
     }
     checkIfObservationIsInMission(observation: ObservationModel) {
-        if (this.state.currentMission != null && observation.isCertain) {
-            if (this.state.currentMission.missionType == "IdentificationMissionModel") {
+        if (this.state.currentMission != null) {
+            if (this.state.currentMission.missionType == "IdentificationMissionModel" && observation.isCertain) {
                 const mission = this.state.currentMission as IdentificationMissionModel;
                 if (mission.observationIdentified != null && mission.observationIdentified.length > 0) {
                     if (mission.observationIdentified.includes(observation.id)) {
@@ -269,28 +299,61 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                     }
                 }
                 if (mission.restrictedArea != null) {
-                    if ((mission.restrictedArea as CircleAreaModel).center != null) {
-                        const circle = mission.restrictedArea as CircleAreaModel;
-                        var cir = L.circle(latLng(circle.center.latitude, circle.center.longitude), circle.radius);
-                        var circleCenterPoint = cir.getLatLng();
-                        return circleCenterPoint.distanceTo(latLng(observation.latitude, observation.longitude)) <= circle.radius;
-                    }
-                    else {
-                        const polygon = mission.restrictedArea as PolygonArea;
-                        var poly = L.polygon(polygon.polygon.map(p => latLng(p.latitude, p.longitude)));
-                        return this.isMarkerInsidePolygon(observation.latitude, observation.longitude, poly);
+                    if (!this.concernByZone(mission, observation)) {                        
+                        return false;
                     }
                 }
-                else {
-                    return false;
+                if (mission.restriction != null) {
+                    if (mission.restriction.species != "") {
+                        if (!observation.observationStatements.some(x => x.speciesName == mission.restriction.species)) {
+                            return false;
+                        }
+                    }
+                    if (mission.restriction.species == "" && mission.restriction.genus != "") {
+                        if (!observation.observationStatements.some(x => x.genus == mission.restriction.genus)) {
+                            return false;
+                        }
+                    }
                 }
+                return true;                
             }
-            else if (this.state.currentMission.missionType == "") {
-
+            else if (this.state.currentMission.missionType == "VerificationMissionModel") {
+                const mission = this.state.currentMission as VerificationMissionModel;
+                if (mission.restrictedArea != null) {
+                    if (!this.concernByZone(mission, observation)) {
+                        return false;
+                    }
+                }
+                if (mission.restriction != null) {
+                    if (mission.restriction.species != "") {
+                        if (!observation.observationStatements.some(x => x.speciesName == mission.restriction.species)) {
+                            return false;
+                        }
+                    }
+                    if (mission.restriction.species == "" && mission.restriction.genus != "") {
+                        if (!observation.observationStatements.some(x => x.genus == mission.restriction.genus)) {
+                            return false;
+                        }
+                    }
+                }
+                if (mission.observationWithPics) {
+                    if (observation.pictures == null || observation.pictures.length <= 0) {
+                        return false;
+                    }
+                }
+                if (mission.unreliableObservation) {
+                    if (!observation.isIdentified) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            else {
+                return false;
             }
         }
     }
-    isMarkerInsidePolygon(lat,lng, poly) {
+    isMarkerInsidePolygon(lat, lng, poly) {
         var polyPoints = poly.getLatLngs();
         var x = lat
         var y = lng;
@@ -309,10 +372,76 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         }
         return inside;
     }
-    
+    concernByZone(miss: MissionModel, observation: ObservationModel) {
+        var mission;
+        if (miss.missionType == "VerificationMissionModel") {
+            mission = miss as VerificationMissionModel;
+        }
+        else if (miss.missionType == "IdentificationMissionModel") {
+            mission = miss as IdentificationMissionModel;
+        }
+        if ((mission.restrictedArea as CircleAreaModel).center != null) {
+            const circle = mission.restrictedArea as CircleAreaModel;
+            var cir = L.circle(latLng(circle.center.latitude, circle.center.longitude), circle.radius);
+            var circleCenterPoint = cir.getLatLng();
+            return (circleCenterPoint.distanceTo(latLng(observation.latitude, observation.longitude)) <= circle.radius);
+        }
+        else {
+            const polygon = mission.restrictedArea as PolygonArea;
+            var poly = L.polygon(polygon.polygon.map(p => latLng(p.latitude, p.longitude)));
+            return this.isMarkerInsidePolygon(observation.latitude, observation.longitude, poly);
+        }
+
+    }
+
+    checkConditionEnding() {
+        if (this.state.currentMission != null && this.state.missionProgression != null) {  
+            if (this.state.currentMission.endingCondition.endingConditionType == "NumberOfActionsModel") {
+                const nbActions = this.state.currentMission.endingCondition as NumberOfActions;
+                const progression = this.state.missionProgression.progression ? this.state.missionProgression.progression : 0;
+                return progression + "/" + nbActions.number;
+            }
+            else {
+                const seconds = this.state.seconds;
+                if (seconds < 10) {
+                    return this.state.minutes + ":0" + seconds;
+                }
+                else {
+                    return this.state.minutes + ":" + seconds;
+                }
+            }
+        }
+    }
+
+    timer() {
+        this.myInterval = setTimeout(() => {
+            const { seconds, minutes } = this.state;
+            if (seconds > 0) {
+                this.setState(({ seconds }) => ({
+                    seconds: seconds - 1
+                }))
+            }
+            if (seconds === 0) {
+                if (minutes === 0) {
+                    clearTimeout(this.myInterval)
+                } else {
+                    this.setState(({ minutes }) => ({
+                        minutes: minutes - 1,
+                        seconds: 59
+                    }))
+                }
+            }
+            this.timer();
+        }, 1000);
+        if (this.state.minutes == 0 && this.state.seconds == 0) {
+            clearTimeout(this.myInterval);
+            NotifyHelper.sendInfoNotif("La mission est terminé !");
+        }
+    }
     render() {
 
         const { classes } = this.props;
+        const { minutes, seconds } = this.state;
 
         const position = this.state.userPosition && { lat: this.state.userPosition.coords.latitude, lng: this.state.userPosition.coords.longitude };
 
@@ -362,6 +491,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                                 stroke-opacity={0.5}
                                 color={"orange"}
                                 fillOpacity={0}
+                                interactive={false}
 
                             />
                         }
@@ -377,7 +507,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                                         color={this.checkIfObservationIsInMission(observation) ? "red" : this.getColor(observation)}
                                         className={clsx(classes.imageClignote)}
                                         onclick={this.checkIfObservationIsInMission(observation) ? (() => this.props.history.push({ pathname: `/new-identification-mission/${observation.id}` })) : (() => this.props.history.push({ pathname: `/observation/${observation.id}` }))}
-                                        
+
                                     />
                                 )
                             })
@@ -430,7 +560,8 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                     </Box>
                 }
                 <Box className={clsx(classes.missionBox)}>
-                    {this.state.currentMission != null && this.state.currentMission != undefined ? (<div>{this.state.currentMission.description}</div>) : (<div>Aucune mission séléctionnée</div>)}
+                    {this.state.currentMission != null && this.state.currentMission != undefined ? (<div style={{ textAlign: "center" }}><p>{this.state.currentMission.description}</p> <p>{this.checkConditionEnding()}</p></div>) : (<div>Aucune mission séléctionnée</div>)}
+                    
                 </Box>
 
 

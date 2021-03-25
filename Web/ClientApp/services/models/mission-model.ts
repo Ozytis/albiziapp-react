@@ -15,9 +15,9 @@ export class VerificationMissionModel implements MissionModel {
     restrictedArea: RestrictedArea;
     title: string;
     description: string;
-    unreliableObservation: boolean;
-    observationWithPics: boolean;
-    restriction: Restriction;
+    unreliableObservation: boolean;// releve pas fiable donc si true on verifie tout les relevés isIdentified
+    observationWithPics: boolean;//si true osef de ceux sans photos
+    restriction: Restriction;// si !=null on verifie si c'est un genre/espece
     missionType: string;
 }
 
@@ -53,9 +53,11 @@ export enum NewObservationMissionType {
 export interface Restriction {
     type: RestrictionType;
     value: string;
+    genus: string;
+    species: string;
 }
 export interface EndingCondition {
-
+    endingConditionType: string;
 }
 
 export enum RestrictionType {
@@ -65,10 +67,12 @@ export enum RestrictionType {
 
 export class NumberOfActions implements EndingCondition {
     number: number;
+    endingConditionType: string;
 }
 
 export class TimeLimit implements EndingCondition {
     minutes: number;
+    endingConditionType: string;
 }
 
 export interface RestrictedArea {

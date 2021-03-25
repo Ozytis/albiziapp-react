@@ -124,7 +124,62 @@ namespace Business
                 Center = new GeoJsonPoint<GeoJson2DGeographicCoordinates>(new GeoJson2DGeographicCoordinates(-0.7595157623291017, 48.0699066369019)),
                 Radius = 1000,
             };
+            mission.Restriction = new Restriction
+            {
+                Type = RestrictionType.ExactSpecies,
+                Value = "Abricotier commun",
+                Genus = "Prunus",
+                Species = "Prunus Armeniaca"
+            };
             await this.CreateMissionAsync(mission);
+        }
+        public async Task GenerateVerifyMission()
+        {
+            var mission = new VerificationMission();
+            mission.Id = Guid.NewGuid().ToString("N");
+            mission.Title = "Verifier des relevés spécifiques dans une zone circulaire avec photo";
+            mission.Description = "Verifier des relevés spécifiques dans une zone circulaire avec photo";
+            mission.EndingCondition = new NumberOfActions
+            {
+                Number = 2,
+            };
+            mission.RestrictedArea = new CircleArea
+            {
+                Center = new GeoJsonPoint<GeoJson2DGeographicCoordinates>(new GeoJson2DGeographicCoordinates(-0.7595157623291017, 48.0699066369019)),
+                Radius = 1000,
+            };
+            await this.CreateMissionAsync(mission); 
+            var mission2 = new VerificationMission();
+            mission2.Id = Guid.NewGuid().ToString("N");
+            mission2.Title = "Verifier des relevés spécifiques dans une zone polygonale avec chrono";
+            mission2.Description = "Verifier des relevés spécifiques dans une zone polygonale avec chrono";
+            mission2.EndingCondition = new TimeLimit
+            {
+                Minutes = 10,
+            };
+            mission2.RestrictedArea = new PolygonArea
+            {
+                Polygon = GeoJson.Polygon(new GeoJson2DGeographicCoordinates(-0.574204, 48.019921), new GeoJson2DGeographicCoordinates(-0.573883, 48.01395),
+                new GeoJson2DGeographicCoordinates(-0.588023, 48.015214), new GeoJson2DGeographicCoordinates(-0.587873, 48.021041),
+                 new GeoJson2DGeographicCoordinates(-0.574204, 48.019921))
+            };
+            mission2.Restriction = new Restriction
+            {
+                Type = RestrictionType.ExactSpecies,
+                Value = "Abricotier commun",
+                Genus = "Prunus",
+                Species = "Prunus Armeniaca"
+            };
+            await this.CreateMissionAsync(mission2);
+            var mission3 = new VerificationMission();
+            mission3.Id = Guid.NewGuid().ToString("N");
+            mission3.Title = "Verifier des relevés spécifiques dans une zone circulaire";
+            mission3.Description = "Verifier des relevés spécifiques dans une zone circulaire";
+            mission3.EndingCondition = new TimeLimit
+            {
+                Minutes = 10,
+            };            
+            await this.CreateMissionAsync(mission3);
         }
     }
     }

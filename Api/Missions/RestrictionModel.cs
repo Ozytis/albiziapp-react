@@ -9,5 +9,7 @@ namespace Api.Missions
         public RestrictionTypeModel Type { get; set; }
 
         public string Value { get; set; }
+        public string Genus { get; set; }
+        public string Species { get; set; }
     }
 }

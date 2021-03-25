@@ -114,7 +114,9 @@ namespace Web.Mappings
             return new RestrictionModel()
             {
                 Type = (RestrictionTypeModel)restriction.Type,
-                Value = restriction.Value
+                Value = restriction.Value,
+                Genus = restriction.Genus,
+                Species = restriction.Species
             };
         }
     }

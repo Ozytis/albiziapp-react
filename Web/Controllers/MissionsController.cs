@@ -37,6 +37,7 @@ namespace Web.Controllers
             // User user = await this.UsersManager.SelectAsync(this.User.Identity.Name);
             //await this.MissionsManager.AddCompleteMission(user);
             await this.MissionsManager.GenerateIdentificationCircleMission();
+            await this.MissionsManager.GenerateVerifyMission();
         }
 
         //public NotifyHub NotifyHub { get; }
@@ -84,6 +85,12 @@ namespace Web.Controllers
                 mp = null;
             }
             await this.UsersManager.StartMissionAsync(mp, this.User.Identity.Name);
+        }
+        [HttpPost("progression")]
+        [AllowAnonymous]
+        public async Task UpdateMissionProgression()
+        {
+            //await this.UsersManager.UpdateMissionProgression( this.User.Identity.Name);
         }
     }
 }
