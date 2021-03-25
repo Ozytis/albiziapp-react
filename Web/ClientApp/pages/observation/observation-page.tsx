@@ -186,7 +186,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         console.log(observation);
 
         await this.setState({ observation: observation, currentUser: currentUser.osmId, currentUserRole: currentUser.role, currentUserName: currentUser.name, isCertain: observation.isCertain }); 
-        if (observation.statementValidatedId != (null && "")){
+        if (observation.statementValidatedId != null && observation.statementValidatedId !=""){
             await this.setState({ validatedStatementId: observation.statementValidatedId });
         }
         this.filterObservationStatements();

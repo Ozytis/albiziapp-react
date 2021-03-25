@@ -241,7 +241,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         const species = this.state.species.find(g => g.speciesName === speciesName);
         if (species != null) {
             model.species = species.speciesName;
-            const genus = this.state.genus.find(g => g.genus === species[0].genus);
+            const genus = this.state.genus.find(g => g.genus === species.genus);
             model.genus = genus.genus;
             await this.setState({ model: model, selectedspecies: species, selectedGenus: genus, selectedCommonGenus: genus, selectedCommonSpecies:species });
         } else {

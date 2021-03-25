@@ -1,5 +1,5 @@
 import { Box, Card, CardContent, createStyles, LinearProgress, Theme, Typography, WithStyles, withStyles, Button } from "@material-ui/core";
-import { DoneAll, HelpOutline, RadioButtonChecked, Search, Watch, WatchLaterTwoTone, StopOutlined, Cancel } from "@material-ui/icons";
+import { DoneAll, HelpOutline, RadioButtonChecked, Search, Watch, WatchLaterTwoTone, StopOutlined, Cancel, Check } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -102,23 +102,23 @@ class ActivityCardComponent extends BaseComponent<ActivityCardProps, ActivityCar
                         </Box>
                         { mission && !active && !end &&
                             <Box>
-                                <Button color="primary" variant="contained" onClick={() => this.startMission(mission.id)}>
-                                <WatchLaterTwoTone className="mr-2"/>
+                            <Button color="primary" variant="contained" onClick={() => this.startMission(mission.id)} style={{maxWidth:"80%", fontSize:"9px"}}>
+                                <WatchLaterTwoTone className="mr-2" style={{ width: "15px" }} />
                                 {t.__("Commencer")}
                             </Button>
                             </Box>
                         }
                         {mission && active && !end &&
                             <Box>
-                            <Button color="secondary" variant="contained" onClick={() => this.startMission(null)}>
-                                <Cancel className="mr-2" />
+                            <Button color="secondary" variant="contained" onClick={() => this.startMission(null)} style={{ maxWidth: "80%", fontSize: "9px" }}>
+                                <Cancel className="mr-2" style={{ width:"15px" }} />
                                 {t.__("Abandonner")}
                             </Button>
                             </Box>
                         }
                         {end &&
                             <Box>
-                                {t.__("Mission terminé")}
+                                <Check className="mr-2" style={{ width: "50px" }} />
                             </Box>
                         }
                     </Box>

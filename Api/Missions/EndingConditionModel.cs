@@ -6,5 +6,12 @@ namespace Api.Missions
 {
     public abstract class EndingConditionModel
     {
+        public string EndingConditionType
+        {
+            get
+            {
+                return this.GetType().Name;
+            }
+        }
     }
 }
