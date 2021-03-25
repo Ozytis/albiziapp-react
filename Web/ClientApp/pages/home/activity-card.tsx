@@ -70,11 +70,11 @@ class ActivityCardComponent extends BaseComponent<ActivityCardProps, ActivityCar
 
     render() {
 
-        const { mission, classes, completion, active } = this.props;
+        const { mission, classes, completion, active, end} = this.props;
         const ActivityIcon = this.getIcon();
         // console.log(activity);
         return (
-            <Card className={clsx(classes.card, active && classes.disabledCard)} variant="elevation" raised={!active}>
+            <Card className={clsx(classes.card, end && classes.disabledCard)} variant="elevation" raised={!end}>
                 <CardContent>
                     <Box display="flex" alignItems="center">
                         <Box minWidth={35}>
@@ -100,7 +100,7 @@ class ActivityCardComponent extends BaseComponent<ActivityCardProps, ActivityCar
                                 </Box>
                             }
                         </Box>
-                        { mission && !active && 
+                        { mission && !active && !end &&
                             <Box>
                                 <Button color="primary" variant="contained" onClick={() => this.startMission(mission.id)}>
                                 <WatchLaterTwoTone className="mr-2"/>
@@ -108,12 +108,17 @@ class ActivityCardComponent extends BaseComponent<ActivityCardProps, ActivityCar
                             </Button>
                             </Box>
                         }
-                        {mission && active && 
+                        {mission && active && !end &&
                             <Box>
                             <Button color="secondary" variant="contained" onClick={() => this.startMission(null)}>
                                 <Cancel className="mr-2" />
-                                {t.__("Annuler")}
+                                {t.__("Abandonner")}
                             </Button>
+                            </Box>
+                        }
+                        {end &&
+                            <Box>
+                                {t.__("Mission terminé")}
                             </Box>
                         }
                     </Box>

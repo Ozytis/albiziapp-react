@@ -203,13 +203,13 @@ namespace Web.Controllers
                 throw be;
             }
         }
-        [HttpPut("isCertain/{observationId}/{userName}")]
+        [HttpPut("isCertain/{observationId}/{statementId}/{userName}")]
         [HandleBusinessException, ValidateModel]
-        public async Task SetObservationToCertainAysnc(string observationId, string userName)
+        public async Task SetObservationToCertainAysnc(string observationId, string statementId, string userName)
         {
             try
             {
-                await this.ObservationsManager.SetObservationToCertainAysnc(observationId, userName);
+                await this.ObservationsManager.SetObservationToCertainAysnc(observationId, statementId, userName);
             }
             catch (BusinessException be)
             {

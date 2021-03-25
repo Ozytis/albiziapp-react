@@ -79,13 +79,6 @@ interface NewIdentificationMissionPageProps extends RouteComponentProps, IPropsW
 }
 
 class NewIdentificationMissionPageState {
-
-    constructor() {
-        const coordinates = ObservationsApi.getNextObservationCoordinates();
-        this.model.latitude = coordinates[0];
-        this.model.longitude = coordinates[1];
-    }
-
     isProcessing = false;
     errors: string[];
     model = new ObservationCreationModel();
@@ -103,11 +96,6 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
     }
 
     async componentDidMount() {
-        if (!this.state.model.latitude) {
-            this.props.history.replace({
-                pathname: "/map"
-            })
-        }
         AuthenticationApi.refreshUser();
 
         this.listener = SpeciesApi.registerSpeciesListener(() => this.refreshSpecies());
@@ -138,7 +126,7 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
     }
 
     async goBack() {
-
+        console.log("byyyyyyyyyyyyyyye");
             ObservationsApi.setNextObservationCoordinates(null);
             await this.props.history.replace({
                 pathname: "/map"
@@ -200,7 +188,8 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
         const species = this.state.species.find(g => g.speciesName === speciesName);
         if (species != null) {
             model.species = species.speciesName;
-            const genus = this.state.genus.find(g => g.genus === species[0].genus);
+            console.log(species);
+            const genus = this.state.genus.find(g => g.genus === species.genus);
             model.genus = genus.genus;
             await this.setState({ model: model, selectedspecies: species, selectedGenus: genus, selectedCommonGenus: genus, selectedCommonSpecies:species });
         } else {
@@ -216,50 +205,20 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
         }      
     }
     async checkIdentification() {
-        this.sendNotify("test");
         const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
-        if (observation.genus == this.state.model.genus) {
-            if (observation.speciesName == this.state.model.species) {
-                
+        const statement = observation.observationStatements.find(x => x.id == observation.statementValidatedId);
+        if (statement.genus == this.state.model.genus) {
+            if (statement.speciesName == this.state.model.species) {
+                console.log("Bonne identification");
+            }
+            else {
+                console.log("Mauvaise identification");
             }
         }
+        else {
+            console.log("Mauvaise identification");
+        }
     }
-    async sendNotify(notifContent: string) {
-        var hubConnection = new signalR.HubConnectionBuilder()
-            .withUrl("/notifyhub")
-            .build();
-        hubConnection.on("SendNotif", function () {
-
-            const notify = () => toast.success(notifContent, {
-                position: toast.POSITION.BOTTOM_CENTER,
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-            });
-            console.log("1");
-            const element =
-                <div onLoad={notify}>
-                    <ToastContainer position="bottom-center"
-                        autoClose={5000}
-                        hideProgressBar={false}
-                        newestOnTop={false}
-                        closeOnClick
-                        rtl={false}
-                        pauseOnFocusLoss
-                        draggable
-                        pauseOnHover />
-                </div>;
-            console.log(element);
-            console.log(document.getElementById('toast'));
-
-            ReactDOM.render(element, document.getElementById('toast'));
-            notify();
-        });
-    }
-    
     render() {
 
         const { classes } = this.props;
