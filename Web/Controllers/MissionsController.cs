@@ -33,7 +33,8 @@ namespace Web.Controllers
         public async Task CreateMission()
         {
             //await this.MissionsManager.GenerateMission();
-            await this.MissionsManager.GenerateIdentificationMission();
+            //await this.MissionsManager.GenerateIdentificationMission();
+            await this.MissionsManager.GenerateVerifyMission();
         }
 
         //public NotifyHub NotifyHub { get; }

@@ -74,8 +74,50 @@ namespace Business
                new GeoJson2DGeographicCoordinates(-0.588023, 48.015214), new GeoJson2DGeographicCoordinates(-0.587873, 48.021041),
                 new GeoJson2DGeographicCoordinates(-0.574204, 48.019921))
             };
-          
+
             mission2.Type = NewObservationMissionType.DifferentSpecies;
+            await this.CreateMissionAsync(mission2);
+        }
+
+        public async Task GenerateVerifyMission()
+        {
+            var mission = new VerificationMission();
+            mission.Id = Guid.NewGuid().ToString("N");
+            mission.Title = "Première verif identification";
+            mission.Description = "Première verif identification description";
+            mission.EndingCondition = new NumberOfActions
+            {
+                Number = 2,
+            };
+            mission.RestrictedArea = new CircleArea
+            {
+                Center = new GeoJsonPoint<GeoJson2DGeographicCoordinates>(new GeoJson2DGeographicCoordinates(-0.5762835000000001, 48.015947000000004)),
+                Radius = 3000
+            };
+            mission.UnreliableObservation = true;
+            await this.CreateMissionAsync(mission);
+
+
+            var mission2 = new VerificationMission();
+            mission2.Id = Guid.NewGuid().ToString("N");
+            mission2.Title = "Seconde verif identification";
+            mission2.Description = "Seconde verif identification description";
+            mission2.EndingCondition =  new NumberOfActions
+            {
+                Number = 1,
+            };
+            mission2.RestrictedArea = new PolygonArea
+            {
+                Polygon = GeoJson.Polygon(new GeoJson2DGeographicCoordinates(-0.574204, 48.019921), new GeoJson2DGeographicCoordinates(-0.573883, 48.01395),
+               new GeoJson2DGeographicCoordinates(-0.588023, 48.015214), new GeoJson2DGeographicCoordinates(-0.587873, 48.021041),
+                new GeoJson2DGeographicCoordinates(-0.574204, 48.019921))
+            };
+
+            mission2.Restriction = new Restriction()
+            {
+                Type = RestrictionType.ExactGender,
+                Value = "Prunus"
+            };
             await this.CreateMissionAsync(mission2);
         }
         public async Task GenerateIdentificationMission()
@@ -94,5 +136,5 @@ namespace Business
             await this.CreateMissionAsync(mission);
         }
 
-        }
     }
+}

@@ -90,7 +90,7 @@ namespace Business.MissionValidation
 
             if (conditionsCompleted)
             {
-                await this.UsersManager.EndCurrentMission(userId: this.User.Id, missionProgressHistory.ToArray());
+                await this.UsersManager.EndCurrentMission(userId: this.User.OsmId, missionProgressHistory.ToArray());
             }
             else
             {
