@@ -1,6 +1,7 @@
 ﻿using Api;
 using Api.Missions;
 using Business;
+using Business.MissionValidation;
 using Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,15 +18,18 @@ namespace Web.Controllers
     [Route("api/[controller]")]
     public class MissionsController : ControllerBase
     {
-        public MissionsController(MissionsManager missionsManager, UsersManager usersManager/*,NotifyHub notifyHub*/)
+        public MissionsController(MissionsManager missionsManager, UsersManager usersManager,IServiceProvider serviceProvider/*,NotifyHub notifyHub*/)
         {
             this.MissionsManager = missionsManager;
             this.UsersManager = usersManager;
+            this.ServiceProvider = serviceProvider;
             //this.NotifyHub = notifyHub;
         }
 
         public MissionsManager MissionsManager { get; }
         public UsersManager UsersManager { get; }
+
+        public IServiceProvider ServiceProvider { get; set; }
 
 
         [HttpGet("create")]
@@ -33,11 +37,11 @@ namespace Web.Controllers
         public async Task CreateMission()
         {
             //await this.MissionsManager.GenerateMission();
-            //await this.MissionsManager.GenerateIdentificationMission();
+            await this.MissionsManager.GenerateIdentificationMission();
             // User user = await this.UsersManager.SelectAsync(this.User.Identity.Name);
             //await this.MissionsManager.AddCompleteMission(user);
-            await this.MissionsManager.GenerateIdentificationCircleMission();
-            await this.MissionsManager.GenerateVerifyMission();
+            //await this.MissionsManager.GenerateIdentificationCircleMission();
+            //await this.MissionsManager.GenerateVerifyMission();
         }
 
         //public NotifyHub NotifyHub { get; }
@@ -70,6 +74,24 @@ namespace Web.Controllers
 
             return missions.Select(mission => mission.ToMissionModel());
         }
+        [HttpGet("history")]
+        public async Task<MissionHistoryModel[]> GetHistoryMission()
+        {
+            User user = await this.UsersManager.SelectAsync(this.User.Identity.Name);
+            List<MissionHistoryModel> history = new List<MissionHistoryModel>(); ;
+
+            if(user.MissionProgress?.History != null)
+            {
+                foreach (MissionProgressionHistory h in user.MissionProgress.History)
+                {
+                    history.Add(new MissionHistoryModel{
+                        ObservationId = h.ObservationId,
+                        Recognition = (bool)h.SuccessRecognition
+                    });
+                }
+            }
+                return history.ToArray(); 
+        }
         [HttpPost("startMission")]
         [AllowAnonymous]
         public async Task StartMission([FromBody] MissionProgressionModel model)
@@ -86,11 +108,24 @@ namespace Web.Controllers
             }
             await this.UsersManager.StartMissionAsync(mp, this.User.Identity.Name);
         }
-        [HttpPost("progression")]
+        [HttpPost("newIdentification/{observationId}")]
         [AllowAnonymous]
-        public async Task UpdateMissionProgression()
+        public async Task<bool> UpdateMissionProgression([FromBody] ObservationCreationModel identification, string observationId)
         {
-            //await this.UsersManager.UpdateMissionProgression( this.User.Identity.Name);
+            User user = await this.UsersManager.SelectAsync(this.User.Identity.Name);
+            Mission mission = await this.MissionsManager.GetMissionById(user.MissionProgress.MissionId);
+            ObservationStatement os = new ObservationStatement
+            {
+                Genus = identification.Genus,
+                SpeciesName = identification.Species
+            }; 
+             var result = false;
+             var validator= await MissionValidatorFactory.GetValidator(this.ServiceProvider, user);
+            if(validator != null)
+            {
+               result = await ((IdentifyMissionValidator)validator).UpdateIdentifyMissionProgression(observationId, mission, os, user.OsmId);
+            }
+            return result;
         }
     }
 }

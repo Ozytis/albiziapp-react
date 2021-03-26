@@ -1,4 +1,4 @@
-import { Box, Button, createStyles, FormControl, Theme, Typography, WithStyles, withStyles, TextField} from "@material-ui/core";
+import { Box, Button, createStyles, FormControl, Theme, Typography, WithStyles, withStyles, TextField } from "@material-ui/core";
 import { Undo } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
@@ -20,14 +20,16 @@ import * as signalR from "@microsoft/signalr";
 import { toast, ToastContainer } from "react-toastify";
 import ReactDOM from "react-dom";
 import { NotifyHelper } from "../../utils/notify-helper";
+import { MissionsApi } from "../../services/missions-service";
+import { MissionHistoryModel } from "../../services/generated/mission-history-model";
 
 const styles = (theme: Theme) => createStyles({
-    root: {        
+    root: {
         maxHeight: "calc(100vh - 120px)",
-        height: "calc(" + window.innerHeight+"px - 112px)",
+        height: "calc(" + window.innerHeight + "px - 112px)",
         overflowY: "auto",
         padding: theme.spacing(1),
-        color: theme.palette.common.white
+        color: theme.palette.common.black
     },
     sectionHeading: {
         marginTop: theme.spacing(1),
@@ -89,6 +91,8 @@ class NewIdentificationMissionPageState {
     selectedGenus: TreeGenusModel;
     selectedCommonSpecies: SpeciesModel;
     selectedspecies: SpeciesModel;
+    history: MissionHistoryModel[];
+    try = 0;
 }
 
 class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificationMissionPageProps, NewIdentificationMissionPageState>{
@@ -102,8 +106,13 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
         this.listener = SpeciesApi.registerSpeciesListener(() => this.refreshSpecies());
 
         await this.refreshSpecies();
+        await this.loadTry();
     }
-
+    async loadTry() {
+        const history = await MissionsApi.getHistoryMission();
+        var nbtry = history.filter(x => x.observationId == this.props.match.params["observationid"] && !x.recognition).length;
+        await this.setState({ history: history, try: nbtry });
+    }
     listener: () => Promise<void>;
 
     async componentWillUnmount() {
@@ -127,10 +136,10 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
     }
 
     async goBack() {
-            ObservationsApi.setNextObservationCoordinates(null);
-            await this.props.history.replace({
-                pathname: "/map"
-            });        
+        ObservationsApi.setNextObservationCoordinates(null);
+        await this.props.history.replace({
+            pathname: "/map"
+        });
     }
 
     async updateCommonGenus(commonGenus: string) {
@@ -138,7 +147,7 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
         const genus = this.state.genus.filter(g => g.commonGenus === commonGenus);
         if (genus != null && genus.length > 0) {
             model.genus = genus[0].genus;
-            await this.setState({ model: model, selectedCommonGenus : genus[0] });
+            await this.setState({ model: model, selectedCommonGenus: genus[0] });
             if (genus.length == 1) {
                 await this.updateGenus(genus[0].genus);
             }
@@ -151,10 +160,10 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
     async updateGenus(genusName: string) {
         const model = this.state.model;
         const genus = this.state.genus.find(g => g.genus === genusName);
-       
+
         if (genus != null) {
             model.genus = genus.genus;
-            await this.setState({ model: model,  selectedGenus: genus  });         
+            await this.setState({ model: model, selectedGenus: genus });
             const speciesCount = this.state.species.filter(species => species.genus === model.genus);
             if (speciesCount.length == 1) {
                 this.updateCommonSpecies(speciesCount[0].commonSpeciesName);
@@ -162,7 +171,7 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
         } else {
             model.genus = null;
             model.species = null;
-            await this.setState({ model: model, selectedGenus: null, selectedCommonGenus: null, selectedCommonSpecies: null,selectedspecies : null });
+            await this.setState({ model: model, selectedGenus: null, selectedCommonGenus: null, selectedCommonSpecies: null, selectedspecies: null });
         }
     }
 
@@ -173,13 +182,13 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
             model.species = species[0].speciesName;
             const genus = this.state.genus.find(g => g.genus === species[0].genus);
             model.genus = genus.genus;
-            await this.setState({ model: model, selectedCommonSpecies: species[0], selectedGenus: genus, selectedCommonGenus: genus, selectedspecies: species[0]  });
+            await this.setState({ model: model, selectedCommonSpecies: species[0], selectedGenus: genus, selectedCommonGenus: genus, selectedspecies: species[0] });
             if (species.length == 1) {
                 this.updateSpecies(species[0].speciesName);
             }
         } else {
             model.species = null;
-            await this.setState({ model: model,  selectedCommonSpecies: null, selectedspecies: null });
+            await this.setState({ model: model, selectedCommonSpecies: null, selectedspecies: null });
         }
     }
 
@@ -190,36 +199,31 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
             model.species = species.speciesName;
             const genus = this.state.genus.find(g => g.genus === species.genus);
             model.genus = genus.genus;
-            await this.setState({ model: model, selectedspecies: species, selectedGenus: genus, selectedCommonGenus: genus, selectedCommonSpecies:species });
+            await this.setState({ model: model, selectedspecies: species, selectedGenus: genus, selectedCommonGenus: genus, selectedCommonSpecies: species });
         } else {
             model.species = null;
             await this.setState({ model: model, selectedCommonSpecies: null, selectedspecies: null });
-        }       
-    }    
-    blurField(id)
-    {
+        }
+    }
+    blurField(id) {
         let element = document.getElementById(id);
         if (element != null) {
-            element.blur();  
-        }      
+            element.blur();
+        }
     }
     async checkIdentification() {
         const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
-        const statement = observation.observationStatements.find(x => x.id == observation.statementValidatedId);
-        if (statement.genus == this.state.model.genus) {
-            if (statement.speciesName == this.state.model.species) {
-                NotifyHelper.sendNotif("Bonne identification");
-
-            }
-            else {
-                NotifyHelper.sendErrorNotif("Mauvaise identification");
-            }
+        const result = await MissionsApi.validateNewIdentification(this.state.model, this.props.match.params["observationid"]);
+        if (result.data) {
+            NotifyHelper.sendNotif("Vous avez correctement identifier cette observation");
         }
         else {
             NotifyHelper.sendErrorNotif("Mauvaise identification");
         }
+        await this.loadTry();
+
     }
-    
+
     render() {
 
         const { classes } = this.props;
@@ -233,10 +237,9 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
                 </Box>
             )
         }
-
         if (model.genus && model.genus.length > 0) {
-            species = species.filter(species => species.genus === model.genus);         
-            genus = genus.filter(g => g.commonGenus == selectedCommonGenus?.commonGenus);            
+            species = species.filter(species => species.genus === model.genus);
+            genus = genus.filter(g => g.commonGenus == selectedCommonGenus?.commonGenus);
         }
 
         if (model.species && model.species.length > 0 && (model.genus == null || model.genus.length == 0)) {
@@ -245,32 +248,36 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
         }
 
         if (selectedCommonSpecies != null) {
-            species = species.filter(species => species.commonSpeciesName === selectedCommonSpecies.commonSpeciesName);         
+            species = species.filter(species => species.commonSpeciesName === selectedCommonSpecies.commonSpeciesName);
         }
-       
+
         let commonGenus = [...genus];
         commonGenus = commonGenus.sort((g1, g2) => g1.commonGenus.localeCompare(g2.commonGenus));
         let commonSpecies = [...species];
         commonSpecies = commonSpecies.sort((s1, s2) => s1.commonSpeciesName.localeCompare(s2.commonSpeciesName));
         return (
             <>
-                <Box className={clsx(classes.root)} >                    
+                <Box className={clsx(classes.root)} >
+
+                    <Typography variant="h5" style={{ margin: "auto", textAlign: "center", color: "red" }}>
+                        {t.__("Nombre d'essai " + this.state.try + "/3")}
+                    </Typography>
 
                     <Typography variant="h6" className={clsx(classes.sectionHeading)}>
                         {t.__("Genre")}
                     </Typography>
 
                     <FormControl className={clsx(classes.formControl)}>
-                        <Autocomplete                         
+                        <Autocomplete
                             id="commonGenusSelect"
                             options={commonGenus}
                             getOptionLabel={(option: TreeGenusModel) => option?.commonGenus ?? ""}
                             renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}
                             value={this.state.selectedCommonGenus || ''}
                             onChange={(e, v) => {
-                                this.updateCommonGenus((v as any)?.commonGenus); 
+                                this.updateCommonGenus((v as any)?.commonGenus);
                             }}
-                            onClose={() => {this.blurField("commonGenusSelect");}}
+                            onClose={() => { this.blurField("commonGenusSelect"); }}
                         />
                     </FormControl>
 
@@ -299,7 +306,7 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
                             getOptionLabel={(option: SpeciesModel) => option?.commonSpeciesName ?? ""}
                             renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}
                             onChange={(e, v) => { this.updateCommonSpecies((v as any)?.commonSpeciesName); }}
-                            onClose={() => { this.blurField("commonSpeciesSelect"); }}         
+                            onClose={() => { this.blurField("commonSpeciesSelect"); }}
                         />
                     </FormControl>
 
@@ -311,21 +318,28 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
                             getOptionLabel={(option: SpeciesModel) => option?.speciesName ?? ""}
                             renderInput={(params) => <TextField {...params} label="Latine" variant="outlined" />}
                             onChange={(e, v) => { this.updateSpecies((v as any)?.speciesName); }}
-                            onClose={() => { this.blurField("SpeciesSelect"); }} 
+                            onClose={() => { this.blurField("SpeciesSelect"); }}
                         />
-                        
-                    </FormControl>
-                    
-                    <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.checkIdentification()}>
-                        <Loader loading={this.state.isProcessing} usualIcon="check" />
-                        {t.__("Valider")}
-                    </Button>
 
-                    <Button color="secondary" variant="contained" className={clsx(classes.buttons)} onClick={() => this.goBack()} fullWidth>
-                        <Undo />
-                        {t.__("Annuler")}
-                    </Button>
-                </Box>                
+                    </FormControl>
+                    {
+                        this.state.try < 3 &&
+                        <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.checkIdentification()}>
+                            <Loader loading={this.state.isProcessing} usualIcon="check" />
+                            {t.__("Valider")}
+                        </Button>
+                    }
+                    {
+                        this.state.try >= 3 &&
+                        <Typography variant="h6" style={{ margin: "auto", textAlign: "center"}}>
+                            {t.__("Vous n'avez plus d'essais possible")}
+                        </Typography>
+                    }
+                            <Button color="secondary" variant="contained" className={clsx(classes.buttons)} onClick={() => this.goBack()} fullWidth>
+                                <Undo />
+                                {t.__("Retour")}
+                            </Button>                       
+                </Box>
             </>
         )
     }

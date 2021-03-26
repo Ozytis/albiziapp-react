@@ -20,6 +20,7 @@ import { MissionModel, CircleAreaModel, PolygonArea, IdentificationMissionModel,
 import { CoordinateModel } from "../../services/generated/coordinate-model";
 import { orange } from "@material-ui/core/colors";
 import { NotifyHelper } from "../../utils/notify-helper";
+import { MissionHistoryModel } from "../../services/generated/mission-history-model";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -78,6 +79,7 @@ class MapPageState {
     minutes: number ;
     seconds: number ;
     myInterval: number;
+    history: MissionHistoryModel[];
 }
 
 class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
@@ -121,9 +123,11 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
         var missions = await MissionsApi.getMissions();
         var userMissions = await AuthenticationApi.getUserMission();
+        const history = await MissionsApi.getHistoryMission();
         var currentMission = missions.find(m => m.id == userMissions.missionProgression?.missionId);
         var missionProgression = userMissions.missionProgression;
-        await this.setState({ currentMission: currentMission, missionProgression:missionProgression });
+        console.log(history);
+        await this.setState({ currentMission: currentMission, missionProgression:missionProgression, history :history });
         await this.setPosition();
         this.setZoneForMission();
 
@@ -286,7 +290,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             }
         }
     }
-    checkIfObservationIsInMission(observation: ObservationModel) {
+     checkIfObservationIsInMission(observation: ObservationModel) {
         if (this.state.currentMission != null) {
             if (this.state.currentMission.missionType == "IdentificationMissionModel" && observation.isCertain) {
                 const mission = this.state.currentMission as IdentificationMissionModel;
@@ -315,6 +319,12 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         }
                     }
                 }
+                if (this.state.history != null) {
+                    console.log(this.state.history)
+                    if (this.state.history.some(x => x.observationId == observation.id && x.recognition == true)) {
+                        return false;
+                    }
+                } 
                 return true;                
             }
             else if (this.state.currentMission.missionType == "VerificationMissionModel") {

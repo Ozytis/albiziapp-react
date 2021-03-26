@@ -4,6 +4,7 @@
 // </auto-generated>
 //----------------------
 
-export interface EndingConditionModel {
-    endingConditionType: string;
+export interface MissionHistoryModel {
+    observationId: string;
+    recognition: boolean;
 }

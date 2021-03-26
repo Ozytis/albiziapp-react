@@ -21,6 +21,7 @@ namespace Business.MissionValidation
             var observationManager = serviceProvider.GetService<ObservationsManager>();
             var missionsManager = serviceProvider.GetService<MissionsManager>();
             var userManager = serviceProvider.GetService<UsersManager>();
+            var datacontext = serviceProvider.GetService<DataContext>();
             var mission = (await missionsManager.GetAllMissionsAsync()).FirstOrDefault(m => m.Id == user.MissionProgress.MissionId);
 
             if (mission.GetType() == typeof(IdentificationMission))
@@ -53,6 +54,7 @@ namespace Business.MissionValidation
         public T Mission { get; set; }
 
         public User User { get; set; }
+        public DataContext DataContext { get; set; }
 
         protected MissionValidator(T mission, User user, ObservationsManager observationsManager, MissionsManager missionsManager, UsersManager usersManager)
         {
@@ -65,10 +67,27 @@ namespace Business.MissionValidation
 
       
  
-        public async Task UpdateProgression(MissionProgressionHistory[] historyToUpdate)
+        public async Task UpdateProgression(MissionProgressionHistory[] historyToUpdate, bool isIdentifyMission = false, bool isIdentified =false)
         {
             var missionProgress = this.User.MissionProgress;
-            missionProgress.Progression = historyToUpdate.Count();
+            if (!isIdentifyMission)
+            {
+                missionProgress.Progression = historyToUpdate.Count();
+            }
+            else
+            {
+                if (isIdentified)
+                {
+                    if (missionProgress.Progression != null)
+                    {
+                        missionProgress.Progression += 1;
+                    }
+                    else
+                    {
+                        missionProgress.Progression = 1;
+                    }
+                }
+            }
             missionProgress.History = historyToUpdate;
             await this.UsersManager.UpdateMissionProgression(this.User.OsmId, missionProgress);
         }

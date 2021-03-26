@@ -16,7 +16,7 @@ namespace Business.MissionValidation
 
         public async Task<bool> UpdateMissionProgression(Observation observation, ObservationStatement statement, ActionType? type)
         {
-            bool conditionsCompleted = true;
+            bool conditionsCompleted = false;
             
             int count = 0;
             /*foreach (var endCondition in this.Activity.EndConditions)
@@ -59,6 +59,73 @@ namespace Business.MissionValidation
 
             return conditionsCompleted;*/
             return false;
+        }
+        public async Task<bool> UpdateIdentifyMissionProgression(string observationId, Mission mission, ObservationStatement identification,  string osmId)
+        {
+            bool isMissionCompleted = false;
+            bool isIdentified = true;
+            Observation observation = await this.ObservationsManager.GetObservationbyId(observationId);
+            ObservationStatement observationStatement = observation.ObservationStatements.FirstOrDefault(x => x.Id == observation.StatementValidatedId);
+            if(mission.GetType() == typeof(NewObservationMission) || mission.GetType() == typeof(VerificationMission))
+            {
+                return false;
+            }
+            IdentificationMission identifyMission = (IdentificationMission)mission;
+            if (identifyMission.Restriction == null)
+            {
+                if(!(observationStatement.Genus == identification.Genus && observationStatement.SpeciesName == identification.SpeciesName))
+                {
+                    isIdentified = false;
+                }
+            }
+            else
+            {
+                if(identifyMission.Restriction.Type == RestrictionType.ExactGender)
+                {
+                    if(identifyMission.Restriction.Genus != identification.Genus)
+                    {
+                        isIdentified = false;
+                    }
+                }
+                else if(identifyMission.Restriction.Type == RestrictionType.ExactSpecies)
+                {
+                    if(!(identifyMission.Restriction.Genus == identification.Genus && identifyMission.Restriction.Species == identification.SpeciesName))
+                    {
+                        isIdentified = false;
+                    }
+                }
+            }
+            User user = await this.UsersManager.SelectAsync(osmId);
+
+            var missionProgressHistory = user.MissionProgress.History?.ToList() ?? new List<MissionProgressionHistory>();
+            missionProgressHistory.Add(new MissionProgressionHistory
+            {
+                ObservationId = observation.Id,
+                Date = DateTime.UtcNow,
+                StatementId = observationStatement?.Id,
+                Type = ActionType.Recognition,
+                Gender = identification.Genus,
+                Species = identification.SpeciesName,
+                SuccessRecognition = isIdentified 
+            }) ;
+            user.MissionProgress.Progression += isIdentified ? 1 : 0;
+            if (identifyMission.EndingCondition.GetType() == typeof(NumberOfActions))
+            {
+                NumberOfActions numberOfActions = (NumberOfActions)identifyMission.EndingCondition;
+                if(user.MissionProgress.Progression == numberOfActions.Number)
+                {
+                    isMissionCompleted = true;
+                }
+            }
+            if (isMissionCompleted)
+            {
+                await this.UsersManager.EndCurrentMission(osmId, missionProgressHistory.ToArray());
+            }
+            else
+            {
+                await this.UpdateProgression(missionProgressHistory.ToArray(), true, isIdentified);
+            }
+            return isIdentified;
         }
     }
 }

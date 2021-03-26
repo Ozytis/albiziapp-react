@@ -243,6 +243,10 @@ namespace Business
         {
             return await this.DataContext.Users.Find(u => osmIds.Contains(u.OsmId)).ToListAsync();
         }
+        public async Task<User> GetUserById(string osmId)
+        {
+            return await this.SelectAsync(osmId);
+        }
 
         public async Task<User> EditUserAsync(User user)
         {

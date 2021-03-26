@@ -8,4 +8,6 @@ import { RestrictionTypeModel } from "./restriction-type-model";
 export interface RestrictionModel {
     type: RestrictionTypeModel;
     value: string;
+    genus: string;
+    species: string;
 }

@@ -79,7 +79,7 @@ namespace Business
             await this.CreateMissionAsync(mission2);
         }
 
-        public async Task GenerateVerifyMission()
+        /*public async Task GenerateVerifyMission()
         {
             var mission = new VerificationMission();
             mission.Id = Guid.NewGuid().ToString("N");
@@ -119,19 +119,17 @@ namespace Business
                 Value = "Prunus"
             };
             await this.CreateMissionAsync(mission2);
-        }
+        }*/
         public async Task GenerateIdentificationMission()
         {
             var mission = new IdentificationMission();
             mission.Id = Guid.NewGuid().ToString("N");
-            mission.Title = "Identifier des relevés spécifiques dans une zone";
-            mission.Description = "Identifier des relevés spécifiques dans une zone";
+            mission.Title = "Identifier cinq relevés spécifiques dans une zone définie";
+            mission.Description = "Identifier cinq relevés spécifiques dans une zone définie";
             mission.EndingCondition = new NumberOfActions
             {
-                Number = 2,
+                Number = 5,
             };
-           // string[] tab = new string[] { "f05810b268a942eebd6c1909e7688ea6", "afb46627a0314cdc95d0edda8f510cc2" };
-            //mission.ObservationIdentified = tab;
             mission.RestrictedArea = new PolygonArea
             {
                 Polygon = GeoJson.Polygon(new GeoJson2DGeographicCoordinates(-0.574204, 48.019921), new GeoJson2DGeographicCoordinates(-0.573883, 48.01395),
@@ -139,6 +137,19 @@ namespace Business
                 new GeoJson2DGeographicCoordinates(-0.574204, 48.019921))
             };
             await this.CreateMissionAsync(mission);
+
+            var mission2 = new IdentificationMission();
+            mission2.Id = Guid.NewGuid().ToString("N");
+            mission2.Title = "Identifier des relevés sélectionnés";
+            mission2.Description = "Identifier des relevés sélectionnés";
+            mission2.EndingCondition = new NumberOfActions
+            {
+                Number = 2,
+            };
+            string[] tab = new string[] { "f8c0f1bb5ed44f66add7289e08ecbdce", "796837ead7e246adb7aad7454f9f10a1" };
+            mission2.ObservationIdentified = tab;
+
+            await this.CreateMissionAsync(mission2);
         } 
         public async Task AddCompleteMission(User user)
         {
