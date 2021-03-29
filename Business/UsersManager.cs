@@ -199,6 +199,8 @@ namespace Business
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
 
             await this.AddTrophies(user.OsmId);
+            await this.UserNotify.SendNotif(userId, "Vous avez terminé la mission !");
+
         }
 
         /* public async Task StartFirstMission(string userId)
