@@ -2,7 +2,7 @@ import { Box, createStyles, Icon, Theme, WithStyles, withStyles, Button, Dialog,
 import clsx from "clsx";
 import L, { LatLng, latLng } from "leaflet";
 import React, { createRef, Component, useState, useEffect } from "react";
-import { Circle, Map, Marker, TileLayer, LayerGroup, Polygon } from "react-leaflet";
+import { Circle, Map, Marker, TileLayer, LayerGroup, Polygon, Polyline } from "react-leaflet";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
 import { BaseComponent } from "../../components/base-component";
@@ -81,6 +81,7 @@ class MapPageState {
     timer: number;
     myInterval: number;
     history: MissionHistoryModel[];
+    poly: L.LatLng[];
 }
 
 class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{

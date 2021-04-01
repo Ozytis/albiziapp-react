@@ -70,16 +70,36 @@ namespace Business
             };
             mission2.RestrictedArea = new PolygonArea
             {
-                Polygon = GeoJson.Polygon(new GeoJson2DGeographicCoordinates(48.074989, -0.746958), new GeoJson2DGeographicCoordinates(48.083799, -0.767936),
-               new GeoJson2DGeographicCoordinates(48.079838, -0.777394), new GeoJson2DGeographicCoordinates(48.072354, -0.778360),
-               new GeoJson2DGeographicCoordinates(48.063175, -0.773097),new GeoJson2DGeographicCoordinates(48.060604, -0.761133),
-                new GeoJson2DGeographicCoordinates(48.074989, -0.746958))
+                Polygon = GeoJson.Polygon(new GeoJson2DGeographicCoordinates(-0.746958,48.074989), new GeoJson2DGeographicCoordinates(-0.767936,48.083799),
+               new GeoJson2DGeographicCoordinates(-0.777394,48.079838), new GeoJson2DGeographicCoordinates(-0.778360, 48.072354),
+               new GeoJson2DGeographicCoordinates(-0.773097,48.063175),new GeoJson2DGeographicCoordinates(-0.761133,48.060604),
+                new GeoJson2DGeographicCoordinates(-0.746958,48.074989))
             };
 
             mission2.Type = NewObservationMissionType.DifferentSpecies;
             await this.CreateMissionAsync(mission2);
         }
+        public async Task MissionPolygon()
+        {
+            var mission2 = new NewObservationMission();
+            mission2.Id = Guid.NewGuid().ToString("N");
+            mission2.Title = "TEST POLYGON 5 COTE";
+            mission2.Description = "TEST POLYGON 5 COTE";
+            mission2.EndingCondition = new NumberOfActions
+            {
+                Number = 5,
+            };
+            mission2.RestrictedArea = new PolygonArea
+            {
+                Polygon = GeoJson.Polygon(new GeoJson2DGeographicCoordinates(-0.746958, 48.074989), new GeoJson2DGeographicCoordinates(-0.767936, 48.083799),
+               new GeoJson2DGeographicCoordinates(-0.777394, 48.079838), new GeoJson2DGeographicCoordinates(-0.778360, 48.072354),
+               new GeoJson2DGeographicCoordinates(-0.773097, 48.063175), new GeoJson2DGeographicCoordinates(-0.761133, 48.060604),
+                new GeoJson2DGeographicCoordinates(-0.746958, 48.074989))
+            };
 
+            mission2.Type = NewObservationMissionType.DifferentSpecies;
+            await this.CreateMissionAsync(mission2);
+        }
         /*public async Task GenerateVerifyMission()
         {
             var mission = new VerificationMission();
