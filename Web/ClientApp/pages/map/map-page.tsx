@@ -121,6 +121,9 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             this.setState({ observations: obs })
         });
         this.hub.start();
+        await this.loadData();
+    }
+    async loadData() {
 
         var missions = await MissionsApi.getMissions();
         var userMissions = await AuthenticationApi.getUserMission();
@@ -131,13 +134,11 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         await this.setState({ currentMission: currentMission, missionProgression: missionProgression, history: history });
         await this.setPosition();
         this.setZoneForMission();
-
-
-
         if (currentMission != null && missionProgression != null) {
             if (currentMission.endingCondition.endingConditionType == "TimeLimitModel") {
                 const timeLimit = this.state.currentMission.endingCondition as TimeLimit;
                 const start = new Date(missionProgression.startDate);
+                console.log(start);
                 var timer = timeLimit.minutes;
                 timer = timer * 60;
                 const startInSeconds = start.getHours() * 60 + start.getMinutes() * 60 + start.getSeconds();
@@ -148,8 +149,6 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                 if (secRestante > 0) {
                     var minRestante = secRestante / 60;
                     minRestante = Math.trunc(minRestante);
-                    console.log("minuterestante: " + minRestante);
-                    console.log("seconderestante: " + secRestante);
                     secRestante = secRestante - (minRestante * 60);
                     await this.setState({ minutes: minRestante, seconds: secRestante, timer: timeLimit.minutes });
                     this.timer();
@@ -458,8 +457,8 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         }, 1000);
         if (this.state.minutes == 0 && this.state.seconds == 0) {
             clearTimeout(this.myInterval);
-            console.log("c'est finiiiiiiiiiiiiiiiiiiiii");
             await MissionsApi.timerIsEnd(this.state.currentMission?.id);
+            await this.loadData();
         }
     }
     render() {

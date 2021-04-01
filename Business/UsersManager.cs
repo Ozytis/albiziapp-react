@@ -191,7 +191,7 @@ namespace Business
                 CompletedDate = DateTime.UtcNow,
                 History = historyToUpdate
             };
-            var nbReleve = missionComplete.History?.Where(x=> (bool)x.SuccessRecognition )?.Count();
+            var nbReleve = missionComplete.History?.Count();
             missionsCompleted.Add(missionComplete);
             user.MissionCompleted = missionsCompleted.ToArray();
             user.MissionProgress = null;
@@ -199,7 +199,7 @@ namespace Business
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
 
             await this.AddTrophies(user.OsmId);
-            await this.UserNotify.SendNotif(userId, $"Vous avez terminé la mission en faisant {nbReleve} relevés !");
+            await this.UserNotify.SendInfoNotif(userId, $"Vous avez terminé la mission en faisant {nbReleve} relevés !");
 
         }
 
@@ -285,6 +285,10 @@ namespace Business
 
                 await this.DataContext.Users.FindOneAndReplaceAsync(x => x.Id == user.Id, user);
 
+                if(mission == null)
+                {
+                    await this.UserNotify.SendErrorNotif(userId, $"La mission a été abandonné");
+                }
             }
             catch
             {

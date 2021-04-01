@@ -117,7 +117,7 @@ namespace Web.Controllers
             if(model.MissionId != null)
             {
                 mp.MissionId = model.MissionId;
-                mp.StartDate = DateTime.Now;
+                mp.StartDate = DateTime.UtcNow;
             }
             else
             {
