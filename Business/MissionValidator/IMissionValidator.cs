@@ -9,5 +9,7 @@ namespace Business.MissionValidation
     public interface IMissionValidator
     {
         public Task<bool> UpdateMissionProgression(Observation observation, ObservationStatement statement, ActionType? type);
+
+        public Task<bool> IsMissionValid(string missionId, User user);
     }
 }

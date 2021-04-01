@@ -1,4 +1,5 @@
 ﻿using Api;
+using Api.Missions;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -31,7 +32,7 @@ namespace DataMigrator
                     Console.WriteLine("Url incorrecte,l'url de base va être utilisé");
                 }
             }
-            Console.WriteLine("L'url du serveur utilisé sera :" + URL);
+            Console.WriteLine("L'url du serveur utilisé sera : " + URL);
 
             while (true)
             {              
@@ -42,6 +43,7 @@ namespace DataMigrator
                 Console.WriteLine("\t4 - Trophée");
                 Console.WriteLine("\t5 - Titre");
                 Console.WriteLine("\t6 - Rareté");
+                Console.WriteLine("\t7 - Mission v2");
                 Console.WriteLine("\tQ - Quitter");
 
                 ConsoleKeyInfo key = Console.ReadKey();
@@ -67,6 +69,9 @@ namespace DataMigrator
                         break;
                     case '6':
                         await MigrateRarety();
+                        break;
+                    case '7':
+                        await MigrateMissionv2();
                         break;
                     case 'q':
                         return;
@@ -281,6 +286,42 @@ namespace DataMigrator
                     }
                 }
             }
+        }
+        private static async Task MigrateMissionv2()
+        {
+            using StreamReader reader = new StreamReader(Path.Combine(Directory.GetCurrentDirectory(), "Migrate", "missionv2.json"));
+            var json = await reader.ReadToEndAsync();
+
+            var data = JsonConvert.DeserializeObject<MissionModel[]>(json);
+            //using JsonTextReader jsonReader = new JsonTextReader(reader);
+
+            //jsonReader.SupportMultipleContent = true;
+
+            //JsonSerializer serializer = new JsonSerializer(new );
+            //while (jsonReader.Read())
+            //{
+            //    if (jsonReader.TokenType == JsonToken.StartObject)
+            //    {
+            //        MissionModel mission = serializer.Deserialize<MissionModel>(jsonReader);
+
+            //        string json = JsonConvert.SerializeObject(new MissionCreationModel
+            //        {
+            //            Description = mission.Description,
+            //            RestrictedArea = mission.RestrictedArea,
+            //            EndingCondition = mission.EndingCondition,
+            //            Title = mission.Title,
+            //        });
+
+            //        using (WebClient webClient = new WebClient())
+            //        {
+            //            webClient.Headers.Add("Accept", "text/json");
+            //            webClient.Headers.Add("Content-Type", "text/json");
+            //            await webClient.UploadDataTaskAsync(new Uri($"{URL}/api/missions"), Encoding.UTF8.GetBytes(json));
+            //        }
+
+            //        Console.WriteLine(json);
+            //    }
+            //}
         }
     }
 }

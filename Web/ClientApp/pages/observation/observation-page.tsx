@@ -937,7 +937,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                         </table>
                     </Box>
 
-            {   this.state.displayAddAndConfirmButton && !observation.isIdentified && 
+            {   this.state.displayAddAndConfirmButton && !observation.isCertain && 
                         <Box className={clsx(classes.buttonsDiv)}>                        
                             <Button color="secondary" disabled={this.state.isValidated} fullWidth variant="contained" startIcon={<Check />} onClick={() => this.showConfirmation()}>
                                 {t.__("Confirmer")}

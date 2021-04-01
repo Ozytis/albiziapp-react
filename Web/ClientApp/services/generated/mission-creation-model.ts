@@ -4,6 +4,18 @@
 // </auto-generated>
 //----------------------
 
-export interface MissionCreationModel {
-    order: number;
+import { EndingConditionModel } from "./ending-condition-model";
+import { RestrictedAreaModel } from "./restricted-area-model";
+export class MissionCreationModel {
+    endingCondition : EndingConditionModel = null;
+    restrictedArea : RestrictedAreaModel = null;
+    title = "";
+    description = "";
+    missionType = "";
+
+    validate() {
+        const errors: string[] = [];
+
+        return errors;
+    }
 }

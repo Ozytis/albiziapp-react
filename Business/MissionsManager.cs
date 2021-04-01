@@ -70,9 +70,10 @@ namespace Business
             };
             mission2.RestrictedArea = new PolygonArea
             {
-                Polygon = GeoJson.Polygon(new GeoJson2DGeographicCoordinates(-0.574204, 48.019921), new GeoJson2DGeographicCoordinates(-0.573883, 48.01395),
-               new GeoJson2DGeographicCoordinates(-0.588023, 48.015214), new GeoJson2DGeographicCoordinates(-0.587873, 48.021041),
-                new GeoJson2DGeographicCoordinates(-0.574204, 48.019921))
+                Polygon = GeoJson.Polygon(new GeoJson2DGeographicCoordinates(48.074989, -0.746958), new GeoJson2DGeographicCoordinates(48.083799, -0.767936),
+               new GeoJson2DGeographicCoordinates(48.079838, -0.777394), new GeoJson2DGeographicCoordinates(48.072354, -0.778360),
+               new GeoJson2DGeographicCoordinates(48.063175, -0.773097),new GeoJson2DGeographicCoordinates(48.060604, -0.761133),
+                new GeoJson2DGeographicCoordinates(48.074989, -0.746958))
             };
 
             mission2.Type = NewObservationMissionType.DifferentSpecies;
@@ -124,32 +125,56 @@ namespace Business
         {
             var mission = new IdentificationMission();
             mission.Id = Guid.NewGuid().ToString("N");
-            mission.Title = "Identifier cinq relevés spécifiques dans une zone définie";
-            mission.Description = "Identifier cinq relevés spécifiques dans une zone définie";
+            mission.Title = "Mission identification : Identifier 3 relevés dans un polygone";
+            mission.Description = "Mission identification : Identifier 3 relevés dans un polygone";
             mission.EndingCondition = new NumberOfActions
             {
-                Number = 5,
+                Number = 3,
             };
             mission.RestrictedArea = new PolygonArea
             {
                 Polygon = GeoJson.Polygon(new GeoJson2DGeographicCoordinates(-0.574204, 48.019921), new GeoJson2DGeographicCoordinates(-0.573883, 48.01395),
                new GeoJson2DGeographicCoordinates(-0.588023, 48.015214), new GeoJson2DGeographicCoordinates(-0.587873, 48.021041),
                 new GeoJson2DGeographicCoordinates(-0.574204, 48.019921))
+                /* Polygon = GeoJson.Polygon(new GeoJson2DGeographicCoordinates(48.074989, -0.746958), new GeoJson2DGeographicCoordinates(48.083799, -0.767936),
+                new GeoJson2DGeographicCoordinates(48.079838, -0.777394), new GeoJson2DGeographicCoordinates(48.072354, -0.778360),
+                new GeoJson2DGeographicCoordinates(48.063175, -0.773097), new GeoJson2DGeographicCoordinates(48.060604, -0.761133),
+                 new GeoJson2DGeographicCoordinates(48.074989, -0.746958))*/
             };
             await this.CreateMissionAsync(mission);
 
             var mission2 = new IdentificationMission();
             mission2.Id = Guid.NewGuid().ToString("N");
-            mission2.Title = "Identifier des relevés sélectionnés";
-            mission2.Description = "Identifier des relevés sélectionnés";
+            mission2.Title = "Mission identification : Identifier 2 relevés précis";
+            mission2.Description = "Mission identification : Identifier 2 relevés précis";
             mission2.EndingCondition = new NumberOfActions
             {
                 Number = 2,
             };
-            string[] tab = new string[] { "f8c0f1bb5ed44f66add7289e08ecbdce", "796837ead7e246adb7aad7454f9f10a1" };
-            mission2.ObservationIdentified = tab;
-
+            mission2.ObservationIdentified = new string[] { "2d4be513b0324d2289096c851932ad72", "51ac0a0e7aae4591977ed76841b03b4e" };
             await this.CreateMissionAsync(mission2);
+
+            var mission3 = new IdentificationMission();
+            mission3.Id = Guid.NewGuid().ToString("N");
+            mission3.Title = "Mission identification : Identifier 2 relevés d'Abricotier commun dans un cercle";
+            mission3.Description = "Mission identification : Identifier 2 relevés d'Abricotier commun dans un cercle";
+            mission3.EndingCondition = new NumberOfActions
+            {
+                Number = 2,
+            };
+            mission3.RestrictedArea = new CircleArea
+            {
+                Center = new GeoJsonPoint<GeoJson2DGeographicCoordinates>(new GeoJson2DGeographicCoordinates(-0.7595157623291017, 48.0699066369019)),
+                Radius = 1000,
+            };
+            mission3.Restriction = new Restriction
+            {
+                Type = RestrictionType.ExactSpecies,
+                Value = "Abricotier commun",
+                Genus = "Prunus",
+                Species = "Prunus Armeniaca"
+            };
+            await this.CreateMissionAsync(mission3);
         } 
         public async Task AddCompleteMission(User user)
         {
@@ -162,36 +187,12 @@ namespace Business
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
         }
         
-        public async Task GenerateIdentificationCircleMission()
-        {
-            var mission = new IdentificationMission();
-            mission.Id = Guid.NewGuid().ToString("N");
-            mission.Title = "Identifier des relevés spécifiques dans une zone circulaire";
-            mission.Description = "Identifier des relevés spécifiques dans une zone circulaire";
-            mission.EndingCondition = new NumberOfActions
-            {
-                Number = 2,
-            };
-            mission.RestrictedArea = new CircleArea
-            {
-                Center = new GeoJsonPoint<GeoJson2DGeographicCoordinates>(new GeoJson2DGeographicCoordinates(-0.7595157623291017, 48.0699066369019)),
-                Radius = 1000,
-            };
-            mission.Restriction = new Restriction
-            {
-                Type = RestrictionType.ExactSpecies,
-                Value = "Abricotier commun",
-                Genus = "Prunus",
-                Species = "Prunus Armeniaca"
-            };
-            await this.CreateMissionAsync(mission);
-        }
         public async Task GenerateVerifyMission()
         {
             var mission = new VerificationMission();
             mission.Id = Guid.NewGuid().ToString("N");
-            mission.Title = "Verifier des relevés spécifiques dans une zone circulaire avec photo";
-            mission.Description = "Verifier des relevés spécifiques dans une zone circulaire avec photo";
+            mission.Title = "Mission vérification : Verifier des relevés dans une zone circulaire";
+            mission.Description = "Mission vérification : Verifier des relevés dans une zone circulaire";
             mission.EndingCondition = new NumberOfActions
             {
                 Number = 2,
@@ -204,17 +205,11 @@ namespace Business
             await this.CreateMissionAsync(mission); 
             var mission2 = new VerificationMission();
             mission2.Id = Guid.NewGuid().ToString("N");
-            mission2.Title = "Verifier des relevés spécifiques dans une zone polygonale avec chrono";
-            mission2.Description = "Verifier des relevés spécifiques dans une zone polygonale avec chrono";
+            mission2.Title = "Mission vérification : Verifier des relevés d'abricotier commun en 10 minutes";
+            mission2.Description = "Mission vérification : Verifier des relevés d'abricotier commun en 10 minutes";
             mission2.EndingCondition = new TimeLimit
             {
                 Minutes = 10,
-            };
-            mission2.RestrictedArea = new PolygonArea
-            {
-                Polygon = GeoJson.Polygon(new GeoJson2DGeographicCoordinates(-0.574204, 48.019921), new GeoJson2DGeographicCoordinates(-0.573883, 48.01395),
-                new GeoJson2DGeographicCoordinates(-0.588023, 48.015214), new GeoJson2DGeographicCoordinates(-0.587873, 48.021041),
-                 new GeoJson2DGeographicCoordinates(-0.574204, 48.019921))
             };
             mission2.Restriction = new Restriction
             {
@@ -224,15 +219,42 @@ namespace Business
                 Species = "Prunus Armeniaca"
             };
             await this.CreateMissionAsync(mission2);
-            var mission3 = new VerificationMission();
-            mission3.Id = Guid.NewGuid().ToString("N");
-            mission3.Title = "Verifier des relevés spécifiques dans une zone circulaire";
-            mission3.Description = "Verifier des relevés spécifiques dans une zone circulaire";
-            mission3.EndingCondition = new TimeLimit
-            {
-                Minutes = 10,
-            };            
-            await this.CreateMissionAsync(mission3);
         }
+        public async Task GenerateNewObservationMission()
+        {
+            var mission = new NewObservationMission();
+            mission.Id = Guid.NewGuid().ToString("N");
+            mission.Title = "Mission de nouveau relevé : faites 2 nouveaux relevés dans la zone cicrulaire";
+            mission.Description = "Mission de nouveau relevé : faites 2 nouveaux relevés dans la zone cicrulaire";
+            mission.EndingCondition = new NumberOfActions
+            {
+                Number = 2,
+            };
+            mission.RestrictedArea = new CircleArea
+            {
+                Center = new GeoJsonPoint<GeoJson2DGeographicCoordinates>(new GeoJson2DGeographicCoordinates(-0.7595157623291017, 48.0699066369019)),
+                Radius = 1000,
+            };
+            await this.CreateMissionAsync(mission); 
+
+          /*  var mission2 = new NewObservationMission();
+            mission2.Id = Guid.NewGuid().ToString("N");
+            mission2.Title = "Mission de nouveau relevé : faites 2 relevés d'Ailante dans la zone cicrulaire";
+            mission2.Description = "Mission de nouveau relevé : faites 2 relevés d'Ailante dans la zone cicrulaire";
+            mission.EndingCondition = new NumberOfActions
+            {
+                Number = 2,
+            };
+            mission2.EndingCondition = new e
+            {
+                Type = RestrictionType.ExactSpecies,
+                Value = "Abricotier commun",
+                Genus = "Prunus",
+                Species = "Prunus Armeniaca"
+            };
+            await this.CreateMissionAsync(mission2);*/
+        }
+
+        
     }
 }

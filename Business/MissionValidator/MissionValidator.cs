@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Business.MissionValidation
 {
-    public static class MissionValidatorFactory 
+    public static class MissionValidatorFactory
     {
-        public static async Task<IMissionValidator> GetValidator(IServiceProvider serviceProvider, User user)
+        public static async Task<IMissionValidator> GetValidator(IServiceProvider serviceProvider, User user) 
         {
             if (user == null || user.MissionProgress == null)
             {
@@ -23,10 +23,13 @@ namespace Business.MissionValidation
             var userManager = serviceProvider.GetService<UsersManager>();
             var datacontext = serviceProvider.GetService<DataContext>();
             var mission = (await missionsManager.GetAllMissionsAsync()).FirstOrDefault(m => m.Id == user.MissionProgress.MissionId);
-
+            if(mission == null)
+            {
+                return null;
+            }
             if (mission.GetType() == typeof(IdentificationMission))
             {
-                return new IdentifyMissionValidator((IdentificationMission)mission, user, observationManager, missionsManager, userManager);
+                return  new IdentifyMissionValidator((IdentificationMission)mission, user, observationManager, missionsManager, userManager);
             }
             else if (mission.GetType() == typeof(NewObservationMission))
             {
@@ -43,7 +46,7 @@ namespace Business.MissionValidation
         }
     }
         
-    public abstract class MissionValidator<T> where T : Mission
+    public abstract class MissionValidator<T> : IMissionValidator where T : Mission 
     {        
         public MissionsManager MissionsManager { get; }
 
@@ -63,10 +66,7 @@ namespace Business.MissionValidation
             this.ObservationsManager = observationsManager;
             this.MissionsManager = missionsManager;
             this.UsersManager = usersManager;
-        }
-
-      
- 
+        } 
         public async Task UpdateProgression(MissionProgressionHistory[] historyToUpdate, bool isIdentifyMission = false, bool isIdentified =false)
         {
             var missionProgress = this.User.MissionProgress;
@@ -110,6 +110,47 @@ namespace Business.MissionValidation
             }
             return true;
         }
-        
+        public bool IsTimerEnd(int timer, DateTime start)
+        {
+            int startInSecs = start.Second + start.Minute * 60 + start.Hour * 3600;
+            int timerInSecs = timer * 60;
+            DateTime now = DateTime.Now;
+            int nowInSecs = now.Second + now.Minute * 60 + now.Hour * 3600;
+
+            if (nowInSecs - startInSecs > timerInSecs)
+            {
+                if ((startInSecs + timerInSecs) - (nowInSecs - startInSecs) < 90)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public async Task<bool> IsMissionValid(string missionId, User user)
+        {           
+            Mission mission = await this.MissionsManager.GetMissionById(missionId);
+            TimeLimit tl = (TimeLimit)mission.EndingCondition;
+            var timer = tl.Minutes;
+            var start = user.MissionProgress.StartDate;
+            if (IsTimerEnd(timer,start))
+            {
+                return (user.MissionProgress.History?.Length > 1);
+                
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public abstract Task<bool> UpdateMissionProgression(Observation observation, ObservationStatement statement, ActionType? type);
     }
+
 }

@@ -191,7 +191,7 @@ namespace Business
                 CompletedDate = DateTime.UtcNow,
                 History = historyToUpdate
             };
-
+            var nbReleve = missionComplete.History?.Where(x=> (bool)x.SuccessRecognition )?.Count();
             missionsCompleted.Add(missionComplete);
             user.MissionCompleted = missionsCompleted.ToArray();
             user.MissionProgress = null;
@@ -199,7 +199,7 @@ namespace Business
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
 
             await this.AddTrophies(user.OsmId);
-            await this.UserNotify.SendNotif(userId, "Vous avez terminé la mission !");
+            await this.UserNotify.SendNotif(userId, $"Vous avez terminé la mission en faisant {nbReleve} relevés !");
 
         }
 

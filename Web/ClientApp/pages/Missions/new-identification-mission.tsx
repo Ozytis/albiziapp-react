@@ -212,7 +212,7 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
         }
     }
     async checkIdentification() {
-        const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
+
         const result = await MissionsApi.validateNewIdentification(this.state.model, this.props.match.params["observationid"]);
         if (result.data) {
             NotifyHelper.sendNotif("Vous avez correctement identifier cette observation");

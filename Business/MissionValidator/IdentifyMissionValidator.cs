@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace Business.MissionValidation
 {
-    public class IdentifyMissionValidator : MissionValidator<IdentificationMission>, IMissionValidator
+    public class IdentifyMissionValidator : MissionValidator<IdentificationMission>
     {
         public IdentifyMissionValidator(IdentificationMission mission, User user, ObservationsManager observationsManager, MissionsManager missionsManager, UsersManager usersManager) : base(mission, user, observationsManager, missionsManager, usersManager)
         {
 
         }
 
-        public async Task<bool> UpdateMissionProgression(Observation observation, ObservationStatement statement, ActionType? type)
+        public override async Task<bool> UpdateMissionProgression(Observation observation, ObservationStatement statement, ActionType? type)
         {
             bool conditionsCompleted = false;
             
@@ -117,7 +117,15 @@ namespace Business.MissionValidation
                     isMissionCompleted = true;
                 }
             }
-            if (isMissionCompleted)
+            if(identifyMission.EndingCondition.GetType() == typeof(TimeLimit))
+            {
+                TimeLimit timeLimit = (TimeLimit)identifyMission.EndingCondition;
+                if(this.IsTimerEnd(timeLimit.Minutes, user.MissionProgress.StartDate))
+                {
+                    isMissionCompleted = true;
+                }
+            }
+            if (isMissionCompleted )
             {
                 await this.UsersManager.EndCurrentMission(osmId, missionProgressHistory.ToArray());
             }

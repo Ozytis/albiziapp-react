@@ -48,7 +48,7 @@ const styles = (theme: Theme) => createStyles({
         alignItems: "center",
         justifyContent: "center",
         padding: "1%",
-        verticalAlign :"middle"
+        verticalAlign: "middle"
     },
     imageClignote: {
         animationDuration: ".8s",
@@ -76,8 +76,9 @@ class MapPageState {
     });
     circle: CircleAreaModel;
     polygon: PolygonArea;
-    minutes: number ;
-    seconds: number ;
+    minutes: number = 0;
+    seconds: number = 0;
+    timer: number;
     myInterval: number;
     history: MissionHistoryModel[];
 }
@@ -125,9 +126,9 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         var userMissions = await AuthenticationApi.getUserMission();
         const history = await MissionsApi.getHistoryMission();
         var currentMission = missions.find(m => m.id == userMissions.missionProgression?.missionId);
+        console.log(currentMission);
         var missionProgression = userMissions.missionProgression;
-        console.log(history);
-        await this.setState({ currentMission: currentMission, missionProgression:missionProgression, history :history });
+        await this.setState({ currentMission: currentMission, missionProgression: missionProgression, history: history });
         await this.setPosition();
         this.setZoneForMission();
 
@@ -136,22 +137,25 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         if (currentMission != null && missionProgression != null) {
             if (currentMission.endingCondition.endingConditionType == "TimeLimitModel") {
                 const timeLimit = this.state.currentMission.endingCondition as TimeLimit;
-
                 const start = new Date(missionProgression.startDate);
-                const now = new Date();
                 var timer = timeLimit.minutes;
                 timer = timer * 60;
-                var secRestante = (now.getHours() * 60 + now.getMinutes() * 60 + now.getSeconds()) - (start.getHours() * 60 + start.getMinutes() * 60 + start.getSeconds());
-                secRestante = timer - secRestante;
+                const startInSeconds = start.getHours() * 60 + start.getMinutes() * 60 + start.getSeconds();
+                const endInSeconds = startInSeconds + timer;
+                const now = new Date();
+                var nowInSeconds = now.getHours() * 60 + now.getMinutes() * 60 + now.getSeconds();
+                var secRestante = endInSeconds - nowInSeconds;
                 if (secRestante > 0) {
-                    secRestante = secRestante / 60;
-                    var minRestante = Math.trunc(secRestante);
-                    await this.setState({ minutes: minRestante, seconds: Math.round(secRestante) });
-                    await this.setState({ minutes: 0, seconds: 5 });
+                    var minRestante = secRestante / 60;
+                    minRestante = Math.trunc(minRestante);
+                    console.log("minuterestante: " + minRestante);
+                    console.log("seconderestante: " + secRestante);
+                    secRestante = secRestante - (minRestante * 60);
+                    await this.setState({ minutes: minRestante, seconds: secRestante, timer: timeLimit.minutes });
                     this.timer();
                 }
                 else {
-                    NotifyHelper.sendInfoNotif("Le temps de la mission est écoulé");
+                    await MissionsApi.timerIsEnd(this.state.currentMission?.id);
                 }
             }
         }
@@ -290,7 +294,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             }
         }
     }
-     checkIfObservationIsInMission(observation: ObservationModel) {
+    checkIfObservationIsInMission(observation: ObservationModel) {
         if (this.state.currentMission != null) {
             if (this.state.currentMission.missionType == "IdentificationMissionModel" && observation.isCertain) {
                 const mission = this.state.currentMission as IdentificationMissionModel;
@@ -303,7 +307,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                     }
                 }
                 if (mission.restrictedArea != null) {
-                    if (!this.concernByZone(mission, observation)) {                        
+                    if (!this.concernByZone(mission, observation)) {
                         return false;
                     }
                 }
@@ -324,8 +328,8 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                     if (this.state.history.some(x => x.observationId == observation.id && x.recognition == true)) {
                         return false;
                     }
-                } 
-                return true;                
+                }
+                return true;
             }
             else if (this.state.currentMission.missionType == "VerificationMissionModel") {
                 const mission = this.state.currentMission as VerificationMissionModel;
@@ -405,7 +409,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
     }
 
     checkConditionEnding() {
-        if (this.state.currentMission != null && this.state.missionProgression != null) {  
+        if (this.state.currentMission != null && this.state.missionProgression != null) {
             if (this.state.currentMission.endingCondition.endingConditionType == "NumberOfActionsModel") {
                 const nbActions = this.state.currentMission.endingCondition as NumberOfActions;
                 const progression = this.state.missionProgression.progression ? this.state.missionProgression.progression : 0;
@@ -422,8 +426,17 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             }
         }
     }
-
-    timer() {
+    IsMissionIdentification() {
+        if (this.state.currentMission != null) {
+            if (this.state.currentMission.missionType == "IdentificationMissionModel") {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+    async timer() {
         this.myInterval = setTimeout(() => {
             const { seconds, minutes } = this.state;
             if (seconds > 0) {
@@ -445,7 +458,8 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         }, 1000);
         if (this.state.minutes == 0 && this.state.seconds == 0) {
             clearTimeout(this.myInterval);
-            NotifyHelper.sendInfoNotif("La mission est terminé !");
+            console.log("c'est finiiiiiiiiiiiiiiiiiiiii");
+            await MissionsApi.timerIsEnd(this.state.currentMission?.id);
         }
     }
     render() {
@@ -516,7 +530,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                                         radius={6}
                                         color={this.checkIfObservationIsInMission(observation) ? "red" : this.getColor(observation)}
                                         className={clsx(classes.imageClignote)}
-                                        onclick={this.checkIfObservationIsInMission(observation) ? (() => this.props.history.push({ pathname: `/new-identification-mission/${observation.id}` })) : (() => this.props.history.push({ pathname: `/observation/${observation.id}` }))}
+                                        onclick={this.checkIfObservationIsInMission(observation) && this.IsMissionIdentification() ? (() => this.props.history.push({ pathname: `/new-identification-mission/${observation.id}` })) : (() => this.props.history.push({ pathname: `/observation/${observation.id}` }))}
 
                                     />
                                 )
@@ -571,7 +585,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                 }
                 <Box className={clsx(classes.missionBox)}>
                     {this.state.currentMission != null && this.state.currentMission != undefined ? (<div style={{ textAlign: "center" }}><p>{this.state.currentMission.description}</p> <p>{this.checkConditionEnding()}</p></div>) : (<div>Aucune mission séléctionnée</div>)}
-                    
+
                 </Box>
 
 

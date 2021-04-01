@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace Business.MissionValidation
 {
-    public class VerifyMissionValidator : MissionValidator<VerificationMission>, IMissionValidator
+    public class VerifyMissionValidator : MissionValidator<VerificationMission>
     {
         public VerifyMissionValidator(VerificationMission mission, User user, ObservationsManager observationsManager, MissionsManager missionsManager, UsersManager usersManager) : base(mission,user, observationsManager, missionsManager, usersManager)
         {
 
         }
 
-        public async Task<bool> UpdateMissionProgression(Observation observation, ObservationStatement statement, ActionType? type)
+        public override async Task<bool> UpdateMissionProgression(Observation observation, ObservationStatement statement, ActionType? type)
         {
             bool conditionsCompleted = true;
 
@@ -41,8 +41,8 @@ namespace Business.MissionValidation
             {
                 return false;
             }
-
-            var missionProgressHistory = User.MissionProgress.History.ToList() ?? new List<MissionProgressionHistory>();
+            Console.WriteLine(User.MissionProgress.History);
+            var missionProgressHistory = User.MissionProgress.History?.ToList() ?? new List<MissionProgressionHistory>();
             var observationsFromHistory = await this.ObservationsManager.GetObservationsByIds(missionProgressHistory.Select(x => x.ObservationId).ToArray());
 
             //TODO vérification des type de donénes botanique
@@ -53,13 +53,13 @@ namespace Business.MissionValidation
                 switch (this.Mission.Restriction.Type)
                 {                    
                     case RestrictionType.ExactSpecies:
-                        if (statement.CommonSpeciesName.ToLowerInvariant().RemoveDiacritics() != this.Mission.Restriction.Value.ToLowerInvariant().RemoveDiacritics() && statement.SpeciesName.ToLowerInvariant().RemoveDiacritics() != this.Mission.Restriction.Value.ToLowerInvariant().RemoveDiacritics())
+                        if (statement.CommonSpeciesName != this.Mission.Restriction.Value && statement.SpeciesName != this.Mission.Restriction.Species)
                         {
                             return false;
                         }
                         break;
                     case RestrictionType.ExactGender:
-                        if (statement.CommonGenus.ToLowerInvariant().RemoveDiacritics() != this.Mission.Restriction.Value.ToLowerInvariant().RemoveDiacritics() && statement.Genus.ToLowerInvariant().RemoveDiacritics() != this.Mission.Restriction.Value.ToLowerInvariant().RemoveDiacritics())
+                        if (statement.CommonGenus.ToLowerInvariant().RemoveDiacritics() != this.Mission.Restriction.Value.ToLowerInvariant().RemoveDiacritics() && statement.Genus.ToLowerInvariant().RemoveDiacritics() != this.Mission.Restriction.Genus.ToLowerInvariant().RemoveDiacritics())
                         {
                             return false;
                         }
@@ -83,9 +83,10 @@ namespace Business.MissionValidation
                     conditionsCompleted = false;
                 }
             }
-            else
+            if (this.Mission.EndingCondition.GetType() == typeof(TimeLimit))
             {
-                //todo voir gestion du timer..
+                TimeLimit timeLimit = (TimeLimit)this.Mission.EndingCondition;
+                conditionsCompleted = this.IsTimerEnd(timeLimit.Minutes, User.MissionProgress.StartDate);
             }
 
             if (conditionsCompleted)

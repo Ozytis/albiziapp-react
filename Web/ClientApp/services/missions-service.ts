@@ -26,7 +26,10 @@ class MissionsService extends BaseService {
 
         return result;
     }
-
+    async timerIsEnd(missionId : string) {
+        const result = await this.post<MissionProgressionCreationModel>(`missions/endTimer/${missionId}`, null);
+        return result;
+    } 
 }
 
 export const MissionsApi = new MissionsService();

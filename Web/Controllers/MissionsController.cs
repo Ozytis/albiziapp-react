@@ -12,6 +12,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Web.Hubs;
 using Web.Mappings;
+using Web.Utilities;
 
 namespace Web.Controllers
 {
@@ -38,12 +39,17 @@ namespace Web.Controllers
         {
             //await this.MissionsManager.GenerateMission();
             await this.MissionsManager.GenerateIdentificationMission();
-            // User user = await this.UsersManager.SelectAsync(this.User.Identity.Name);
+            //User user = await this.UsersManager.SelectAsync(this.User.Identity.Name);
             //await this.MissionsManager.AddCompleteMission(user);
-            //await this.MissionsManager.GenerateIdentificationCircleMission();
-            //await this.MissionsManager.GenerateVerifyMission();
+            await this.MissionsManager.GenerateNewObservationMission();
+            await this.MissionsManager.GenerateVerifyMission();
         }
-
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task CreateMissionAsync([FromBody] MissionCreationModel model)
+        {
+            Console.WriteLine(model);
+        }
         //public NotifyHub NotifyHub { get; }
 
         /* [HttpPost]
@@ -74,6 +80,18 @@ namespace Web.Controllers
 
             return missions.Select(mission => mission.ToMissionModel());
         }
+
+
+        [HttpGet("dev")]
+        [AllowAnonymous]
+        [JsonTypeNameHandlingOutputAttribute]
+        public async Task<MissionModel[]> GetAllMissionsDev()
+        {
+            IEnumerable<Mission> missions = await this.MissionsManager
+                .GetAllMissionsAsync();
+
+            return missions.Select(mission => mission.ToMissionModel()).ToArray();
+        }
         [HttpGet("history")]
         public async Task<MissionHistoryModel[]> GetHistoryMission()
         {
@@ -84,16 +102,15 @@ namespace Web.Controllers
             {
                 foreach (MissionProgressionHistory h in user.MissionProgress.History)
                 {
-                    history.Add(new MissionHistoryModel{
-                        ObservationId = h.ObservationId,
-                        Recognition = (bool)h.SuccessRecognition
-                    });
+                    MissionHistoryModel mhm = new MissionHistoryModel();
+                    mhm.ObservationId = h.ObservationId;
+                    mhm.Recognition = h.SuccessRecognition != null ? (bool)h.SuccessRecognition : false ;
                 }
             }
                 return history.ToArray(); 
         }
         [HttpPost("startMission")]
-        [AllowAnonymous]
+        [AllowAnonymous]    
         public async Task StartMission([FromBody] MissionProgressionModel model)
         {
             MissionProgress mp = new MissionProgress();
@@ -126,6 +143,28 @@ namespace Web.Controllers
                result = await ((IdentifyMissionValidator)validator).UpdateIdentifyMissionProgression(observationId, mission, os, user.OsmId);
             }
             return result;
+        }
+        [HttpPost("endTimer/{missionId}")]
+        [AllowAnonymous]
+        public async Task TimerIsEnd(string missionId)
+        {
+            User user =await this.UsersManager.SelectAsync(this.User.Identity.Name);
+
+            var validator = await MissionValidatorFactory.GetValidator(this.ServiceProvider, user);
+            var result = false;
+            if (validator != null)
+            {
+                result = await validator.IsMissionValid(missionId, user);
+            }
+
+            if (result)
+            {
+                await this.UsersManager.EndCurrentMission(user.OsmId, user.MissionProgress.History);
+            }
+            else
+            {
+                await this.UsersManager.StartMissionAsync(null, user.OsmId);
+            }
         }
     }
 }
