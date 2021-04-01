@@ -92,6 +92,16 @@ namespace Web.Controllers
 
             return missions.Select(mission => mission.ToMissionModel()).ToArray();
         }
+
+        [HttpPost("createMissionFromApi")]
+        [AllowAnonymous]
+        public async Task CreateMissionFromApi([FromBody] MissionModel model)
+        {
+            var mission = model.ToMission();
+            await this.MissionsManager.CreateMissionAsync(mission);
+
+            //return missions.Select(mission => mission.ToMissionModel()).ToArray();
+        }
         [HttpGet("history")]
         public async Task<MissionHistoryModel[]> GetHistoryMission()
         {
