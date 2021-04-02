@@ -38,11 +38,12 @@ namespace Web.Controllers
         public async Task CreateMission()
         {
             //await this.MissionsManager.GenerateMission();
-            await this.MissionsManager.GenerateIdentificationMission();
+            //await this.MissionsManager.GenerateIdentificationMission();
             //User user = await this.UsersManager.SelectAsync(this.User.Identity.Name);
             //await this.MissionsManager.AddCompleteMission(user);
             await this.MissionsManager.GenerateNewObservationMission();
-            await this.MissionsManager.GenerateVerifyMission();
+            //await this.MissionsManager.GenerateVerifyMission();
+           // await this.MissionsManager.MissionPolygon();
         }
         [HttpPost]
         [AllowAnonymous]
@@ -127,7 +128,7 @@ namespace Web.Controllers
             if(model.MissionId != null)
             {
                 mp.MissionId = model.MissionId;
-                mp.StartDate = DateTime.Now;
+                mp.StartDate = DateTime.UtcNow;
             }
             else
             {

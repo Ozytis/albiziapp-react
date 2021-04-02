@@ -2,7 +2,7 @@ import { Box, createStyles, Icon, Theme, WithStyles, withStyles, Button, Dialog,
 import clsx from "clsx";
 import L, { LatLng, latLng } from "leaflet";
 import React, { createRef, Component, useState, useEffect } from "react";
-import { Circle, Map, Marker, TileLayer, LayerGroup, Polygon } from "react-leaflet";
+import { Circle, Map, Marker, TileLayer, LayerGroup, Polygon, Polyline } from "react-leaflet";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
 import { BaseComponent } from "../../components/base-component";
@@ -81,6 +81,7 @@ class MapPageState {
     timer: number;
     myInterval: number;
     history: MissionHistoryModel[];
+    poly: L.LatLng[];
 }
 
 class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
@@ -121,6 +122,9 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             this.setState({ observations: obs })
         });
         this.hub.start();
+        await this.loadData();
+    }
+    async loadData() {
 
         var missions = await MissionsApi.getMissions();
         var userMissions = await AuthenticationApi.getUserMission();
@@ -131,13 +135,11 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         await this.setState({ currentMission: currentMission, missionProgression: missionProgression, history: history });
         await this.setPosition();
         this.setZoneForMission();
-
-
-
         if (currentMission != null && missionProgression != null) {
             if (currentMission.endingCondition.endingConditionType == "TimeLimitModel") {
                 const timeLimit = this.state.currentMission.endingCondition as TimeLimit;
                 const start = new Date(missionProgression.startDate);
+                console.log(start);
                 var timer = timeLimit.minutes;
                 timer = timer * 60;
                 const startInSeconds = start.getHours() * 60 + start.getMinutes() * 60 + start.getSeconds();
@@ -148,8 +150,6 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                 if (secRestante > 0) {
                     var minRestante = secRestante / 60;
                     minRestante = Math.trunc(minRestante);
-                    console.log("minuterestante: " + minRestante);
-                    console.log("seconderestante: " + secRestante);
                     secRestante = secRestante - (minRestante * 60);
                     await this.setState({ minutes: minRestante, seconds: secRestante, timer: timeLimit.minutes });
                     this.timer();
@@ -458,8 +458,9 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         }, 1000);
         if (this.state.minutes == 0 && this.state.seconds == 0) {
             clearTimeout(this.myInterval);
-            console.log("c'est finiiiiiiiiiiiiiiiiiiiii");
+            NotifyHelper.sendInfoNotif("Le temps est écoulé");
             await MissionsApi.timerIsEnd(this.state.currentMission?.id);
+            await this.loadData();
         }
     }
     render() {
