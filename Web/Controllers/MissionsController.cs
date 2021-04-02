@@ -41,9 +41,9 @@ namespace Web.Controllers
             //await this.MissionsManager.GenerateIdentificationMission();
             //User user = await this.UsersManager.SelectAsync(this.User.Identity.Name);
             //await this.MissionsManager.AddCompleteMission(user);
-            //await this.MissionsManager.GenerateNewObservationMission();
+            await this.MissionsManager.GenerateNewObservationMission();
             //await this.MissionsManager.GenerateVerifyMission();
-            await this.MissionsManager.MissionPolygon();
+           // await this.MissionsManager.MissionPolygon();
         }
         [HttpPost]
         [AllowAnonymous]

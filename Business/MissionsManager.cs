@@ -244,16 +244,18 @@ namespace Business
         {
             var mission = new NewObservationMission();
             mission.Id = Guid.NewGuid().ToString("N");
-            mission.Title = "Mission de nouveau relevé : faites 2 nouveaux relevés dans la zone cicrulaire";
-            mission.Description = "Mission de nouveau relevé : faites 2 nouveaux relevés dans la zone cicrulaire";
-            mission.EndingCondition = new NumberOfActions
+            mission.Title = "Mission de nouveau relevé : faites le plus de relevé possible en 5 minutes dans la zone indiqué";
+            mission.Description = "Mission de nouveau relevé :  faites le plus de relevé possible en 5 minutes dans la zone indiqué";
+            mission.EndingCondition = new TimeLimit
             {
-                Number = 2,
+                Minutes = 5,
             };
-            mission.RestrictedArea = new CircleArea
+            mission.RestrictedArea = new PolygonArea
             {
-                Center = new GeoJsonPoint<GeoJson2DGeographicCoordinates>(new GeoJson2DGeographicCoordinates(-0.7595157623291017, 48.0699066369019)),
-                Radius = 1000,
+                Polygon = GeoJson.Polygon(new GeoJson2DGeographicCoordinates(-0.746958, 48.074989), new GeoJson2DGeographicCoordinates(-0.767936, 48.083799),
+               new GeoJson2DGeographicCoordinates(-0.777394, 48.079838), new GeoJson2DGeographicCoordinates(-0.778360, 48.072354),
+               new GeoJson2DGeographicCoordinates(-0.773097, 48.063175), new GeoJson2DGeographicCoordinates(-0.761133, 48.060604),
+                new GeoJson2DGeographicCoordinates(-0.746958, 48.074989))
             };
             await this.CreateMissionAsync(mission); 
 

@@ -458,6 +458,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         }, 1000);
         if (this.state.minutes == 0 && this.state.seconds == 0) {
             clearTimeout(this.myInterval);
+            NotifyHelper.sendInfoNotif("Le temps est écoulé");
             await MissionsApi.timerIsEnd(this.state.currentMission?.id);
             await this.loadData();
         }
