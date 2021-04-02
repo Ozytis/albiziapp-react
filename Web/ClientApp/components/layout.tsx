@@ -1,5 +1,5 @@
 import { AppBar, createStyles, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Theme, Toolbar, Typography, withStyles, WithStyles, Switch } from "@material-ui/core";
-import { AccountTree, Book, Eco, ExitToApp, SupervisorAccount, ArrowBack, ClearAll, VerifiedUser } from "@material-ui/icons";
+import { AccountTree, Book, Eco, ExitToApp, SupervisorAccount, ArrowBack, ClearAll, VerifiedUser, DoubleArrow } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -280,7 +280,14 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                                 </ListItemIcon>
                                 <ListItemText primary={t.__("Supprimer tous les relevés")} />
                             </ListItem>
-                        }    
+                        }   
+
+                        <ListItem button onClick={() => this.goTo("/create-mission")}>
+                            <ListItemIcon>
+                                <DoubleArrow />
+                            </ListItemIcon>
+                            <ListItemText primary={t.__("Création d'une mission")} />
+                        </ListItem>
                             <ListItem button onClick={() => this.logOut()}>
                                 <ListItemIcon>
                                     <ExitToApp />
