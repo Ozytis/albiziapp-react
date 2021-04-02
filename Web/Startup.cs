@@ -30,6 +30,7 @@ namespace Web
             services.AddControllers().AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+                options.SerializerSettings.TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Auto;
             });
 
             this.ConfigureSecurity(services);

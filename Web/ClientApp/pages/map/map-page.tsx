@@ -136,7 +136,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         await this.setPosition();
         this.setZoneForMission();
         if (currentMission != null && missionProgression != null) {
-            if (currentMission.endingCondition.endingConditionType == "TimeLimitModel") {
+            if (currentMission.endingCondition.$type.indexOf("TimeLimitModel") != -1) {
                 const timeLimit = this.state.currentMission.endingCondition as TimeLimit;
                 const start = new Date(missionProgression.startDate);
                 console.log(start);
@@ -296,7 +296,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
     }
     checkIfObservationIsInMission(observation: ObservationModel) {
         if (this.state.currentMission != null) {
-            if (this.state.currentMission.missionType == "IdentificationMissionModel" && observation.isCertain) {
+            if (this.state.currentMission.$type.indexOf("IdentificationMissionModel") != -1 && observation.isCertain) {
                 const mission = this.state.currentMission as IdentificationMissionModel;
                 if (mission.observationIdentified != null && mission.observationIdentified.length > 0) {
                     if (mission.observationIdentified.includes(observation.id)) {
@@ -331,7 +331,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                 }
                 return true;
             }
-            else if (this.state.currentMission.missionType == "VerificationMissionModel") {
+            else if (this.state.currentMission.$type.indexOf("VerificationMissionModel") != -1) {
                 const mission = this.state.currentMission as VerificationMissionModel;
                 if (mission.restrictedArea != null) {
                     if (!this.concernByZone(mission, observation)) {
@@ -410,7 +410,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
     checkConditionEnding() {
         if (this.state.currentMission != null && this.state.missionProgression != null) {
-            if (this.state.currentMission.endingCondition.endingConditionType == "NumberOfActionsModel") {
+            if (this.state.currentMission.endingCondition.$type.indexOf("NumberOfActionsModel") != -1) {
                 const nbActions = this.state.currentMission.endingCondition as NumberOfActions;
                 const progression = this.state.missionProgression.progression ? this.state.missionProgression.progression : 0;
                 return progression + "/" + nbActions.number;
@@ -428,7 +428,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
     }
     IsMissionIdentification() {
         if (this.state.currentMission != null) {
-            if (this.state.currentMission.missionType == "IdentificationMissionModel") {
+            if (this.state.currentMission.$type.indexOf("IdentificationMissionModel") != -1) {
                 return true;
             }
             else {

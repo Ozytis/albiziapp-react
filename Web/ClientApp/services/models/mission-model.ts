@@ -6,7 +6,7 @@ export interface MissionModel {
     description: string;
     endingCondition: EndingCondition;
     restrictedArea: RestrictedArea;
-    missionType: string;
+    $type: string;
 }
 
 export class VerificationMissionModel implements MissionModel {
@@ -18,7 +18,7 @@ export class VerificationMissionModel implements MissionModel {
     unreliableObservation: boolean;// releve pas fiable donc si true on verifie tout les relevés isIdentified
     observationWithPics: boolean;//si true osef de ceux sans photos
     restriction: Restriction;// si !=null on verifie si c'est un genre/espece
-    missionType: string;
+    $type: string;
 }
 
 export class IdentificationMissionModel implements MissionModel {
@@ -29,7 +29,7 @@ export class IdentificationMissionModel implements MissionModel {
     description: string;
     restriction: Restriction;
     observationIdentified: string[];
-    missionType: string;
+    $type: string;
 }
 
 export class NewObservationMissionModel implements MissionModel {
@@ -40,7 +40,7 @@ export class NewObservationMissionModel implements MissionModel {
     description: string;
     type: NewObservationMissionType;
     value: string;
-    missionType: string;
+    $type: string;
 }
 
 export enum NewObservationMissionType {
@@ -57,7 +57,7 @@ export interface Restriction {
     species: string;
 }
 export interface EndingCondition {
-    endingConditionType: string;
+    $type: string;
 }
 
 export enum RestrictionType {
@@ -67,25 +67,27 @@ export enum RestrictionType {
 
 export class NumberOfActions implements EndingCondition {
     number: number;
-    endingConditionType: string;
+    $type: string;
 }
 
 export class TimeLimit implements EndingCondition {
     minutes: number;
-    endingConditionType: string;
+    $type: string;
 }
 
 export interface RestrictedArea {
-
+    $type: string;
 }
 
 export class PolygonArea implements RestrictedArea {
     polygon: CoordinateModel[];
+    $type: string;
 }
 
 export class CircleAreaModel implements RestrictedArea {
     center: CoordinateModel;
     radius: number;
+    $type: string;
 }
 
 export interface CoordinateModel {
