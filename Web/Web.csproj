@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <None Remove="ClientApp\components\mapPosition.ts" />
-    <None Remove="ClientApp\pages\Missions\create-mission.ts" />
+    <None Remove="ClientApp\pages\Missions\create-mission-config.ts" />
     <None Remove="ClientApp\pages\Missions\create-mission.tsx" />
     <None Remove="ClientApp\pages\score\exploration-points-page.tsx" />
     <None Remove="ClientApp\pages\score\knowledge-points-page.tsx" />
@@ -70,7 +70,7 @@
 
   <ItemGroup>
     <TypeScriptCompile Include="ClientApp\components\mapPosition.ts" />
-    <TypeScriptCompile Include="ClientApp\pages\Missions\create-mission.ts">
+    <TypeScriptCompile Include="ClientApp\pages\Missions\create-mission-config.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="ClientApp\pages\Missions\create-mission.tsx" />
