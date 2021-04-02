@@ -388,10 +388,10 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
     }
     concernByZone(miss: MissionModel, observation: ObservationModel) {
         var mission;
-        if (miss.missionType == "VerificationMissionModel") {
+        if (miss.$type == "VerificationMissionModel") {
             mission = miss as VerificationMissionModel;
         }
-        else if (miss.missionType == "IdentificationMissionModel") {
+        else if (miss.$type == "IdentificationMissionModel") {
             mission = miss as IdentificationMissionModel;
         }
         if ((mission.restrictedArea as CircleAreaModel).center != null) {

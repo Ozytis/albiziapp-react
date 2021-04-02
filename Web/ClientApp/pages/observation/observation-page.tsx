@@ -1,5 +1,5 @@
 import { Box, Button, createStyles, Icon, Theme, WithStyles, withStyles, Switch} from "@material-ui/core";
-import { Check, Delete, NearMe, Cancel, Add } from "@material-ui/icons";
+import { Check, Delete, NearMe, Cancel, Add, ViewList } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -939,9 +939,19 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
 
             {   this.state.displayAddAndConfirmButton && !observation.isCertain && 
                         <Box className={clsx(classes.buttonsDiv)}>                        
-                            <Button color="secondary" disabled={this.state.isValidated} fullWidth variant="contained" startIcon={<Check />} onClick={() => this.showConfirmation()}>
+                            
+                            {
+                            !this.state.isConfirmating &&
+                            <Button color="secondary" disabled={this.state.genusSelectedRadio != null ? false : true}fullWidth variant="contained" startIcon={<Check />} onClick={() => this.showConfirmation()}>
                                 {t.__("Confirmer")}
                             </Button> 
+                            }
+                            {
+                            this.state.isConfirmating &&
+                            <Button color="secondary" disabled={this.state.isValidated} fullWidth variant="contained" startIcon={<ViewList />} onClick={() => this.showConfirmation()}>
+                                { t.__("Sélectionner une proposition")}
+                            </Button> 
+                        }
                         </Box>
                     }
                     {!this.state.isConfirmating &&
@@ -1075,8 +1085,13 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                 <textarea className={clsx(classes.textArea)} value={this.state.newCommentary} onChange={(value) => this.updateCommentary(value.target.value)} />
                             }                           
                                 <Box className={clsx(classes.buttonsDiv)}>
-                                    <Button color="primary" variant="contained" fullWidth startIcon={<Add />} onClick={() => this.addCommentary("confirm")}>
-                                        {t.__("Ajouter un commentaire")}
+                                <Button color="primary" variant="contained" fullWidth startIcon={!this.state.isAddingCommentary ? <Add /> : <Check />} onClick={() => this.addCommentary("confirm")}>
+                                    {!this.state.isAddingCommentary &&
+                                         t.__("Ajouter un  commentaire") 
+                                    }
+                                    {this.state.isAddingCommentary &&
+                                         t.__("Valider le commentaire") 
+                                    }
                                     </Button>
                             </Box>
                             {this.state.isAddingCommentary && 
