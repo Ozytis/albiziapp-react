@@ -15,11 +15,7 @@ namespace Api.Missions
         public string Title { get; set; }
 
         public string Description { get; set; }
-
-        public string MissionType {get{
-                return this.GetType().Name;       
-            } 
-        }
+    
     }
 
 }

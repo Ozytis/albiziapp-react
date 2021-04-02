@@ -39,11 +39,11 @@ class ActivityCardComponent extends BaseComponent<ActivityCardProps, ActivityCar
     }
     getIcon() {
 
-        if (this.props.mission instanceof IdentificationMissionModel) {
+        if (this.props.mission.$type.indexOf("IdentificationMissionModel") != -1) {
             return HelpOutline;
-        } else if (this.props.mission instanceof NewObservationMissionModel) {
+    } else if(this.props.mission.$type.indexOf("NewObservationMissionModel") != -1) {
             return Search;
-        } else if (this.props.mission instanceof NewObservationMissionModel) {
+        } else if (this.props.mission.$type.indexOf("NewObservationMissionModel") != -1) {
             return DoneAll;
         } else {
             return RadioButtonChecked;
