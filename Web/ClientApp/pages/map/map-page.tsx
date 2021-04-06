@@ -283,7 +283,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
     async setZoneForMission() {
         const mission = this.state.currentMission;
-        if (mission.restrictedArea != null) {
+        if (mission.restrictedArea != null && mission.restrictedArea != undefined) {
             if ((mission.restrictedArea as CircleAreaModel).center != null) {
                 const model = mission.restrictedArea as CircleAreaModel;
                 await this.setState({ circle: model });
@@ -306,7 +306,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         return false;
                     }
                 }
-                if (mission.restrictedArea != null) {
+                if (mission.restrictedArea != null && mission.restrictedArea != undefined) {
                     if (!this.concernByZone(mission, observation)) {
                         return false;
                     }
@@ -333,7 +333,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             }
             else if (this.state.currentMission.$type.indexOf("VerificationMissionModel") != -1) {
                 const mission = this.state.currentMission as VerificationMissionModel;
-                if (mission.restrictedArea != null) {
+                if (mission.restrictedArea != null && mission.restrictedArea != undefined) {
                     if (!this.concernByZone(mission, observation)) {
                         return false;
                     }
@@ -394,16 +394,18 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         else if (miss.$type == "IdentificationMissionModel") {
             mission = miss as IdentificationMissionModel;
         }
-        if ((mission.restrictedArea as CircleAreaModel).center != null) {
-            const circle = mission.restrictedArea as CircleAreaModel;
-            var cir = L.circle(latLng(circle.center.latitude, circle.center.longitude), circle.radius);
-            var circleCenterPoint = cir.getLatLng();
-            return (circleCenterPoint.distanceTo(latLng(observation.latitude, observation.longitude)) <= circle.radius);
-        }
-        else {
-            const polygon = mission.restrictedArea as PolygonArea;
-            var poly = L.polygon(polygon.polygon.map(p => latLng(p.latitude, p.longitude)));
-            return this.isMarkerInsidePolygon(observation.latitude, observation.longitude, poly);
+        if ( mission.restrictedArea != null && mission.restrictedArea != undefined) {
+            if ((mission.restrictedArea as CircleAreaModel).center != null) {
+                const circle = mission.restrictedArea as CircleAreaModel;
+                var cir = L.circle(latLng(circle.center.latitude, circle.center.longitude), circle.radius);
+                var circleCenterPoint = cir.getLatLng();
+                return (circleCenterPoint.distanceTo(latLng(observation.latitude, observation.longitude)) <= circle.radius);
+            }
+            else {
+                const polygon = mission.restrictedArea as PolygonArea;
+                var poly = L.polygon(polygon.polygon.map(p => latLng(p.latitude, p.longitude)));
+                return this.isMarkerInsidePolygon(observation.latitude, observation.longitude, poly);
+            }
         }
 
     }

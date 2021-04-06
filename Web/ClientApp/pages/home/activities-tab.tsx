@@ -7,6 +7,7 @@ import { ActivityCard } from "./activity-card";
 import { AuthenticationApi } from "../../services/authentication-service";
 import { MissionUserModel } from "../../services/generated/mission-user-model";
 import { MissionsCompleteModel } from "../../services/generated/missions-user-model";
+import { forEach } from "lodash";
 
 interface ActivitiesTabProps extends RouteComponentProps {
 
@@ -28,18 +29,15 @@ class ActivitiesTabComponent extends BaseComponent<ActivitiesTabProps, Activitie
 
     async refreshMissions() {
         const missions = await MissionsApi.getMissions();
-
-        var userMissions = await AuthenticationApi.getUserMission(); 
+        var userMissions = await AuthenticationApi.getUserMission();
         var endMissions= [];
         var count = 0;
         if (userMissions.missionsComplete != null && userMissions.missionsComplete.length > 0) {
             while (userMissions.missionsComplete[count]) {
-                console.log(userMissions.missionsComplete[count]);
                 endMissions[count] = userMissions.missionsComplete[count].idMission;
                 count= count+1;
             }
         }
-        console.log(endMissions);
         await this.setPersistantState({
             currentMission: missions.find(m => m.id == userMissions.missionProgression?.missionId),
             currentActivityId: userMissions.missionProgression?.missionId,
@@ -47,10 +45,30 @@ class ActivitiesTabComponent extends BaseComponent<ActivitiesTabProps, Activitie
             endMissions : endMissions
         });
 
-        console.log(this.state.currentMission);
-        console.log(this.state.currentActivityId);
-        console.log(this.state.missionProgress);
         await this.setState({ missions: missions });
+        await this.missionOrder();
+    }
+   async  missionOrder() {
+        const missions = this.state.missions;
+        const end = this.state.endMissions;
+       var orderMissions;
+       var count = 0;
+       missions.forEach(e => {
+           if (!end.includes(e.id)) {
+               console.log(e);
+               orderMissions[count] = e;
+           }
+           count++;
+       });
+       missions.forEach(e => {
+           if (end.includes(e.id)) {
+               console.log(e);
+               orderMissions[count] = e;
+           }
+           count++;
+       });
+       console.log(orderMissions);
+       await this.setState({ missions: orderMissions });
     }
 
     render() {
