@@ -51,23 +51,20 @@ class ActivitiesTabComponent extends BaseComponent<ActivitiesTabProps, Activitie
    async  missionOrder() {
         const missions = this.state.missions;
         const end = this.state.endMissions;
-       var orderMissions;
+       let orderMissions = [];
        var count = 0;
        missions.forEach(e => {
            if (!end.includes(e.id)) {
-               console.log(e);
                orderMissions[count] = e;
            }
            count++;
        });
        missions.forEach(e => {
            if (end.includes(e.id)) {
-               console.log(e);
                orderMissions[count] = e;
            }
            count++;
        });
-       console.log(orderMissions);
        await this.setState({ missions: orderMissions });
     }
 
