@@ -99,9 +99,13 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             });
             this.loadObservations();
             this.positionWatcher = navigator.geolocation.watchPosition(async (position: Position) => {
-                await this.setState({
-                    userPosition: position
-                })
+                var lastPos: MapPosition = JSON.parse(localStorage.getItem("mapPosition"));
+                var now = new Date();
+                now = new Date(now.getTime() - 30 * 60000);
+                var date = new Date(lastPos.Date as any);
+                if (!(date >= now)) {
+                    await this.setState({ userPosition: position });
+                }
             });
         }, async () => {
             await this.setState({
@@ -130,7 +134,6 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         var userMissions = await AuthenticationApi.getUserMission();
         const history = await MissionsApi.getHistoryMission();
         var currentMission = missions.find(m => m.id == userMissions.missionProgression?.missionId);
-        console.log(currentMission);
         var missionProgression = userMissions.missionProgression;
         await this.setState({ currentMission: currentMission, missionProgression: missionProgression, history: history });
         await this.setPosition();
@@ -139,7 +142,6 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             if (currentMission.endingCondition.$type.indexOf("TimeLimitModel") != -1) {
                 const timeLimit = this.state.currentMission.endingCondition as TimeLimit;
                 const start = new Date(missionProgression.startDate);
-                console.log(start);
                 var timer = timeLimit.minutes;
                 timer = timer * 60;
                 const startInSeconds = start.getHours() * 60 + start.getMinutes() * 60 + start.getSeconds();
@@ -176,7 +178,6 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                     await this.state.mapRef.current.leafletElement.setView([lastPos.Latitude, lastPos.Longitude], lastPos.Zoom);
                 }
                 else {
-
                     await this.state.mapRef.current.leafletElement.panTo([this.state.userPosition.coords.latitude, this.state.userPosition.coords.longitude]);
                 }
             }
@@ -324,7 +325,6 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                     }
                 }
                 if (this.state.history != null) {
-                    console.log(this.state.history)
                     if (this.state.history.some(x => x.observationId == observation.id && x.recognition == true)) {
                         return false;
                     }
@@ -465,6 +465,9 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             await this.loadData();
         }
     }
+    async setZoom(zoom: number) {
+        await this.setState({ zoomLevel: zoom });
+    }
     render() {
 
         const { classes } = this.props;
@@ -482,12 +485,12 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         className={clsx(classes.map)}
                         style={{ "height": window.innerHeight - 180 + "px" }}
                         center={position}
-                        zoom={21}
+                        zoom={this.state.zoomLevel}
                         zoomSnap={0.5}
                         minZoom={5}
                         onclick={(e) => this.onMapClicked(e)}
-                        onmoveend={() => this.setLastPosition(this.state.mapRef.current.leafletElement.getCenter().lat, this.state.mapRef.current.leafletElement.getCenter().lng, this.state.mapRef.current.leafletElement.getZoom())}
-                        setView
+                        ondragend={() => this.setLastPosition(this.state.mapRef.current.leafletElement.getCenter().lat, this.state.mapRef.current.leafletElement.getCenter().lng, this.state.mapRef.current.leafletElement.getZoom())}
+                        onzoomend={() => this.setZoom(this.state.mapRef.current.leafletElement.getZoom())}
                     >
                         <TileLayer
                             url={this.getTilesUrl()}
