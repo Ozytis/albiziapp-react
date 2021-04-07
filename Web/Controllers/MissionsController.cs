@@ -2,10 +2,11 @@
 using Api.Missions;
 using Business;
 using Business.MissionValidation;
+using Common;
 using Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Ozytis.Common.Core.Web.WebApi;
+using Ozytis.Common.Core.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,16 +20,18 @@ namespace Web.Controllers
     [Route("api/[controller]")]
     public class MissionsController : ControllerBase
     {
-        public MissionsController(MissionsManager missionsManager, UsersManager usersManager,IServiceProvider serviceProvider/*,NotifyHub notifyHub*/)
+        public MissionsController(MissionsManager missionsManager, UsersManager usersManager,IServiceProvider serviceProvider/*,NotifyHub notifyHub*/, IUserNotify userNotify)
         {
             this.MissionsManager = missionsManager;
             this.UsersManager = usersManager;
             this.ServiceProvider = serviceProvider;
             //this.NotifyHub = notifyHub;
+            this.UserNotify = userNotify;
         }
 
         public MissionsManager MissionsManager { get; }
         public UsersManager UsersManager { get; }
+        public IUserNotify UserNotify { get; }
 
         public IServiceProvider ServiceProvider { get; set; }
 
@@ -98,9 +101,17 @@ namespace Web.Controllers
         [AllowAnonymous]
         public async Task CreateMissionFromApi([FromBody] MissionModel model)
         {
-            var mission = model.ToMission();
-            await this.MissionsManager.CreateMissionAsync(mission);
+            try
+            {
+                var mission = model.ToMission();
+                await this.MissionsManager.CreateMissionAsync(mission);
+                await this.UserNotify.SendNotif(this.User.Identity.Name, "La mission a bien été crée");
+            }
+            catch (BusinessException ex)
+            {
+                await this.UserNotify.SendErrorNotif(this.User.Identity.Name, ex.Message);
 
+            }
             //return missions.Select(mission => mission.ToMissionModel()).ToArray();
         }
         [HttpGet("history")]

@@ -31,7 +31,6 @@ namespace Business
                 session.StartTransaction();
 
                 mission.Id = Guid.NewGuid().ToString("N");
-
                 await this.DataContext.Missions.InsertOneAsync(mission);
             }
             catch

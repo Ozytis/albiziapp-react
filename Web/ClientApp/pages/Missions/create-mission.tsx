@@ -159,10 +159,12 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
         await this.setState({ model: model });
     }
     async send() {
-        if (this.checkModel()) {
-            console.log(this.state.model);
+        await this.checkModel();
+        console.log(this.state.errors?.length);
+        if (this.state.errors?.length <= 0 || this.state.errors == undefined || this.state.errors == null) {
+            console.log("pas d'erreur ca passe");
+        MissionsApi.createNewMission(this.state.model);
         }
-        //MissionsApi.createNewMission(this.state.model);
     }
     async checkModel() {
         var errors = [];
@@ -190,11 +192,11 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
                 }
             }
         }
-        if (this.state.model.title == "") {
+        if (this.state.model.title == null ||this.state.model.title == "") {
             errors.push("-Le titre n'est pas renseigné");
         }
-        if (this.state.model.description == "") {
-            errors.push("-Le titre n'est pas renseigné");
+        if (this.state.model.description == null || this.state.model.description == "") {
+            errors.push("-La description n'est pas renseigné");
         }
         if (this.state.model.restrictedArea != null && this.state.model.restrictedArea!=undefined) {
             if (this.state.model.restrictedArea.$type.indexOf("CircleAreaModel") != -1) {
@@ -222,7 +224,6 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
             }
         }
         await this.setState({ errors: errors });
-        return true;
     }
 
     render() {
