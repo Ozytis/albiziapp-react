@@ -9,6 +9,7 @@ import { IdentificationMissionModel, NewObservationMissionModel, NewObservationM
 import { Timelapse } from "@material-ui/icons";
 import { Polygon } from "react-leaflet";
 import { Circle } from "leaflet";
+import { MissionsApi } from "../../services/missions-service";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -48,6 +49,12 @@ interface CreateMissionProps extends RouteComponentProps, IPropsWithAppContext, 
 }
 
 class CreateMissionState {
+    constructor() {
+        this.model.type = -1;
+        this.model.endingCondition = new NumberOfActions();
+        this.endOfCondition = 0;
+        this.zoneType = 0;
+    }
     model = new NewObservationMissionModel();
     endOfCondition: number;
     zoneType: number;
@@ -70,9 +77,9 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
 
         var model = this.state.model;
         if (value == 0) {
-            model.endingCondition = new TimeLimit();
-        } else {
             model.endingCondition = new NumberOfActions();
+        } else {           
+            model.endingCondition = new TimeLimit();
         }
         await this.setState({ endOfCondition: value, model: model });
     }
@@ -106,7 +113,7 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
         await this.setState({ model: model });
     }
 
-    async updateLongitudePolygon(index: number,value) {
+    async updateLongitudePolygon(index: number, value) {
         var model = this.state.model;
         var coord = (model.restrictedArea as PolygonArea).polygon[index];
         coord.longitude = value;
@@ -119,7 +126,7 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
         coord.latitude = value;
         await this.setState({ model: model });
     }
-    async updateLongitudeCircle( value) {
+    async updateLongitudeCircle(value) {
         var model = this.state.model;
         var coord = (model.restrictedArea as CircleAreaModel).center;
         coord.longitude = value;
@@ -136,6 +143,21 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
         var model = this.state.model;
         (model.restrictedArea as CircleAreaModel).radius = value;
         await this.setState({ model: model });
+    }
+    async updateEndingConditionValue(value) {
+        var model = this.state.model;
+        var endCondition = model.endingCondition;
+        if (this.state.model.endingCondition != null && this.state.endOfCondition == 0) {
+            (endCondition as NumberOfActions).number = value;
+        } else if (this.state.model.endingCondition != null && this.state.endOfCondition == 1) {
+            (endCondition as TimeLimit).minutes = value;
+        }
+        await this.setState({ model : model });
+    }
+    async send() {
+        console.log(this.state.model);
+
+        //MissionsApi.createNewMission(this.state.model);
     }
 
     render() {
@@ -174,10 +196,10 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
                     <Select
                         label={t.__("Restriction")}
                         value={this.state.model.type}
-                        onChange={e => this.updateModel("type", e.target.value as string)}
+                        onChange={e => { console.log(e.target.value); this.updateModel("type", e.target.value as string) }}
                         className={clsx(classes.select)}
                     >
-                        <MenuItem key={"non"} value="">
+                        <MenuItem key={"non"} value={-1}>
                             {t.__("Aucune restriction")}
                         </MenuItem>
 
@@ -226,6 +248,7 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
                         </MenuItem>
 
                     </Select>
+                    <Box>
                     {(this.state.model.endingCondition != null && this.state.endOfCondition == 0) &&
                         <>
                             <Typography variant="h6" className={clsx(classes.sectionHeading)}>
@@ -233,7 +256,7 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
                             </Typography>
 
                             <FormControl className={clsx(classes.formControl)}>
-                                <Input type="text" value={(this.state.model.endingCondition as NumberOfActions).number} onChange={e => this.updateModel("description", e.target.value)} />
+                            <Input type="text" value={(this.state.model.endingCondition as NumberOfActions).number} onChange={e => this.updateEndingConditionValue( e.target.value)} />
                             </FormControl>
                         </>
                     }
@@ -244,11 +267,11 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
                             </Typography>
 
                             <FormControl className={clsx(classes.formControl)}>
-                                <Input type="text" value={(this.state.model.endingCondition as TimeLimit).minutes} onChange={e => this.updateModel("description", e.target.value)} />
+                            <Input type="text" value={(this.state.model.endingCondition as TimeLimit).minutes} onChange={e => this.updateEndingConditionValue( e.target.value)} />
                             </FormControl>
                         </>
                     }
-
+                </Box>
                     <Typography variant="h6" className={clsx(classes.sectionHeading)}>
                         {t.__("Zone")}
                     </Typography>
@@ -269,6 +292,7 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
                         </MenuItem>
 
                     </Select>
+                    <Box>
                     {(this.state.model.restrictedArea != null && this.state.zoneType == 1) &&
                         <>
                             <Typography variant="h6" className={clsx(classes.sectionHeading)}>
@@ -276,16 +300,16 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
                             </Typography>
 
                             <FormControl className={clsx(classes.formControl)}>
-                            <Input type="text" value={(this.state.model.restrictedArea as CircleAreaModel).center.latitude} onChange={e =>this.updateLatitudeCircle( e.target.value)} placeholder="Latitude" />
-                            <Input type="text" value={(this.state.model.restrictedArea as CircleAreaModel).center.longitude} onChange={e => this.updateLongitudeCircle(e.target.value)} placeholder="Longitude" />
+                                <Input type="text" value={(this.state.model.restrictedArea as CircleAreaModel).center.latitude} onChange={e => this.updateLatitudeCircle(e.target.value)} placeholder="Latitude" />
+                                <Input type="text" value={(this.state.model.restrictedArea as CircleAreaModel).center.longitude} onChange={e => this.updateLongitudeCircle(e.target.value)} placeholder="Longitude" />
                             </FormControl>
 
                             <Typography variant="h6" className={clsx(classes.sectionHeading)}>
                                 {t.__("Radius (en m)")}
                             </Typography>
 
-                        <FormControl className={clsx(classes.formControl)}>
-                            <Input type="text" value={(this.state.model.restrictedArea as CircleAreaModel).radius} onChange={e => this.updateRadiusCircle(e.target.value)} placeholder="Radius" />
+                            <FormControl className={clsx(classes.formControl)}>
+                                <Input type="text" value={(this.state.model.restrictedArea as CircleAreaModel).radius} onChange={e => this.updateRadiusCircle(e.target.value)} placeholder="Radius" />
                             </FormControl>
                         </>
                     }
@@ -307,7 +331,13 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
                             ))
                             }
                         </>
-                    }
+                        }
+                    </Box>
+                    
+                    <Button color="secondary" variant="contained" className="button button-primary  button-block mb-1"
+                        onClick={() => this.send()}>
+                        Envoyer
+                                    </Button>
                 </Box>
 
             </Container >

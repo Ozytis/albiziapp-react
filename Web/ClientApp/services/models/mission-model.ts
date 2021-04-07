@@ -18,7 +18,7 @@ export class VerificationMissionModel implements MissionModel {
     unreliableObservation: boolean;// releve pas fiable donc si true on verifie tout les relevés isIdentified
     observationWithPics: boolean;//si true osef de ceux sans photos
     restriction: Restriction;// si !=null on verifie si c'est un genre/espece
-    $type: string;
+    $type: string = "Api.Missions.VerificationMissionModel, Api";
 }
 
 export class IdentificationMissionModel implements MissionModel {
@@ -29,7 +29,7 @@ export class IdentificationMissionModel implements MissionModel {
     description: string;
     restriction: Restriction;
     observationIdentified: string[];
-    $type: string;
+    $type: string = "Api.Missions.IdentificationMissionModel, Api";
 }
 
 export class NewObservationMissionModel implements MissionModel {
@@ -40,7 +40,7 @@ export class NewObservationMissionModel implements MissionModel {
     description: string;
     type: NewObservationMissionType;
     value: string;
-    $type: string;
+    $type: string = "Api.Missions.NewObservationMissionModel, Api";
 }
 
 export enum NewObservationMissionType {
@@ -67,12 +67,12 @@ export enum RestrictionType {
 
 export class NumberOfActions implements EndingCondition {
     number: number;
-    $type: string;
+    $type: string = "Api.Missions.NumberOfActionsModel, Api";
 }
 
 export class TimeLimit implements EndingCondition {
     minutes: number;
-    $type: string;
+    $type: string = "Api.Missions.TimeLimitModel, Api";
 }
 
 export interface RestrictedArea {
@@ -81,13 +81,13 @@ export interface RestrictedArea {
 
 export class PolygonArea implements RestrictedArea {
     polygon: CoordinateModel[];
-    $type: string;
+    $type: string = "Api.Missions.PolygonAreaModel, Api";
 }
 
 export class CircleAreaModel implements RestrictedArea {
     center: CoordinateModel;
     radius: number;
-    $type: string;
+    $type: string = "Api.Missions.CircleAreaModel, Api";
 }
 
 export interface CoordinateModel {
