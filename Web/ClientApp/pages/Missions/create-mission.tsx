@@ -10,6 +10,9 @@ import { Timelapse } from "@material-ui/icons";
 import { Polygon } from "react-leaflet";
 import { Circle } from "leaflet";
 import { MissionsApi } from "../../services/missions-service";
+import { NotifyHelper } from "../../utils/notify-helper";
+import { ErrorSummary } from "../../components/error-summary";
+import { PolygonAreaModel } from "../../services/generated/polygon-area-model";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -58,6 +61,7 @@ class CreateMissionState {
     model = new NewObservationMissionModel();
     endOfCondition: number;
     zoneType: number;
+    errors: string[];
 }
 
 class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMissionState>{
@@ -78,7 +82,7 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
         var model = this.state.model;
         if (value == 0) {
             model.endingCondition = new NumberOfActions();
-        } else {           
+        } else {
             model.endingCondition = new TimeLimit();
         }
         await this.setState({ endOfCondition: value, model: model });
@@ -152,12 +156,73 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
         } else if (this.state.model.endingCondition != null && this.state.endOfCondition == 1) {
             (endCondition as TimeLimit).minutes = value;
         }
-        await this.setState({ model : model });
+        await this.setState({ model: model });
     }
     async send() {
-        console.log(this.state.model);
-
+        if (this.checkModel()) {
+            console.log(this.state.model);
+        }
         //MissionsApi.createNewMission(this.state.model);
+    }
+    async checkModel() {
+        var errors = [];
+        if (this.state.model.endingCondition.$type.indexOf("NumberOfActionsModel") != -1) {
+            const nbActions = this.state.model.endingCondition as NumberOfActions;
+            if (nbActions.number == null || nbActions.number <= 0) {
+                errors.push("-Le nombre d'action n'est pas renseigné");
+            }
+        }
+        else if(this.state.model.endingCondition.$type.indexOf("TimeLimitModel") != -1) {
+            console.log("timelimit")
+            const timeLimit = this.state.model.endingCondition as TimeLimit;
+            if (timeLimit.minutes == null||timeLimit.minutes <= 0) {
+                errors.push("-Le temps limite n'est pas renseigné");
+            }
+        }
+        if (this.state.model.type != -1) {
+            if (this.state.model.type == NewObservationMissionType.ExactGender || this.state.model.type == NewObservationMissionType.ExactSpecies) {
+                console.log(this.state.model.value);
+                if (this.state.model.type == NewObservationMissionType.ExactGender && (this.state.model.value == "" || this.state.model.value == null)) {
+                    errors.push("-Le genre précis n'est pas renseigné");
+                }
+                else if (this.state.model.type == NewObservationMissionType.ExactSpecies && (this.state.model.value == "" || this.state.model.value == null)) {
+                    errors.push("-L'èspece précise n'est pas renseignée");
+                }
+            }
+        }
+        if (this.state.model.title == "") {
+            errors.push("-Le titre n'est pas renseigné");
+        }
+        if (this.state.model.description == "") {
+            errors.push("-Le titre n'est pas renseigné");
+        }
+        if (this.state.model.restrictedArea != null && this.state.model.restrictedArea!=undefined) {
+            if (this.state.model.restrictedArea.$type.indexOf("CircleAreaModel") != -1) {
+                const circle = this.state.model.restrictedArea as CircleAreaModel;
+                if (circle.radius == null || circle.radius <= 0) {
+                    errors.push("-Le radius de la zone n'est pas renseigné");
+
+                }
+                if (circle.center == null || circle.center.latitude == null || circle.center.longitude == null) {
+                    errors.push("-Le point central n'est pas renseigné");
+                }
+            }
+            else if (this.state.model.restrictedArea.$type.indexOf("PolygonAreaModel") != -1) {
+                const polygon = this.state.model.restrictedArea as PolygonArea;
+
+                if (polygon.polygon == null) {
+                    errors.push("-Les coordonnées du polygone ne sont pas renseigné");
+                }
+                if (polygon.polygon != null && polygon.polygon.length <= 3 && polygon.polygon[0].latitude != polygon.polygon[polygon.polygon.length - 1].latitude || polygon.polygon[0].longitude != polygon.polygon[polygon.polygon.length - 1].longitude) {
+                    errors.push("-Le dernier point n'est pas égal au premier");
+                }
+                if (polygon.polygon != null && polygon.polygon.length <= 3) {
+                    errors.push("-Le polygone ne contient pas assez de points(3 mini)");
+                }
+            }
+        }
+        await this.setState({ errors: errors });
+        return true;
     }
 
     render() {
@@ -166,9 +231,12 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
 
         return (
             <Container fixed className={clsx(classes.root)}>
-
+                {this.state.errors &&
+                    <ErrorSummary errors={this.state.errors} />
+                }
                 <h2>Création d'une mission</h2>
                 <Box className={clsx(classes.root)} >
+
                     <Typography variant="h6" className={clsx(classes.sectionHeading)}>
                         {t.__("Type de mision")}
                     </Typography>
@@ -225,7 +293,7 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
                             </Typography>
 
                             <FormControl className={clsx(classes.formControl)}>
-                                <Input type="text" value={this.state.model.description} onChange={e => this.updateModel("description", e.target.value)} />
+                                <Input type="text" value={this.state.model.value} onChange={e => this.updateModel("value", e.target.value)} />
                             </FormControl>
                         </>
                     }
@@ -249,29 +317,29 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
 
                     </Select>
                     <Box>
-                    {(this.state.model.endingCondition != null && this.state.endOfCondition == 0) &&
-                        <>
-                            <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                                {t.__("Nombre d'action")}
-                            </Typography>
+                        {(this.state.model.endingCondition != null && this.state.endOfCondition == 0) &&
+                            <>
+                                <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                                    {t.__("Nombre d'action")}
+                                </Typography>
 
-                            <FormControl className={clsx(classes.formControl)}>
-                            <Input type="text" value={(this.state.model.endingCondition as NumberOfActions).number} onChange={e => this.updateEndingConditionValue( e.target.value)} />
-                            </FormControl>
-                        </>
-                    }
-                    {(this.state.model.endingCondition != null && this.state.endOfCondition == 1) &&
-                        <>
-                            <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                                {t.__("Temps en minutes")}
-                            </Typography>
+                                <FormControl className={clsx(classes.formControl)}>
+                                    <Input required type="text" value={(this.state.model.endingCondition as NumberOfActions).number} onChange={e => this.updateEndingConditionValue(e.target.value)} />
+                                </FormControl>
+                            </>
+                        }
+                        {(this.state.model.endingCondition != null && this.state.endOfCondition == 1) &&
+                            <>
+                                <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                                    {t.__("Temps en minutes")}
+                                </Typography>
 
-                            <FormControl className={clsx(classes.formControl)}>
-                            <Input type="text" value={(this.state.model.endingCondition as TimeLimit).minutes} onChange={e => this.updateEndingConditionValue( e.target.value)} />
-                            </FormControl>
-                        </>
-                    }
-                </Box>
+                                <FormControl className={clsx(classes.formControl)}>
+                                    <Input required type="text" value={(this.state.model.endingCondition as TimeLimit).minutes} onChange={e => this.updateEndingConditionValue(e.target.value)} />
+                                </FormControl>
+                            </>
+                        }
+                    </Box>
                     <Typography variant="h6" className={clsx(classes.sectionHeading)}>
                         {t.__("Zone")}
                     </Typography>
@@ -293,48 +361,48 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
 
                     </Select>
                     <Box>
-                    {(this.state.model.restrictedArea != null && this.state.zoneType == 1) &&
-                        <>
-                            <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                                {t.__("Centre")}
-                            </Typography>
+                        {(this.state.model.restrictedArea != null && this.state.zoneType == 1) &&
+                            <>
+                                <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                                    {t.__("Centre")}
+                                </Typography>
 
-                            <FormControl className={clsx(classes.formControl)}>
-                                <Input type="text" value={(this.state.model.restrictedArea as CircleAreaModel).center.latitude} onChange={e => this.updateLatitudeCircle(e.target.value)} placeholder="Latitude" />
-                                <Input type="text" value={(this.state.model.restrictedArea as CircleAreaModel).center.longitude} onChange={e => this.updateLongitudeCircle(e.target.value)} placeholder="Longitude" />
-                            </FormControl>
+                                <FormControl className={clsx(classes.formControl)}>
+                                    <Input type="text" value={(this.state.model.restrictedArea as CircleAreaModel).center.latitude} onChange={e => this.updateLatitudeCircle(e.target.value)} placeholder="Latitude" />
+                                    <Input type="text" value={(this.state.model.restrictedArea as CircleAreaModel).center.longitude} onChange={e => this.updateLongitudeCircle(e.target.value)} placeholder="Longitude" />
+                                </FormControl>
 
-                            <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                                {t.__("Radius (en m)")}
-                            </Typography>
+                                <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                                    {t.__("Radius (en m)")}
+                                </Typography>
 
-                            <FormControl className={clsx(classes.formControl)}>
-                                <Input type="text" value={(this.state.model.restrictedArea as CircleAreaModel).radius} onChange={e => this.updateRadiusCircle(e.target.value)} placeholder="Radius" />
-                            </FormControl>
-                        </>
-                    }
-                    {(this.state.model.restrictedArea != null && this.state.zoneType == 2) &&
-                        <>
-                            <Button onClick={() => { this.addPointToPolygon() }}  >Ajouter un point</Button>
-                            <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                                {t.__("Polygone (Le dernier point, doit être égale au premier)")}
-                            </Typography>
-                            {(this.state.model.restrictedArea as PolygonArea).polygon.map((p, i) =>
-                            (
-                                <>
-                                    <FormControl className={clsx(classes.formControl)}>
-                                        <Input type="text" value={p.latitude} onChange={e => this.updateLatitudePolygon(i, e.target.value)} placeholder="Latitude" />
-                                        <Input type="text" value={p.longitude} onChange={e => this.updateLongitudePolygon(i, e.target.value)} placeholder="Longitude" />
-                                        <Button onClick={() => { this.removePointToPolygon(i) }}  >Retirer le point</Button>
-                                    </FormControl>
-                                </>
-                            ))
-                            }
-                        </>
+                                <FormControl className={clsx(classes.formControl)}>
+                                    <Input type="text" value={(this.state.model.restrictedArea as CircleAreaModel).radius} onChange={e => this.updateRadiusCircle(e.target.value)} placeholder="Radius" />
+                                </FormControl>
+                            </>
+                        }
+                        {(this.state.model.restrictedArea != null && this.state.zoneType == 2) &&
+                            <>
+                                <Button color="primary" variant="contained" className="button button-primary  button-block mb-1" onClick={() => { this.addPointToPolygon() }}  >Ajouter un point</Button>
+                                <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                                    {t.__("Polygone (Le dernier point, doit être égale au premier)")}
+                                </Typography>
+                                {(this.state.model.restrictedArea as PolygonArea).polygon.map((p, i) =>
+                                (
+                                    <>
+                                        <FormControl className={clsx(classes.formControl)}>
+                                            <Input type="text" value={p.latitude} onChange={e => this.updateLatitudePolygon(i, e.target.value)} placeholder="Latitude" />
+                                            <Input type="text" value={p.longitude} onChange={e => this.updateLongitudePolygon(i, e.target.value)} placeholder="Longitude" />
+                                            <Button color="secondary" variant="contained" className="button button-primary  button-block mb-1" style={{ width: "max-content" }} onClick={() => { this.removePointToPolygon(i) }}  >Retirer le point</Button>
+                                        </FormControl>
+                                    </>
+                                ))
+                                }
+                            </>
                         }
                     </Box>
-                    
-                    <Button color="secondary" variant="contained" className="button button-primary  button-block mb-1"
+
+                    <Button color="primary" variant="contained" className="button button-primary  button-block mb-1"
                         onClick={() => this.send()}>
                         Envoyer
                                     </Button>
