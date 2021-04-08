@@ -6,7 +6,6 @@
 
 export interface MissionProgressionModel {
     missionId: string;
-    activityId: string;
     startDate: string;
     progression: number;
 }

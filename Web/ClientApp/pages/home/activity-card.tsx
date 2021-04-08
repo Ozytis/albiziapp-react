@@ -1,12 +1,15 @@
-import { Box, Card, CardContent, createStyles, LinearProgress, Theme, Typography, WithStyles, withStyles } from "@material-ui/core";
-import { DoneAll, HelpOutline, RadioButtonChecked, Search } from "@material-ui/icons";
+import { Box, Card, CardContent, createStyles, LinearProgress, Theme, Typography, WithStyles, withStyles, Button } from "@material-ui/core";
+import { DoneAll, HelpOutline, RadioButtonChecked, Search, Watch, WatchLaterTwoTone, StopOutlined, Cancel, Check } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
 import { BaseComponent } from "../../components/base-component";
-import { ActivitiesApi } from "../../services/activities-service";
-import { ActivityModel } from "../../services/generated/activity-model";
 import { t } from "../../services/translation-service";
+import { MissionModel, IdentificationMissionModel, NewObservationMissionModel, NumberOfActions } from "../../services/models/mission-model";
+import { MissionProgressionModel } from "../../services/generated/mission-progression-model";
+import { MissionsApi } from "../../services/missions-service";
+import { Confirm } from "../../components/confirm";
+import { MissionProgressionCreationModel } from "../../services/generated/mission-progression-creation-model";
 
 const styles = (theme: Theme) => createStyles({
     card: {
@@ -19,41 +22,59 @@ const styles = (theme: Theme) => createStyles({
 });
 
 interface ActivityCardProps extends WithStyles<typeof styles>, RouteComponentProps {
-    activity: ActivityModel;
+    mission: MissionModel;
     completion: number;
     active: boolean;
+    end?: boolean;
+    onChange?: () => Promise<any>;
+
 }
 
 class ActivityCardState {
-
 }
 
 class ActivityCardComponent extends BaseComponent<ActivityCardProps, ActivityCardState>{
     constructor(props: ActivityCardProps) {
         super(props, "activity", new ActivityCardState())
     }
-
     getIcon() {
-        switch (this.props.activity.type) {
-            case ActivitiesApi.IDENTIFY:
-                return HelpOutline;
-            case ActivitiesApi.INVENTORY:
-                return Search;
-            case ActivitiesApi.VERIFY:
-                return DoneAll;
-            default:
-                return RadioButtonChecked;
+
+        if (this.props.mission.$type.indexOf("IdentificationMissionModel") != -1) {
+            return HelpOutline;
+    } else if(this.props.mission.$type.indexOf("NewObservationMissionModel") != -1) {
+            return Search;
+        } else if (this.props.mission.$type.indexOf("NewObservationMissionModel") != -1) {
+            return DoneAll;
+        } else {
+            return RadioButtonChecked;
         }
+
+    }
+    async startMission(missionId: string) {
+        if (missionId != null ) {
+            if (!await Confirm(t.__("Etes vous sûr de vouloir commencer cette mission? Cela arrêtera les missions déjà commencé."))) {
+                return;
+            }
+        }
+        else if (missionId == null) {
+            if (!await Confirm(t.__("Etes vous sûr de vouloir arrêter cette mission?"))) {
+                return;
+            }
+        }
+        const model = new MissionProgressionCreationModel();
+            model.missionId = missionId;
+        
+        await MissionsApi.startMission(model);
+        this.props.onChange();
     }
 
     render() {
 
-        const { activity, classes, completion, active } = this.props;
-
+        const { mission, classes, completion, active, end} = this.props;
         const ActivityIcon = this.getIcon();
-       // console.log(activity);
+        // console.log(activity);
         return (
-            <Card className={clsx(classes.card, !active && classes.disabledCard)} variant="elevation" raised={active}>
+            <Card className={clsx(classes.card, end && classes.disabledCard)} variant="elevation" raised={!end}>
                 <CardContent>
                     <Box display="flex" alignItems="center">
                         <Box minWidth={35}>
@@ -62,23 +83,44 @@ class ActivityCardComponent extends BaseComponent<ActivityCardProps, ActivityCar
                         <Box width="100%" >
 
                             <Typography variant="caption" component="h2">
-                                {t.__(activity.instructions.long)}
+                                {t.__(mission.description)}
                             </Typography>
 
                             {
-                               active && activity.endConditions && activity.endConditions.length > 0 && activity.endConditions[0] && activity.endConditions[0].actionCount != null &&
+                                !active && mission.endingCondition && mission.endingCondition instanceof NumberOfActions && mission.endingCondition.number != null &&
                                 <Box display="flex" alignItems="center" mt={1}>
                                     <Box width="100%" mr={1}>
-                                        <LinearProgress variant="determinate" value={Math.round(completion * 100 / activity.endConditions[0].actionCount)} />
+                                        <LinearProgress variant="determinate" value={Math.round(completion * 100 / mission.endingCondition.number)} />
                                     </Box>
                                     <Box minWidth={35}>
-                                        <Typography variant="body2" color={active ? "textSecondary" : "inherit"}>
-                                            {completion} / {activity.endConditions[0].actionCount}
+                                        <Typography variant="body2" color={!active ? "textSecondary" : "inherit"}>
+                                            {completion} / {mission.endingCondition.number}
                                         </Typography>
                                     </Box>
                                 </Box>
                             }
                         </Box>
+                        { mission && !active && !end &&
+                            <Box>
+                            <Button color="primary" variant="contained" onClick={() => this.startMission(mission.id)} style={{maxWidth:"80%", fontSize:"9px"}}>
+                                <WatchLaterTwoTone className="mr-2" style={{ width: "15px" }} />
+                                {t.__("Commencer")}
+                            </Button>
+                            </Box>
+                        }
+                        {mission && active && !end &&
+                            <Box>
+                            <Button color="secondary" variant="contained" onClick={() => this.startMission(null)} style={{ maxWidth: "80%", fontSize: "9px" }}>
+                                <Cancel className="mr-2" style={{ width:"15px" }} />
+                                {t.__("Abandonner")}
+                            </Button>
+                            </Box>
+                        }
+                        {end &&
+                            <Box>
+                                <Check className="mr-2" style={{ width: "50px" }} />
+                            </Box>
+                        }
                     </Box>
                 </CardContent>
             </Card>

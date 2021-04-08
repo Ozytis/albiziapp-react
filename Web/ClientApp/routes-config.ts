@@ -19,6 +19,8 @@ import { UsersPageConfig } from "./pages/user/users-page-config";
 import { UserPageConfig } from "./pages/user/user-page-config";
 import { EditUserPageConfig } from "./pages/user/edit-user-page-config";
 import { HistoryPageConfig } from "./pages/observation/history-page-config";
+import { NewIdentificationMissionPageConfig } from "./pages/Missions/new-identification-mission-config";
+import { CreateMissionComponentConfig } from "./pages/Missions/create-mission-config";
 
 const routesConfig = [
     HomePageConfig,
@@ -40,17 +42,15 @@ const routesConfig = [
     UsersPageConfig,
     UserPageConfig,
     EditUserPageConfig,
-    HistoryPageConfig
+    HistoryPageConfig,
+    NewIdentificationMissionPageConfig,
+    CreateMissionComponentConfig
 
 
 ]
 
 class RouteUtils {
-
-
-
     static generateRoutesFromConfigs(configs: PageConfig[]) {
-
         return configs;
     }
 }

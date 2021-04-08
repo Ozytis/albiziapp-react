@@ -90,11 +90,7 @@ class App extends BaseComponent<AppProps, AppState>{
 
     async refreshAuth() {
         const currentUser = await AuthenticationApi.getCurrentUser();
-        
-        
         await this.setState({ user: currentUser });
-               
-
         if (currentUser) {
 
             var hubConnection = new signalR.HubConnectionBuilder()

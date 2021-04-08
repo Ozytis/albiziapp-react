@@ -241,7 +241,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
         const species = this.state.species.find(g => g.speciesName === speciesName);
         if (species != null) {
             model.species = species.speciesName;
-            const genus = this.state.genus.find(g => g.genus === species[0].genus);
+            const genus = this.state.genus.find(g => g.genus === species.genus);
             model.genus = genus.genus;
             await this.setState({ model: model, selectedspecies: species, selectedGenus: genus, selectedCommonGenus: genus, selectedCommonSpecies:species });
         } else {
@@ -506,7 +506,33 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                         {(this.state.model.species != null && this.state.model.species.length > 0) &&
                             <a style={{ color: 'black' }} onClick={() => { this.goToSpeciesPage(); }}>Voir la fiche de l'espèce </a>
                         }
+                        
                     </FormControl>
+                    {this.state.selectedGenus != null &&
+                        <div>
+                        <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                            {t.__("Confiance")}
+                        </Typography>
+                        <div>
+                            <table className={clsx(classes.center)}>
+                                <tbody>
+                                    <tr>
+                                        <td style={{ width: "20%" }}>Confiance</td>
+                                        <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isLowConfident ? "green" : "white", color: this.state.isLowConfident ? "white" : "black" }} onClick={() => this.updateConfident("low")}>
+                                            Faible
+                                    </td>
+                                        <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isMediumConfident ? "green" : "white", color: this.state.isMediumConfident ? "white" : "black" }} onClick={() => this.updateConfident("medium")}>
+                                            Moyen
+                                </td>
+                                        <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isHighConfident ? "green" : "white", color: this.state.isHighConfident ? "white" : "black" }} onClick={() => this.updateConfident("high")} >
+                                            Haute
+                                </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        </div>
+                    }
                     <Typography variant="h6" className={clsx(classes.sectionHeading)}>
                         {t.__("Hauteur de l'arbre")}
                     </Typography>
@@ -536,27 +562,7 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
                     </Typography>
                     <PhotoFormItem label={t.__("Prendre une photo")} value={model.pictures} onAdd={val => this.addPicture(val)} onDelete={index => this.deletePicture(index)} />
 
-                    <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                        {t.__("Confiance")}
-                    </Typography>
-                    <div>
-                        <table className={clsx(classes.center)}>
-                            <tbody>
-                                <tr>
-                                    <td style={{ width: "20%" }}>Confiance</td>
-                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isLowConfident ? "green" : "white", color: this.state.isLowConfident ? "white" : "black" }} onClick={() => this.updateConfident("low")}>
-                                        Faible
-                                    </td>
-                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isMediumConfident ? "green" : "white", color: this.state.isMediumConfident ? "white" : "black" }} onClick={() => this.updateConfident("medium")}>
-                                        Moyen
-                                </td>
-                                    <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.isHighConfident ? "green" : "white", color: this.state.isHighConfident ? "white" : "black" }} onClick={() => this.updateConfident("high")} >
-                                        Haute
-                                </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                   
                     <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.process()}>
                         <Loader loading={this.state.isProcessing} usualIcon="check" />
                         {t.__("Valider")}

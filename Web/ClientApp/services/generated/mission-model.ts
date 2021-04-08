@@ -4,9 +4,13 @@
 // </auto-generated>
 //----------------------
 
-import { ActivityModel } from "./activity-model";
+import { EndingConditionModel } from "./ending-condition-model";
+import { RestrictedAreaModel } from "./restricted-area-model";
 export interface MissionModel {
-    activities: ActivityModel[];
     id: string;
-    order: number;
+    endingCondition: EndingConditionModel;
+    restrictedArea: RestrictedAreaModel;
+    title: string;
+    description: string;
+    missionType: string;
 }

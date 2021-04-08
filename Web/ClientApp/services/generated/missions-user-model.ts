@@ -7,10 +7,4 @@
 export interface MissionsCompleteModel {
     idMission: string;
     completedDate: string;
-    activitiesCompleted: ActivityCompleteModel[];
-}
-
-export interface ActivityCompleteModel {
-    idActivity: string;
-    completedDate: string;
 }

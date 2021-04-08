@@ -1,4 +1,5 @@
 ﻿using Api;
+using Api.Missions;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -31,10 +32,10 @@ namespace DataMigrator
                     Console.WriteLine("Url incorrecte,l'url de base va être utilisé");
                 }
             }
-            Console.WriteLine("L'url du serveur utilisé sera :" + URL);
+            Console.WriteLine("L'url du serveur utilisé sera : " + URL);
 
             while (true)
-            {              
+            {
                 Console.WriteLine("Veuillez choisir une opération :");
                 Console.WriteLine("\t1 - Essences d'arbres");
                 Console.WriteLine("\t2 - Clef de détermination");
@@ -42,6 +43,7 @@ namespace DataMigrator
                 Console.WriteLine("\t4 - Trophée");
                 Console.WriteLine("\t5 - Titre");
                 Console.WriteLine("\t6 - Rareté");
+                Console.WriteLine("\t7 - Mission v2");
                 Console.WriteLine("\tQ - Quitter");
 
                 ConsoleKeyInfo key = Console.ReadKey();
@@ -67,6 +69,9 @@ namespace DataMigrator
                         break;
                     case '6':
                         await MigrateRarety();
+                        break;
+                    case '7':
+                        await MigrateMissionv2();
                         break;
                     case 'q':
                         return;
@@ -172,23 +177,23 @@ namespace DataMigrator
             JsonSerializer serializer = new JsonSerializer();
 
             int order = 1;
-            List<ActivityCreationModel> activities = new List<ActivityCreationModel>();
-            while (jsonReader.Read())
-            {
-                if (jsonReader.TokenType == JsonToken.StartObject)
-                {
+            //List<ActivityCreationModel> activities = new List<ActivityCreationModel>();
+            //while (jsonReader.Read())
+            //{
+            //    if (jsonReader.TokenType == JsonToken.StartObject)
+            //    {
 
-                    ActivityCreationModel key = serializer.Deserialize<ActivityCreationModel>(jsonReader);
-                    key.Order = order;
-                    activities.Add(key);
-                    order++;
-                    Console.WriteLine(key.Instructions.Long);
-                }
-            }
-            MissionCreationModel model = new MissionCreationModel();
-            model.Order = 1;
-            model.Activities = activities.ToArray();
-            string json = JsonConvert.SerializeObject(model);
+            //        ActivityCreationModel key = serializer.Deserialize<ActivityCreationModel>(jsonReader);
+            //        key.Order = order;
+            //        activities.Add(key);
+            //        order++;
+            //        Console.WriteLine(key.Instructions.Long);
+            //    }
+            //}
+            //MissionCreationModel model = new MissionCreationModel();
+            //model.Order = 1;
+            //model.Activities = activities.ToArray();
+            string json = "";//; JsonConvert.SerializeObject(model);
             using (WebClient webClient = new WebClient())
             {
                 webClient.Headers.Add("Accept", "text/json");
@@ -281,6 +286,38 @@ namespace DataMigrator
                     }
                 }
             }
+        }
+        private static async Task MigrateMissionv2()
+        {
+            using StreamReader reader = new StreamReader(Path.Combine(Directory.GetCurrentDirectory(), "Migrate", "missionv2.json"));
+            var json = await reader.ReadToEndAsync();
+
+            var data = JsonConvert.DeserializeObject<MissionModel[]>(json, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.All
+            });
+            foreach (var m in data)
+            {
+                try
+                {
+                    using (WebClient webClient = new WebClient())
+                    {
+                        string missionJson = JsonConvert.SerializeObject(m, new JsonSerializerSettings
+                        {
+                            TypeNameHandling = TypeNameHandling.All
+                        });
+                        webClient.Headers.Add("Accept", "text/json");
+                        webClient.Headers.Add("Content-Type", "text/json");
+                        await webClient.UploadDataTaskAsync(new Uri($"{URL}/api/missions/createMissionFromApi"), Encoding.UTF8.GetBytes(missionJson));
+                    }
+                }catch(Exception e)
+                {
+
+                }
+            }
+
+            //Console.WriteLine(json);
+
         }
     }
 }

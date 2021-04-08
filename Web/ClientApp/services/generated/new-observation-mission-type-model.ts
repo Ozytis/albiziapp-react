@@ -4,7 +4,9 @@
 // </auto-generated>
 //----------------------
 
-export interface ActivityEndConditionModel {
-    actionCount: number;
-    time: number;
+export enum NewObservationMissionTypeModel{
+    differentGenders = 0,
+    differentSpecies = 1,
+    exactGender = 2,
+    exactSpecies = 3,
 }

@@ -8,16 +8,13 @@ namespace Entities
     {
         public string IdMission { get; set; }
 
-        public DateTime? CompletedDate { get; set; }
+        public DateTime StartDate { get; set; }
 
-        public ActivityComplete[] ActivitiesCompleted { get; set; }
-        
-    }
-
-    public class ActivityComplete
-    {
-        public string IdActivity { get; set; }
+        public MissionProgressionHistory[] History { get; set; }
 
         public DateTime? CompletedDate { get; set; }
+
     }
+
+ 
 }

@@ -17,12 +17,12 @@ export class ErrorSummary extends BaseComponent<{ errors: string[]; globalText?:
         return (
             <div
                 className="validation-summary-errors alert alert-danger rounded-0"
-                style={{ background: "linear-gradient(to right,#ff6600 0%, #ff8800 100%)" }}
+                style={{ background: "#ff6600", width: "max-content", margin: "auto", padding:"10px" }}
                 role="alert">
 
                 {this.props.globalText || t.__("Veuillez corriger les erreurs suivantes :")}
 
-                <ul>
+                <ul style={{marginTop:"2%"}}>
                     {
                         this.props.errors.map && this.props.errors.map((error, index) => (
                             <li key={`error-${index}`}>

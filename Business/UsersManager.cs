@@ -138,7 +138,7 @@ namespace Business
             {
                 return;
             }
-            var trophies = await this.TrophiesManager.GetTrophiesBySuccessActivitiesCount(user.MissionCompleted?.Sum(x => x.ActivitiesCompleted.Count()) ?? 0);
+            /*var trophies = await this.TrophiesManager.GetTrophiesBySuccessActivitiesCount(user.MissionCompleted?.Sum(x => x.ActivitiesCompleted.Count()) ?? 0);
             if (trophies != null && trophies.Count > 0)
             {
                 if (user.Trophies == null)
@@ -153,7 +153,7 @@ namespace Business
                 }
 
                 await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
-            }
+            }*/
 
 
             await this.UserNotify.SendNotif(userId, "Vous avez debloqué un nouveau trophée !");
@@ -173,7 +173,7 @@ namespace Business
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
         }
 
-        public async Task EndCurrentActivity(string userId)
+        public async Task EndCurrentMission(string userId, MissionProgressionHistory[] historyToUpdate)
         {
             var user = await this.SelectAsync(userId);
             if (user == null)
@@ -182,100 +182,45 @@ namespace Business
             }
 
             var missionsCompleted = user.MissionCompleted?.ToList() ?? new List<MissionComplete>();
-            MissionComplete missionComplete = missionsCompleted?.FirstOrDefault(m => m.IdMission == user.MissionProgress.MissionId);
             Mission mission = await this.MissionsManager.GetMissionById(user.MissionProgress.MissionId);
-            List<ActivityComplete> activities;
-            if (missionComplete == null)
+
+            MissionComplete missionComplete = new MissionComplete
             {
-                missionComplete = new MissionComplete
-                {
-                    IdMission = user.MissionProgress.MissionId
-                };
-                activities = new List<ActivityComplete>();
-            }
-            else
-            {
-                activities = missionComplete.ActivitiesCompleted.ToList();
-            }
-
-            activities.Add(new ActivityComplete { CompletedDate = DateTime.UtcNow, IdActivity = user.MissionProgress.ActivityId });
-
-            if (activities.Count() == mission.Activities.Count())
-            {
-                missionComplete.CompletedDate = DateTime.UtcNow;
-            }
-
-            missionComplete.ActivitiesCompleted = activities.ToArray();
-
-
-            if (missionsCompleted == null)
-            {
-                missionsCompleted = new List<MissionComplete>();
-                missionsCompleted.Add(missionComplete);
-            }
-            else
-            {
-                var missionsCompletedIndex = missionsCompleted.FindIndex(m => m.IdMission == missionComplete.IdMission);
-                if (missionsCompletedIndex != -1)
-                {
-                    missionsCompleted[missionsCompletedIndex] = missionComplete;
-                }
-                else
-                {
-                    missionsCompleted.Add(missionComplete);
-                }
-            }
-
+                IdMission = user.MissionProgress.MissionId,
+                StartDate = user.MissionProgress.StartDate,
+                CompletedDate = DateTime.UtcNow,
+                History = historyToUpdate
+            };
+            var nbReleve = missionComplete.History?.Count();
+            missionsCompleted.Add(missionComplete);
             user.MissionCompleted = missionsCompleted.ToArray();
-            if (missionComplete.CompletedDate.HasValue)
-            {
-                var missions = await this.MissionsManager.GetAllMissionsAsync();
-                var nextMission = missions.FirstOrDefault(x => x.Order > mission.Order);
-                if (nextMission != null)
-                {
-                    user.MissionProgress = new MissionProgress { MissionId = nextMission.Id, ActivityId = nextMission.Activities.OrderBy(x => x.Order).FirstOrDefault()?.Id, StartDate = DateTime.UtcNow };
-                }
-                else
-                {
-                    user.MissionProgress = null;
-                }
-            }
-            else
-            {
-                var nextActivity = mission.Activities.FirstOrDefault(a => a.Order > mission.Activities.First(x => x.Id == user.MissionProgress.ActivityId).Order);
-                if (nextActivity != null)
-                {
-                    user.MissionProgress = new MissionProgress { MissionId = mission.Id, ActivityId = nextActivity.Id, StartDate = DateTime.UtcNow };
-                }
-                else
-                {
-                    user.MissionProgress = null;
-                }
-            }
+            user.MissionProgress = null;
 
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
 
             await this.AddTrophies(user.OsmId);
-        }
-
-        public async Task StartFirstMission(string userId)
-        {
-            var user = await this.SelectAsync(userId);
-            if (user == null || user.MissionProgress != null)
-            {
-                return;
-            }
-
-            var missions = await this.MissionsManager.GetAllMissionsAsync();
-            var nextMission = missions.FirstOrDefault();
-            if (nextMission != null)
-            {
-                user.MissionProgress = new MissionProgress { MissionId = nextMission.Id, ActivityId = nextMission.Activities.OrderBy(x => x.Order).FirstOrDefault()?.Id, StartDate = DateTime.UtcNow };
-            }
-
-            await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
+            await this.UserNotify.SendInfoNotif(userId, $"Vous avez terminé la mission en faisant {nbReleve} relevés !");
 
         }
+
+        /* public async Task StartFirstMission(string userId)
+         {
+             var user = await this.SelectAsync(userId);
+             if (user == null || user.MissionProgress != null)
+             {
+                 return;
+             }
+
+             var missions = await this.MissionsManager.GetAllMissionsAsync();
+             var nextMission = missions.FirstOrDefault();
+             if (nextMission != null)
+             {
+                 user.MissionProgress = new MissionProgress { MissionId = nextMission.Id, ActivityId = nextMission.Activities.OrderBy(x => x.Order).FirstOrDefault()?.Id, StartDate = DateTime.UtcNow };
+             }
+
+             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
+
+         }*/
 
 
 
@@ -300,8 +245,12 @@ namespace Business
         {
             return await this.DataContext.Users.Find(u => osmIds.Contains(u.OsmId)).ToListAsync();
         }
+        public async Task<User> GetUserById(string osmId)
+        {
+            return await this.SelectAsync(osmId);
+        }
 
-            public async Task<User> EditUserAsync(User user)
+        public async Task<User> EditUserAsync(User user)
         {
             using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
             var oldUser = await this.SelectAsync(user.OsmId);
@@ -321,6 +270,31 @@ namespace Business
             }
 
             return oldUser;
+        }
+        public async Task StartMissionAsync(MissionProgress mission, string userId)
+        {
+            using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
+
+            try
+            {
+                session.StartTransaction();
+
+                User user = await this.SelectAsync(userId);
+
+                user.MissionProgress = mission;
+
+                await this.DataContext.Users.FindOneAndReplaceAsync(x => x.Id == user.Id, user);
+
+                if(mission == null)
+                {
+                    await this.UserNotify.SendErrorNotif(userId, $"La mission a été abandonné");
+                }
+            }
+            catch
+            {
+                await session.AbortTransactionAsync();
+                throw;
+            }
         }
     }
 }

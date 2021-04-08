@@ -68,7 +68,7 @@ namespace Web.Controllers
             await this.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
             if (user != null)
             {
-                await this.UsersManager.StartFirstMission(model.OsmId);
+                //await this.UsersManager.StartFirstMission(model.OsmId);
             }
 
             return user?.ToUserApiModel();

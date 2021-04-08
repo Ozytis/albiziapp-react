@@ -46,13 +46,7 @@ namespace Entities
             }
         }
 
-        public IMongoCollection<Activity> Activities
-        {
-            get
-            {
-                return this.Database.GetCollection<Activity>("Activities");
-            }
-        }
+     
 
         public IMongoCollection<Mission> Missions
         {

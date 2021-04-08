@@ -1,5 +1,5 @@
 import { AppBar, createStyles, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Theme, Toolbar, Typography, withStyles, WithStyles, Switch } from "@material-ui/core";
-import { AccountTree, Book, Eco, ExitToApp, SupervisorAccount, ArrowBack, ClearAll, VerifiedUser } from "@material-ui/icons";
+import { AccountTree, Book, Eco, ExitToApp, SupervisorAccount, ArrowBack, ClearAll, VerifiedUser, DoubleArrow } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -26,6 +26,7 @@ import { TrophyPageConfig } from "../pages/score/trophy-page-config";
 import { Confirm } from "./confirm";
 import { UserRole } from "../services/generated/user-role";
 import { UserEditionModel } from "../services/generated/user-edition-model";
+import { CreateMissionComponentConfig } from "../pages/Missions/create-mission-config";
 
 const styles = (theme: Theme) => createStyles({
     menu: {
@@ -177,6 +178,7 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
             ArboretumPageConfig,
             ObservationsPageConfig,
             DeterminationKeyPageConfig,
+            CreateMissionComponentConfig
         ]
         if (matched) {
             return routesConfig.find(route => route.routes.some(r => r.path === matched.route.path)) != null;
@@ -279,6 +281,14 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                                 </ListItemIcon>
                                 <ListItemText primary={t.__("Supprimer tous les relevés")} />
                             </ListItem>
+                          
+
+                        <ListItem button onClick={() => this.goTo("/create-mission")}>
+                            <ListItemIcon>
+                                <DoubleArrow />
+                            </ListItemIcon>
+                            <ListItemText primary={t.__("Création d'une mission")} />
+                        </ListItem>
                             <ListItem button onClick={() => this.logOut()}>
                                 <ListItemIcon>
                                     <ExitToApp />

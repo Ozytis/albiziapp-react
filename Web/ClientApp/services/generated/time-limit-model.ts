@@ -4,7 +4,8 @@
 // </auto-generated>
 //----------------------
 
-export interface ActivityInstructionModel {
-    long: string;
-    short: string;
+import { EndingConditionModel } from "./ending-condition-model";
+export interface TimeLimitModel extends EndingConditionModel
+{
+    minutes: number;
 }

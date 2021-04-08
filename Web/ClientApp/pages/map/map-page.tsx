@@ -1,8 +1,8 @@
 import { Box, createStyles, Icon, Theme, WithStyles, withStyles, Button, Dialog, DialogActions } from "@material-ui/core";
 import clsx from "clsx";
-import L, { LatLng } from "leaflet";
-import React, { createRef, Component } from "react";
-import { Circle, Map, Marker, TileLayer, LayerGroup } from "react-leaflet";
+import L, { LatLng, latLng } from "leaflet";
+import React, { createRef, Component, useState, useEffect } from "react";
+import { Circle, Map, Marker, TileLayer, LayerGroup, Polygon, Polyline } from "react-leaflet";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
 import { BaseComponent } from "../../components/base-component";
@@ -12,11 +12,15 @@ import { ObservationModel } from "../../services/generated/observation-model";
 import { ObservationsApi } from "../../services/observation";
 import { t } from "../../services/translation-service";
 import { MissionsApi } from "../../services/missions-service";
-import { ActivityModel } from "../../services/generated/activity-model";
 import { MissionProgressionModel } from "../../services/generated/mission-progression-model";
 import { NearMe, ZoomOutMapSharp, MapRounded, Layers } from "@material-ui/icons";
 import { MapPosition } from "../../components/mapPosition";
 import * as signalR from "@microsoft/signalr";
+import { MissionModel, CircleAreaModel, PolygonArea, IdentificationMissionModel, VerificationMissionModel, RestrictionType, NumberOfActions, TimeLimit } from "../../services/models/mission-model";
+import { CoordinateModel } from "../../services/generated/coordinate-model";
+import { orange } from "@material-ui/core/colors";
+import { NotifyHelper } from "../../utils/notify-helper";
+import { MissionHistoryModel } from "../../services/generated/mission-history-model";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -37,12 +41,14 @@ const styles = (theme: Theme) => createStyles({
     },
     missionBox: {
         height: "60px",
-        backgroundColor: theme.palette.primary.dark,
+        backgroundColor: "#267F00",
         color: theme.palette.secondary.contrastText,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        padding: "1%",
+        verticalAlign: "middle"
     },
     imageClignote: {
         animationDuration: ".8s",
@@ -59,21 +65,29 @@ interface MapPageProps extends RouteComponentProps, IPropsWithAppContext, WithSt
 class MapPageState {
     userPosition: Position = null;
     observations: ObservationModel[];
-    currentActivity: ActivityModel;
+    currentMission: MissionModel;
     missionProgression: MissionProgressionModel;
-    zoomLevel: number = 0;
+    zoomLevel: number = 19;
     mapRef = createRef<Map>();
     isLayerOn: boolean;
     layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxNativeZoom: 19,
         maxZoom: 21
     });
+    circle: CircleAreaModel;
+    polygon: PolygonArea;
+    minutes: number = 0;
+    seconds: number = 0;
+    timer: number;
+    myInterval: number;
+    history: MissionHistoryModel[];
+    poly: L.LatLng[];
 }
 
 class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
     hub: signalR.HubConnection;
-
+    myInterval: number;
     constructor(props: MapPageProps) {
         super(props, "MapPage", new MapPageState());
     }
@@ -85,12 +99,15 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             });
             this.loadObservations();
             this.positionWatcher = navigator.geolocation.watchPosition(async (position: Position) => {
-                await this.setState({
-                    userPosition: position
-                })
+                var lastPos: MapPosition = JSON.parse(localStorage.getItem("mapPosition"));
+                var now = new Date();
+                now = new Date(now.getTime() - 30 * 60000);
+                var date = new Date(lastPos.Date as any);
+                if (!(date >= now)) {
+                    await this.setState({ userPosition: position });
+                }
             });
         }, async () => {
-            console.log("MAP ERROR");
             await this.setState({
                 userPosition: {
                     coords: ({ latitude: 48.085834, longitude: -0.757896 } as any)
@@ -109,22 +126,42 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             this.setState({ observations: obs })
         });
         this.hub.start();
-
+        await this.loadData();
+    }
+    async loadData() {
 
         var missions = await MissionsApi.getMissions();
         var userMissions = await AuthenticationApi.getUserMission();
-        var currentMission = missions.find(m => m.id == userMissions.missionProgression.missionId);
-        var currentActivityId = userMissions.missionProgression.activityId;
-        if (currentMission != null && currentActivityId != null) {
-            var activity = currentMission.activities.find(a => a.id == currentActivityId);
-            await this.setState({
-                currentActivity: activity,
-                missionProgression: userMissions.missionProgression
-            });
-        }
+        const history = await MissionsApi.getHistoryMission();
+        var currentMission = missions.find(m => m.id == userMissions.missionProgression?.missionId);
+        var missionProgression = userMissions.missionProgression;
+        await this.setState({ currentMission: currentMission, missionProgression: missionProgression, history: history });
         await this.setPosition();
+        this.setZoneForMission();
+        if (currentMission != null && missionProgression != null) {
+            if (currentMission.endingCondition.$type.indexOf("TimeLimitModel") != -1) {
+                const timeLimit = this.state.currentMission.endingCondition as TimeLimit;
+                const start = new Date(missionProgression.startDate);
+                var timer = timeLimit.minutes;
+                timer = timer * 60;
+                const startInSeconds = start.getHours() * 60 + start.getMinutes() * 60 + start.getSeconds();
+                const endInSeconds = startInSeconds + timer;
+                const now = new Date();
+                var nowInSeconds = now.getHours() * 60 + now.getMinutes() * 60 + now.getSeconds();
+                var secRestante = endInSeconds - nowInSeconds;
+                if (secRestante > 0) {
+                    var minRestante = secRestante / 60;
+                    minRestante = Math.trunc(minRestante);
+                    secRestante = secRestante - (minRestante * 60);
+                    await this.setState({ minutes: minRestante, seconds: secRestante, timer: timeLimit.minutes });
+                    this.timer();
+                }
+                else {
+                    await MissionsApi.timerIsEnd(this.state.currentMission?.id);
+                }
+            }
+        }
     }
-
     async setPosition() {
 
         var lastPos: MapPosition = JSON.parse(localStorage.getItem("mapPosition"));
@@ -139,10 +176,8 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                 var date = new Date(lastPos.Date as any);
                 if (date >= now) {
                     await this.state.mapRef.current.leafletElement.setView([lastPos.Latitude, lastPos.Longitude], lastPos.Zoom);
-                    console.log([lastPos.Latitude, lastPos.Longitude], lastPos.Zoom);
                 }
                 else {
-
                     await this.state.mapRef.current.leafletElement.panTo([this.state.userPosition.coords.latitude, this.state.userPosition.coords.longitude]);
                 }
             }
@@ -164,7 +199,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         if (this.positionWatcher) {
             navigator.geolocation.clearWatch(this.positionWatcher);
         }
-
+        clearTimeout(this.myInterval)
     }
 
     async onMapClicked(e: { latlng: LatLng }) {
@@ -247,10 +282,196 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
     }
 
+    async setZoneForMission() {
+        const mission = this.state.currentMission;
+        if (mission.restrictedArea != null && mission.restrictedArea != undefined) {
+            if ((mission.restrictedArea as CircleAreaModel).center != null) {
+                const model = mission.restrictedArea as CircleAreaModel;
+                await this.setState({ circle: model });
+            }
+            else {
+                const model = mission.restrictedArea as PolygonArea;
+                await this.setState({ polygon: model });
+            }
+        }
+    }
+    checkIfObservationIsInMission(observation: ObservationModel) {
+        if (this.state.currentMission != null) {
+            if (this.state.currentMission.$type.indexOf("IdentificationMissionModel") != -1 && observation.isCertain) {
+                const mission = this.state.currentMission as IdentificationMissionModel;
+                if (mission.observationIdentified != null && mission.observationIdentified.length > 0) {
+                    if (mission.observationIdentified.includes(observation.id)) {
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+                if (mission.restrictedArea != null && mission.restrictedArea != undefined) {
+                    if (!this.concernByZone(mission, observation)) {
+                        return false;
+                    }
+                }
+                if (mission.restriction != null) {
+                    if (mission.restriction.species != "") {
+                        if (!observation.observationStatements.some(x => x.speciesName == mission.restriction.species)) {
+                            return false;
+                        }
+                    }
+                    if (mission.restriction.species == "" && mission.restriction.genus != "") {
+                        if (!observation.observationStatements.some(x => x.genus == mission.restriction.genus)) {
+                            return false;
+                        }
+                    }
+                }
+                if (this.state.history != null) {
+                    if (this.state.history.some(x => x.observationId == observation.id && x.recognition == true)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            else if (this.state.currentMission.$type.indexOf("VerificationMissionModel") != -1) {
+                const mission = this.state.currentMission as VerificationMissionModel;
+                if (mission.restrictedArea != null && mission.restrictedArea != undefined) {
+                    if (!this.concernByZone(mission, observation)) {
+                        return false;
+                    }
+                }
+                if (mission.restriction != null) {
+                    if (mission.restriction.species != "") {
+                        if (!observation.observationStatements.some(x => x.speciesName == mission.restriction.species)) {
+                            return false;
+                        }
+                    }
+                    if (mission.restriction.species == "" && mission.restriction.genus != "") {
+                        if (!observation.observationStatements.some(x => x.genus == mission.restriction.genus)) {
+                            return false;
+                        }
+                    }
+                }
+                if (mission.observationWithPics) {
+                    if (observation.pictures == null || observation.pictures.length <= 0) {
+                        return false;
+                    }
+                }
+                if (mission.unreliableObservation) {
+                    if (!observation.isIdentified) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+    isMarkerInsidePolygon(lat, lng, poly) {
+        var polyPoints = poly.getLatLngs();
+        var x = lat
+        var y = lng;
+        var inside = false;
 
+        for (var ii = 0; ii < poly.getLatLngs().length; ii++) {
+            var polyPoints = poly.getLatLngs()[ii];
+            for (var i = 0, j = polyPoints.length - 1; i < polyPoints.length; j = i++) {
+                var xi = polyPoints[i].lat, yi = polyPoints[i].lng;
+                var xj = polyPoints[j].lat, yj = polyPoints[j].lng;
+
+                var intersect = ((yi > y) != (yj > y))
+                    && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+                if (intersect) inside = !inside;
+            }
+        }
+        return inside;
+    }
+    concernByZone(miss: MissionModel, observation: ObservationModel) {
+        var mission;
+        if (miss.$type == "VerificationMissionModel") {
+            mission = miss as VerificationMissionModel;
+        }
+        else if (miss.$type == "IdentificationMissionModel") {
+            mission = miss as IdentificationMissionModel;
+        }
+        if ( mission.restrictedArea != null && mission.restrictedArea != undefined) {
+            if ((mission.restrictedArea as CircleAreaModel).center != null) {
+                const circle = mission.restrictedArea as CircleAreaModel;
+                var cir = L.circle(latLng(circle.center.latitude, circle.center.longitude), circle.radius);
+                var circleCenterPoint = cir.getLatLng();
+                return (circleCenterPoint.distanceTo(latLng(observation.latitude, observation.longitude)) <= circle.radius);
+            }
+            else {
+                const polygon = mission.restrictedArea as PolygonArea;
+                var poly = L.polygon(polygon.polygon.map(p => latLng(p.latitude, p.longitude)));
+                return this.isMarkerInsidePolygon(observation.latitude, observation.longitude, poly);
+            }
+        }
+
+    }
+
+    checkConditionEnding() {
+        if (this.state.currentMission != null && this.state.missionProgression != null) {
+            if (this.state.currentMission.endingCondition.$type.indexOf("NumberOfActionsModel") != -1) {
+                const nbActions = this.state.currentMission.endingCondition as NumberOfActions;
+                const progression = this.state.missionProgression.progression ? this.state.missionProgression.progression : 0;
+                return progression + "/" + nbActions.number;
+            }
+            else {
+                const seconds = this.state.seconds;
+                if (seconds < 10) {
+                    return this.state.minutes + ":0" + seconds;
+                }
+                else {
+                    return this.state.minutes + ":" + seconds;
+                }
+            }
+        }
+    }
+    IsMissionIdentification() {
+        if (this.state.currentMission != null) {
+            if (this.state.currentMission.$type.indexOf("IdentificationMissionModel") != -1) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+    async timer() {
+        this.myInterval = setTimeout(() => {
+            const { seconds, minutes } = this.state;
+            if (seconds > 0) {
+                this.setState(({ seconds }) => ({
+                    seconds: seconds - 1
+                }))
+            }
+            if (seconds === 0) {
+                if (minutes === 0) {
+                    clearTimeout(this.myInterval)
+                } else {
+                    this.setState(({ minutes }) => ({
+                        minutes: minutes - 1,
+                        seconds: 59
+                    }))
+                }
+            }
+            this.timer();
+        }, 1000);
+        if (this.state.minutes == 0 && this.state.seconds == 0) {
+            clearTimeout(this.myInterval);
+            NotifyHelper.sendInfoNotif("Le temps est écoulé");
+            await MissionsApi.timerIsEnd(this.state.currentMission?.id);
+            await this.loadData();
+        }
+    }
+    async setZoom(zoom: number) {
+        await this.setState({ zoomLevel: zoom });
+    }
     render() {
 
         const { classes } = this.props;
+        const { minutes, seconds } = this.state;
 
         const position = this.state.userPosition && { lat: this.state.userPosition.coords.latitude, lng: this.state.userPosition.coords.longitude };
 
@@ -264,12 +485,12 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         className={clsx(classes.map)}
                         style={{ "height": window.innerHeight - 180 + "px" }}
                         center={position}
-                        zoom={21}
+                        zoom={this.state.zoomLevel}
                         zoomSnap={0.5}
                         minZoom={5}
                         onclick={(e) => this.onMapClicked(e)}
-                        onmoveend={() => this.setLastPosition(this.state.mapRef.current.leafletElement.getCenter().lat, this.state.mapRef.current.leafletElement.getCenter().lng, this.state.mapRef.current.leafletElement.getZoom())}
-                        setView
+                        ondragend={() => this.setLastPosition(this.state.mapRef.current.leafletElement.getCenter().lat, this.state.mapRef.current.leafletElement.getCenter().lng, this.state.mapRef.current.leafletElement.getZoom())}
+                        onzoomend={() => this.setZoom(this.state.mapRef.current.leafletElement.getZoom())}
                     >
                         <TileLayer
                             url={this.getTilesUrl()}
@@ -282,23 +503,45 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         <Marker
                             position={{ lat: this.state.userPosition.coords.latitude, lng: this.state.userPosition.coords.longitude }}
                         />
+                        {
+                            this.state.circle &&
+                            <Circle
+                                center={[this.state.circle.center.latitude, this.state.circle.center.longitude]}
+                                radius={this.state.circle.radius}
+                                stroke-opacity={0.5}
+                                color={"orange"}
+                                fillOpacity={0}
+                                interactive={false}
+                            />
+                        }
+                        {
+                            this.state.polygon &&
+                            <Polygon
+                                positions={this.state.polygon.polygon.map(p => latLng(p.latitude, p.longitude))}
+                                stroke-opacity={0.5}
+                                color={"orange"}
+                                fillOpacity={0}
+                                interactive={false}
+
+                            />
+                        }
 
                         {
                             this.state.observations && this.state.observations.map((observation) => {
                                 return (
                                     <Circle
                                         key={observation.id}
-                                        fillOpacity={this.getOppacity(observation)}
+                                        fillOpacity={this.checkIfObservationIsInMission(observation) ? 0 : this.getOppacity(observation)}
                                         center={{ lat: observation.latitude, lng: observation.longitude }}
                                         radius={6}
-                                        color={this.getColor(observation)}
+                                        color={this.checkIfObservationIsInMission(observation) ? "red" : this.getColor(observation)}
                                         className={clsx(classes.imageClignote)}
-                                        onclick={() => this.props.history.push({ pathname: `/observation/${observation.id}` })}
+                                        onclick={this.checkIfObservationIsInMission(observation) && this.IsMissionIdentification() ? (() => this.props.history.push({ pathname: `/new-identification-mission/${observation.id}` })) : (() => this.props.history.push({ pathname: `/observation/${observation.id}` }))}
+
                                     />
                                 )
                             })
                         }
-
                     </Map>
 
                 }
@@ -346,13 +589,11 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         <Icon className="fas fa-sync fa-spin fa-fw" /> {t.__("Chargement...")}
                     </Box>
                 }
-                {this.state.currentActivity != null &&
-                    <Box className={clsx(classes.missionBox)}>{this.state.currentActivity.instructions.long}
-                        {this.state.currentActivity.endConditions && this.state.currentActivity.endConditions.length > 0 && this.state.currentActivity.endConditions[0] && this.state.currentActivity.endConditions[0].actionCount != null &&
-                            <div>{this.state.missionProgression.progression ?? 0}/{this.state.currentActivity.endConditions[0].actionCount}</div>
-                        }
-                    </Box>
-                }
+                <Box className={clsx(classes.missionBox)}>
+                    {this.state.currentMission != null && this.state.currentMission != undefined ? (<div style={{ textAlign: "center" }}><p>{this.state.currentMission.description}</p> <p>{this.checkConditionEnding()}</p></div>) : (<div>Aucune mission séléctionnée</div>)}
+
+                </Box>
+
 
             </Box>
         )

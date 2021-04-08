@@ -58,6 +58,11 @@ namespace Business
             return await this.DataContext.Observations.Find(obs => obs.UserId == userId).ToListAsync();
         }
 
+        public async Task<IEnumerable<Observation>> GetObservationsByIds(string[] observationIds)
+        {
+            return await this.DataContext.Observations.Find(obs => observationIds.Contains( obs.UserId )).ToListAsync();
+        }
+
         public string[] GetAllUserIdForObservation(Observation obs)
         {
             List<string> ids = new List<string>();
@@ -165,9 +170,11 @@ namespace Business
                 await this.AddExplorationPointsForNewObservation(newObservation);
 
 
-                var validator = await MissionValidator.GetValidatorFromActivity(this.ServiceProvider, user);
-                await validator.UpdateActivityProgression();
-
+                var validator = await MissionValidatorFactory.GetValidator(this.ServiceProvider, user);
+                if (validator != null)
+                {
+                    await validator?.UpdateMissionProgression(newObservation, statement, ActionType.CreateObservation);
+                }
             }
             catch
             {
@@ -219,8 +226,11 @@ namespace Business
             await this.CalculateKnowledegePoints(observationId, statementId, confirmation.Id);
             await this.CheckObservationIsIdentify(existingObservation.Id);
             User user = await this.UsersManager.SelectAsync(userId);
-            var validator = await MissionValidator.GetValidatorFromActivity(this.ServiceProvider, user);
-            await validator.UpdateActivityProgression();
+            var validator = await MissionValidatorFactory.GetValidator(this.ServiceProvider, user);
+            if (validator != null)
+            {
+                await validator?.UpdateMissionProgression(existingObservation, statement, ActionType.ConfirmStatement);
+            }
             //TODO voir calcul de points
         }
 
@@ -272,8 +282,12 @@ namespace Business
             await this.CalculateKnowledegePoints(observationId, statement.Id, null);
             await this.CheckObservationIsIdentify(existingObservation.Id);
             User user = await this.UsersManager.SelectAsync(userId);
-            var validator = await MissionValidator.GetValidatorFromActivity(this.ServiceProvider, user);
-            await validator.UpdateActivityProgression();
+            var validator = await MissionValidatorFactory.GetValidator(this.ServiceProvider, user);
+            if (validator != null)
+            {
+                await validator?.UpdateMissionProgression(existingObservation, statement, ActionType.CreateStatement);
+            }
+            
         }
         public async Task AddPictures(string observationId, string[] pictures)
         {
@@ -602,7 +616,7 @@ namespace Business
 
             await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
         } 
-        public async Task SetObservationToCertainAysnc(string observationId, string userName)
+        public async Task SetObservationToCertainAysnc(string observationId,string statementId, string userName)
         {
             var existingObservation = await this.GetUserObservationbyId(observationId);
             if (existingObservation == null)
@@ -611,6 +625,7 @@ namespace Business
             }
             existingObservation.IsCertain = true;
             existingObservation.IsCertainBy = userName;
+            existingObservation.StatementValidatedId = statementId;
 
             await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
         }
