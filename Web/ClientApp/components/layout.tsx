@@ -26,6 +26,7 @@ import { TrophyPageConfig } from "../pages/score/trophy-page-config";
 import { Confirm } from "./confirm";
 import { UserRole } from "../services/generated/user-role";
 import { UserEditionModel } from "../services/generated/user-edition-model";
+import { CreateMissionComponentConfig } from "../pages/Missions/create-mission-config";
 
 const styles = (theme: Theme) => createStyles({
     menu: {
@@ -177,6 +178,7 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
             ArboretumPageConfig,
             ObservationsPageConfig,
             DeterminationKeyPageConfig,
+            CreateMissionComponentConfig
         ]
         if (matched) {
             return routesConfig.find(route => route.routes.some(r => r.path === matched.route.path)) != null;

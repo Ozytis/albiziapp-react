@@ -67,7 +67,7 @@ class MapPageState {
     observations: ObservationModel[];
     currentMission: MissionModel;
     missionProgression: MissionProgressionModel;
-    zoomLevel: number = 0;
+    zoomLevel: number = 19;
     mapRef = createRef<Map>();
     isLayerOn: boolean;
     layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

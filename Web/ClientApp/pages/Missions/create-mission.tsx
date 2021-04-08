@@ -45,6 +45,9 @@ const styles = (theme: Theme) => createStyles({
         flexBasis: "100%",
         width: "100%"
     },
+    marginTop2: {
+        marginTop: "2rem"
+    }
 });
 
 interface CreateMissionProps extends RouteComponentProps, IPropsWithAppContext, WithStyles<typeof styles> {
@@ -163,7 +166,7 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
         console.log(this.state.errors?.length);
         if (this.state.errors?.length <= 0 || this.state.errors == undefined || this.state.errors == null) {
             console.log("pas d'erreur ca passe");
-        MissionsApi.createNewMission(this.state.model);
+            MissionsApi.createNewMission(this.state.model);
         }
     }
     async checkModel() {
@@ -174,10 +177,10 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
                 errors.push("-Le nombre d'action n'est pas renseigné");
             }
         }
-        else if(this.state.model.endingCondition.$type.indexOf("TimeLimitModel") != -1) {
+        else if (this.state.model.endingCondition.$type.indexOf("TimeLimitModel") != -1) {
             console.log("timelimit")
             const timeLimit = this.state.model.endingCondition as TimeLimit;
-            if (timeLimit.minutes == null||timeLimit.minutes <= 0) {
+            if (timeLimit.minutes == null || timeLimit.minutes <= 0) {
                 errors.push("-Le temps limite n'est pas renseigné");
             }
         }
@@ -192,13 +195,13 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
                 }
             }
         }
-        if (this.state.model.title == null ||this.state.model.title == "") {
+        if (this.state.model.title == null || this.state.model.title == "") {
             errors.push("-Le titre n'est pas renseigné");
         }
         if (this.state.model.description == null || this.state.model.description == "") {
             errors.push("-La description n'est pas renseigné");
         }
-        if (this.state.model.restrictedArea != null && this.state.model.restrictedArea!=undefined) {
+        if (this.state.model.restrictedArea != null && this.state.model.restrictedArea != undefined) {
             if (this.state.model.restrictedArea.$type.indexOf("CircleAreaModel") != -1) {
                 const circle = this.state.model.restrictedArea as CircleAreaModel;
                 if (circle.radius == null || circle.radius <= 0) {
@@ -235,9 +238,7 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
                 {this.state.errors &&
                     <ErrorSummary errors={this.state.errors} />
                 }
-                <h2>Création d'une mission</h2>
-                <Box className={clsx(classes.root)} >
-
+                <Box  >
                     <Typography variant="h6" className={clsx(classes.sectionHeading)}>
                         {t.__("Type de mision")}
                     </Typography>
@@ -403,10 +404,10 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
                         }
                     </Box>
 
-                    <Button color="primary" variant="contained" className="button button-primary  button-block mb-1"
+                    <Button color="primary" variant="contained" className={clsx(classes.marginTop2,"button button-primary  button-block mb-1 ")} 
                         onClick={() => this.send()}>
                         Envoyer
-                                    </Button>
+                    </Button>
                 </Box>
 
             </Container >

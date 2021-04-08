@@ -4,7 +4,7 @@ import { CreateMissionPage } from "./create-mission";
 export const CreateMissionComponentConfig: PageConfig = {
     settings: {
         authenticationRequired: true,
-        title: "Identifier l'arbre"
+        title: "Nouvelle mission"
     },
     routes: [{
         path: '/create-mission',
