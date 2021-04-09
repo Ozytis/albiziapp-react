@@ -448,11 +448,12 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
 
                         {this.showConfident() &&
                             <>
+                                {/*
                                 <Typography variant="h6" className={clsx(classes.sectionHeading)}>
                                     {t.__("Confiance")}
                                 </Typography>
 
-                            {/*
+                            
                                     <RadioGroup value={model.isConfident} onChange={(event) => { this.updateModel("isConfident", event.target.value) }} >
                                         <FormControlLabel value={0} control={<Radio checked={model.isConfident == 0} />} label={t.__("Peu confiant")} className={clsx(classes.label)} />
                                         <FormControlLabel value={1} control={<Radio checked={model.isConfident == 1} />} label={t.__("Moyennement confiant")} className={clsx(classes.label)} />
