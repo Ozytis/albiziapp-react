@@ -313,13 +313,13 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                     }
                 }
                 if (mission.restriction != null) {
-                    if (mission.restriction.species != "") {
-                        if (!observation.observationStatements.some(x => x.speciesName == mission.restriction.species)) {
+                    if (mission.restriction.value != "") {
+                        if (!observation.observationStatements.some(x => x.speciesName == mission.restriction.value)) {
                             return false;
                         }
                     }
-                    if (mission.restriction.species == "" && mission.restriction.genus != "") {
-                        if (!observation.observationStatements.some(x => x.genus == mission.restriction.genus)) {
+                    if (mission.restriction.value == "" && mission.restriction.value != "") {
+                        if (!observation.observationStatements.some(x => x.genus == mission.restriction.value)) {
                             return false;
                         }
                     }
@@ -339,13 +339,13 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                     }
                 }
                 if (mission.restriction != null) {
-                    if (mission.restriction.species != "") {
-                        if (!observation.observationStatements.some(x => x.speciesName == mission.restriction.species)) {
+                    if (mission.restriction.value != "") {
+                        if (!observation.observationStatements.some(x => x.speciesName == mission.restriction.value)) {
                             return false;
                         }
                     }
-                    if (mission.restriction.species == "" && mission.restriction.genus != "") {
-                        if (!observation.observationStatements.some(x => x.genus == mission.restriction.genus)) {
+                    if (mission.restriction.value == "" && mission.restriction.value != "") {
+                        if (!observation.observationStatements.some(x => x.genus == mission.restriction.value)) {
                             return false;
                         }
                     }

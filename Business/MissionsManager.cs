@@ -190,8 +190,6 @@ namespace Business
             {
                 Type = RestrictionType.ExactSpecies,
                 Value = "Abricotier commun",
-                Genus = "Prunus",
-                Species = "Prunus Armeniaca"
             };
             await this.CreateMissionAsync(mission3);
         } 
@@ -234,8 +232,6 @@ namespace Business
             {
                 Type = RestrictionType.ExactSpecies,
                 Value = "Abricotier commun",
-                Genus = "Prunus",
-                Species = "Prunus Armeniaca"
             };
             await this.CreateMissionAsync(mission2);
         }

@@ -9,8 +9,7 @@ namespace Entities
         public RestrictionType Type { get; set; }
 
         public string Value { get; set; }
-        public string Genus { get; set; }
-        public string Species { get; set; }
+
 
     }
 }

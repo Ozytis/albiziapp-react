@@ -1,4 +1,5 @@
 ﻿using Entities;
+using Ozytis.Common.Core.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,7 +72,7 @@ namespace Business.MissionValidation
                 return false;
             }
             IdentificationMission identifyMission = (IdentificationMission)mission;
-            if (identifyMission.Restriction == null)
+            if (identifyMission.Restriction == null || string.IsNullOrEmpty(identifyMission.Restriction.Value))
             {
                 if(!(observationStatement.Genus == identification.Genus && observationStatement.SpeciesName == identification.SpeciesName))
                 {
@@ -80,16 +81,17 @@ namespace Business.MissionValidation
             }
             else
             {
-                if(identifyMission.Restriction.Type == RestrictionType.ExactGender)
+                var value = identifyMission.Restriction.Value.ToLowerInvariant().RemoveDiacritics().Trim();
+                if (identifyMission.Restriction.Type == RestrictionType.ExactGender)
                 {
-                    if(identifyMission.Restriction.Genus != identification.Genus)
+                    if(value != identification.Genus?.ToLowerInvariant().RemoveDiacritics().Trim() && value != identification.CommonGenus?.ToLowerInvariant().RemoveDiacritics().Trim())
                     {
                         isIdentified = false;
                     }
                 }
                 else if(identifyMission.Restriction.Type == RestrictionType.ExactSpecies)
                 {
-                    if(!(identifyMission.Restriction.Genus == identification.Genus && identifyMission.Restriction.Species == identification.SpeciesName))
+                    if (value != identification.SpeciesName?.ToLowerInvariant().RemoveDiacritics().Trim() && value != identification.CommonSpeciesName?.ToLowerInvariant().RemoveDiacritics().Trim())
                     {
                         isIdentified = false;
                     }

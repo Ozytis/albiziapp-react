@@ -50,11 +50,9 @@ export enum NewObservationMissionType {
     ExactSpecies = 3
 }
 
-export interface Restriction {
+export class Restriction {
     type: RestrictionType;
     value: string;
-    genus: string;
-    species: string;
 }
 export interface EndingCondition {
     $type: string;

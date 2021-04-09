@@ -115,8 +115,6 @@ namespace Web.Mappings
             {
                 Type = (RestrictionTypeModel)restriction.Type,
                 Value = restriction.Value,
-                Genus = restriction.Genus,
-                Species = restriction.Species
             };
         }
 
@@ -169,8 +167,6 @@ namespace Web.Mappings
             {
                 Type = (RestrictionType)restriction.Type,
                 Value = restriction.Value,
-                Genus = restriction.Genus,
-                Species = restriction.Species
             };
         }
 
