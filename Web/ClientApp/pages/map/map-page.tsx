@@ -125,7 +125,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             var obs = await ObservationsApi.getNearestObservations(this.state.userPosition.coords.latitude, this.state.userPosition.coords.longitude);
             this.setState({ observations: obs })
         });
-        this.hub.start();
+        await this.hub.start();
         await this.loadData();
     }
     async loadData() {
@@ -168,18 +168,26 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
         var now = new Date();
         now = new Date(now.getTime() - 30 * 60000);
-
+    
         if (this.state.mapRef.current != null) {
-            if (lastPos == null) {
-                await this.state.mapRef.current.leafletElement.panTo([this.state.userPosition.coords.latitude, this.state.userPosition.coords.longitude]);
+            let lat = this.state.userPosition.coords.latitude, lng = this.state.userPosition.coords.longitude;
+            if (lastPos == null) {                
+                await this.state.mapRef.current.leafletElement.panTo([lat, lng]);              
             } else {
                 var date = new Date(lastPos.Date as any);
                 if (date >= now) {
-                    await this.state.mapRef.current.leafletElement.setView([lastPos.Latitude, lastPos.Longitude], lastPos.Zoom);
+                    lat = lastPos.Latitude;
+                    lng = lastPos.Longitude;
+                    await this.state.mapRef.current.leafletElement.setView([lastPos.Latitude, lastPos.Longitude], lastPos.Zoom);           
                 }
                 else {
-                    await this.state.mapRef.current.leafletElement.panTo([this.state.userPosition.coords.latitude, this.state.userPosition.coords.longitude]);
+                    await this.state.mapRef.current.leafletElement.panTo([lat, lng]);
                 }
+            }
+            if (this.hub.state == signalR.HubConnectionState.Connected) {
+                await this.hub.send("SetPosition", lat, lng);
+                var obs = await ObservationsApi.getNearestObservations(lat, lng);
+                this.setState({ observations: obs })
             }
         }
     }
@@ -248,6 +256,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
         var now = new Date();
         localStorage.setItem("mapPosition", JSON.stringify({ Latitude: lat, Longitude: lng, Zoom: zoom, Date: now } as MapPosition));
+
         if (this.hub.state == signalR.HubConnectionState.Connected) {
             this.hub.send("SetPosition", lat, lng);
         }
@@ -267,6 +276,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
     goToUserLocation() {
 
         this.state.mapRef.current.leafletElement.setView([this.state.userPosition.coords.latitude, this.state.userPosition.coords.longitude], 18);
+        this.loadObservations();
     }
 
     changeLayer() {
@@ -284,7 +294,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
     async setZoneForMission() {
         const mission = this.state.currentMission;
-        if (mission.restrictedArea != null && mission.restrictedArea != undefined) {
+        if (mission != null && mission.restrictedArea != null && mission.restrictedArea != undefined) {
             if ((mission.restrictedArea as CircleAreaModel).center != null) {
                 const model = mission.restrictedArea as CircleAreaModel;
                 await this.setState({ circle: model });
