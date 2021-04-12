@@ -39,29 +39,28 @@ namespace Business.MissionValidation
             {
                 return false;
             }
-
             switch (this.Mission.Type)
             {
                 case NewObservationMissionType.DifferentGenders:
-                    if (observationsFromHistory.Any(x => x.ObservationStatements.Any(s => s.UserId == User.OsmId && s.CommonGenus == statement.CommonGenus)))
+                    if (observationsFromHistory.Any(x => x.ObservationStatements.Any(s => s.UserId == User.OsmId && s.CommonGenus.ToLowerInvariant().RemoveDiacritics() == statement.CommonGenus.ToLowerInvariant().RemoveDiacritics())))
                     {
                         return false;
                     }
                     break;
                 case NewObservationMissionType.DifferentSpecies:
-                    if (observationsFromHistory.Any(x => x.ObservationStatements.Any(s => s.UserId == User.OsmId && s.CommonSpeciesName == statement.CommonSpeciesName)))
+                    if (observationsFromHistory.Any(x => x.ObservationStatements.Any(s => s.UserId == User.OsmId && s.CommonSpeciesName.ToLowerInvariant().RemoveDiacritics() == statement.CommonSpeciesName.ToLowerInvariant().RemoveDiacritics())))
                     {
                         return false;
                     }
                     break;
                 case NewObservationMissionType.ExactSpecies:
-                    if (statement.CommonSpeciesName.ToLowerInvariant().RemoveDiacritics() != this.Mission.Value.ToLowerInvariant().RemoveDiacritics() && statement.SpeciesName.ToLowerInvariant().RemoveDiacritics() != this.Mission.Value.ToLowerInvariant().RemoveDiacritics())
+                    if (statement.CommonSpeciesName.ToLowerInvariant().RemoveDiacritics() != this.Mission.Value.ToLowerInvariant().RemoveDiacritics() || statement.SpeciesName.ToLowerInvariant().RemoveDiacritics() != this.Mission.Value.ToLowerInvariant().RemoveDiacritics())
                     {
                         return false;
                     }
                     break;
                 case NewObservationMissionType.ExactGender:
-                    if (statement.CommonGenus.ToLowerInvariant().RemoveDiacritics() != this.Mission.Value.ToLowerInvariant().RemoveDiacritics() && statement.Genus.ToLowerInvariant().RemoveDiacritics() != this.Mission.Value.ToLowerInvariant().RemoveDiacritics())
+                    if (!(statement.CommonGenus.RemoveDiacritics().ToLowerInvariant() == this.Mission.Value.RemoveDiacritics().ToLowerInvariant() || statement.Genus.RemoveDiacritics().ToLowerInvariant() == this.Mission.Value.RemoveDiacritics().ToLowerInvariant()))
                     {
                         return false;
                     }

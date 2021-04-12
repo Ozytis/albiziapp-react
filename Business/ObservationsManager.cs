@@ -47,7 +47,7 @@ namespace Business
         public async Task<IEnumerable<Observation>> GetNearestObservations(double latitude, double longitude)
         {
             var collection = this.DataContext.Observations;
-            var point = GeoJson.Point(GeoJson.Geographic(longitude, latitude));            
+            var point = GeoJson.Point(GeoJson.Geographic(longitude, latitude));
             var filter = Builders<Observation>.Filter.Near(o => o.Coordinates, point, 15 * 1000);
 
             return await collection.Find(filter).ToListAsync();
@@ -60,7 +60,7 @@ namespace Business
 
         public async Task<IEnumerable<Observation>> GetObservationsByIds(string[] observationIds)
         {
-            return await this.DataContext.Observations.Find(obs => observationIds.Contains( obs.UserId )).ToListAsync();
+            return await this.DataContext.Observations.Find(obs => observationIds.Contains(obs.UserId)).ToListAsync();
         }
 
         public string[] GetAllUserIdForObservation(Observation obs)
@@ -119,7 +119,7 @@ namespace Business
 
                 newObservation.Coordinates = new GeoJsonPoint<GeoJson2DGeographicCoordinates>(new GeoJson2DGeographicCoordinates(longitude, latitude));
                 newObservation.TreeSize = (TreeSize?)treeSize;
-                
+
 
                 if (!string.IsNullOrEmpty(genus))
                 {
@@ -287,7 +287,7 @@ namespace Business
             {
                 await validator?.UpdateMissionProgression(existingObservation, statement, ActionType.CreateStatement);
             }
-            
+
         }
         public async Task AddPictures(string observationId, string[] pictures)
         {
@@ -615,8 +615,8 @@ namespace Business
             existingObservation.TreeSize = (TreeSize?)treeSize;
 
             await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
-        } 
-        public async Task SetObservationToCertainAysnc(string observationId,string statementId, string userName)
+        }
+        public async Task SetObservationToCertainAysnc(string observationId, string statementId, string userName)
         {
             var existingObservation = await this.GetUserObservationbyId(observationId);
             if (existingObservation == null)
@@ -657,25 +657,29 @@ namespace Business
             using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
             var existingObservation = await this.GetUserObservationbyId(observationId);
             var existingStatement = existingObservation.ObservationStatements.Find(s => s.Id == editStatement.Id);
+            var os = existingObservation.ObservationStatements;
 
-
-            if (existingStatement == null )
+            if (existingStatement == null)
             {
                 throw new BusinessException("Ce relevé n'existe pas");
             }
-            foreach(ObservationStatement os in existingObservation.ObservationStatements)
+            if (existingObservation.ObservationStatements.Count() > 1)
             {
-                if(string.IsNullOrEmpty(os.CommonSpeciesName)||string.IsNullOrEmpty(os.SpeciesName))
+                if (editStatement.SpeciesName != null)
                 {
-                    if(os.Genus==editStatement.Genus && os.CommonGenus == editStatement.CommonGenus)
+                    if (os.Any(x => x.SpeciesName == editStatement.SpeciesName))
                     {
-                        throw new BusinessException("Ce relevé existe deja");
+                        throw new BusinessException("Un relevé avec cette espèce existe déja vous pouvez le confirmer");
                     }
                 }
-                else if(os.CommonSpeciesName==editStatement.CommonSpeciesName && os.SpeciesName == editStatement.SpeciesName)
+                else if(editStatement.SpeciesName == null && editStatement.Genus != null)
                 {
-                    throw new BusinessException("Ce relevé existe deja, vous pouvez le confirmer");
+                    if(os.Any(x => x.Genus == editStatement.Genus))
+                    {
+                        throw new BusinessException("Un relevé avec ce genre existe déja, préciser l'espèce");
+                    }
                 }
+
             }
             try
             {
@@ -700,13 +704,13 @@ namespace Business
                 await session.AbortTransactionAsync();
                 throw;
             }
-            
+
             return existingObservation;
         }
         public async Task DeleteObservationStatementAsync(string observationId, string statementId, string currentUserId)
         {
             Observation observation = await this.DataContext.Observations.Find(o => o.Id == observationId).FirstOrDefaultAsync();
-            
+
 
             observation.ObservationStatements.Remove(observation.ObservationStatements.Find(o => o.Id == statementId));
 

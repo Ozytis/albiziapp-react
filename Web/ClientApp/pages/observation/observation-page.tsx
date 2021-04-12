@@ -670,7 +670,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                             <span className={clsx(classes.bold)}>
                                 Identification:(
                                 {this.state.observation.observationStatements &&
-                                    <span style={{ fontWeight: "normal", textDecoration: "underline", cursor:"pointer" }} onClick={() => this.goTo(`/history/${observation.id}`)}>{this.state.observation.observationStatements.length}</span>
+                                    <span style={{ fontWeight: "normal", textDecoration: "underline", cursor: "pointer" }} onClick={() => this.goTo(`/history/${observation.id}`)}> {t.__("Historique: ")} {this.state.observation.observationStatements.length}</span>
                                 }
                                 )
                             </span>

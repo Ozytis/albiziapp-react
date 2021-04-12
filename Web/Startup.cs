@@ -37,6 +37,7 @@ namespace Web
 
             MongoDBConfig config = new MongoDBConfig();
             this.Configuration.Bind("MongoDB", config);
+System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
             services.AddScoped<Entities.DataContext>((_) => new DataContext(config));
             services.AddScoped<UsersManager>();
@@ -88,6 +89,7 @@ namespace Web
                 endpoints.MapHub<NotifyHub>("/notifyhub");
                 endpoints.MapHub<PositionHub>("/positionhub");
             });
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
         }
 
         public void ConfigureSecurity(IServiceCollection services)
