@@ -235,6 +235,9 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
         if (this.state.errors?.length <= 0 || this.state.errors == undefined || this.state.errors == null) {
             console.log("pas d'erreur ca passe");
             MissionsApi.createNewMission(this.state.model);
+            this.props.history.replace({
+                pathname: "/"
+            })
         }
     }
     async checkModel() {
@@ -320,7 +323,7 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
                             {t.__("Effectuez des nouveaux relevés")}
                         </MenuItem>
                         <MenuItem key={`newObsType-${2}`} value={2} >
-                            {t.__("Vérifiez des relevés non certains")}
+                            {t.__("Vérifiez des relevés non fiables")}
                         </MenuItem>
                         <MenuItem key={`newObsType-${3}`} value={3} >
                             {t.__("Reconnaissez-vous ces arbres ?")}

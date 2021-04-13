@@ -93,6 +93,7 @@ class NewIdentificationMissionPageState {
     selectedspecies: SpeciesModel;
     history: MissionHistoryModel[];
     try = 0;
+    isRecognition: boolean;
 }
 
 class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificationMissionPageProps, NewIdentificationMissionPageState>{
@@ -111,7 +112,11 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
     async loadTry() {
         const history = await MissionsApi.getHistoryMission();
         var nbtry = history.filter(x => x.observationId == this.props.match.params["observationid"] && !x.recognition).length;
-        await this.setState({ history: history, try: nbtry });
+        var isRecognition = history.some(x => x.observationId == this.props.match.params["observationid"] && x.recognition);
+        if (isRecognition) {
+            var recognition = history.find(x => x.observationId == this.props.match.params["observationid"] && x.recognition);
+        }
+        await this.setState({ history: history, try: nbtry, isRecognition: isRecognition });
     }
     listener: () => Promise<void>;
 
@@ -259,86 +264,99 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
             <>
                 <Box className={clsx(classes.root)} >
 
-                    <Typography variant="h5" style={{ margin: "auto", textAlign: "center", color: "red" }}>
+                    <Typography variant="h5" style={{ margin: "auto", textAlign: "center", color: this.state.isRecognition ? "green" : "red" }}>
                         {t.__("Nombre d'essai " + this.state.try + "/3")}
                     </Typography>
 
                     <Typography variant="h6" className={clsx(classes.sectionHeading)}>
                         {t.__("Genre")}
                     </Typography>
+                    {!this.state.isRecognition &&
+                        <>
+                            <>
+                                <FormControl className={clsx(classes.formControl)}>
+                                    <Autocomplete
+                                        id="commonGenusSelect"
+                                        options={commonGenus}
+                                        getOptionLabel={(option: TreeGenusModel) => option?.commonGenus ?? ""}
+                                        renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}
+                                        value={this.state.selectedCommonGenus || ''}
+                                        onChange={(e, v) => {
+                                            this.updateCommonGenus((v as any)?.commonGenus);
+                                        }}
+                                        onClose={() => { this.blurField("commonGenusSelect"); }}
+                                    />
+                                </FormControl>
 
-                    <FormControl className={clsx(classes.formControl)}>
-                        <Autocomplete
-                            id="commonGenusSelect"
-                            options={commonGenus}
-                            getOptionLabel={(option: TreeGenusModel) => option?.commonGenus ?? ""}
-                            renderInput={(params) => <TextField {...params} label="Commun" variant="outlined" />}
-                            value={this.state.selectedCommonGenus || ''}
-                            onChange={(e, v) => {
-                                this.updateCommonGenus((v as any)?.commonGenus);
-                            }}
-                            onClose={() => { this.blurField("commonGenusSelect"); }}
-                        />
-                    </FormControl>
+                                <FormControl className={clsx(classes.formControl)}>
+                                    <Autocomplete
+                                        id="GenusSelect"
+                                        options={genus.sort((g1, g2) => g1.genus.localeCompare(g2.genus))}
+                                        getOptionLabel={(option: TreeGenusModel) => option?.genus ?? ""}
+                                        value={this.state.selectedGenus || ""}
+                                        renderInput={(params) => <TextField {...params} label="Latin" variant="outlined" />}
+                                        onChange={(e, v) => { this.updateGenus((v as any)?.genus); }}
+                                        onClose={() => { this.blurField("GenusSelect"); }}
+                                    />
 
-                    <FormControl className={clsx(classes.formControl)}>
-                        <Autocomplete
-                            id="GenusSelect"
-                            options={genus.sort((g1, g2) => g1.genus.localeCompare(g2.genus))}
-                            getOptionLabel={(option: TreeGenusModel) => option?.genus ?? ""}
-                            value={this.state.selectedGenus || ""}
-                            renderInput={(params) => <TextField {...params} label="Latin" variant="outlined" />}
-                            onChange={(e, v) => { this.updateGenus((v as any)?.genus); }}
-                            onClose={() => { this.blurField("GenusSelect"); }}
-                        />
+                                </FormControl>
+                            </>
 
-                    </FormControl>
+                            <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                                {t.__("Espèce")}
+                            </Typography>
 
-                    <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                        {t.__("Espèce")}
-                    </Typography>
+                            <FormControl className={clsx(classes.formControl)}>
+                                <Autocomplete
+                                    id="commonSpeciesSelect"
+                                    options={commonSpecies}
+                                    value={this.state.selectedCommonSpecies || ""}
+                                    getOptionLabel={(option: SpeciesModel) => option?.commonSpeciesName ?? ""}
+                                    renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}
+                                    onChange={(e, v) => { this.updateCommonSpecies((v as any)?.commonSpeciesName); }}
+                                    onClose={() => { this.blurField("commonSpeciesSelect"); }}
+                                />
+                            </FormControl>
 
-                    <FormControl className={clsx(classes.formControl)}>
-                        <Autocomplete
-                            id="commonSpeciesSelect"
-                            options={commonSpecies}
-                            value={this.state.selectedCommonSpecies || ""}
-                            getOptionLabel={(option: SpeciesModel) => option?.commonSpeciesName ?? ""}
-                            renderInput={(params) => <TextField {...params} label="Commune" variant="outlined" />}
-                            onChange={(e, v) => { this.updateCommonSpecies((v as any)?.commonSpeciesName); }}
-                            onClose={() => { this.blurField("commonSpeciesSelect"); }}
-                        />
-                    </FormControl>
+                            <FormControl className={clsx(classes.formControl)}>
+                                <Autocomplete
+                                    id="SpeciesSelect"
+                                    options={species.sort((s1, s2) => s1.speciesName.localeCompare(s2.speciesName))}
+                                    value={this.state.selectedspecies || ""}
+                                    getOptionLabel={(option: SpeciesModel) => option?.speciesName ?? ""}
+                                    renderInput={(params) => <TextField {...params} label="Latine" variant="outlined" />}
+                                    onChange={(e, v) => { this.updateSpecies((v as any)?.speciesName); }}
+                                    onClose={() => { this.blurField("SpeciesSelect"); }}
+                                />
 
-                    <FormControl className={clsx(classes.formControl)}>
-                        <Autocomplete
-                            id="SpeciesSelect"
-                            options={species.sort((s1, s2) => s1.speciesName.localeCompare(s2.speciesName))}
-                            value={this.state.selectedspecies || ""}
-                            getOptionLabel={(option: SpeciesModel) => option?.speciesName ?? ""}
-                            renderInput={(params) => <TextField {...params} label="Latine" variant="outlined" />}
-                            onChange={(e, v) => { this.updateSpecies((v as any)?.speciesName); }}
-                            onClose={() => { this.blurField("SpeciesSelect"); }}
-                        />
-
-                    </FormControl>
-                    {
-                        this.state.try < 3 &&
-                        <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.checkIdentification()}>
-                            <Loader loading={this.state.isProcessing} usualIcon="check" />
-                            {t.__("Valider")}
-                        </Button>
+                            </FormControl>
+                            {
+                                this.state.try < 3 &&
+                                <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.checkIdentification()}>
+                                    <Loader loading={this.state.isProcessing} usualIcon="check" />
+                                    {t.__("Valider")}
+                                </Button>
+                            }
+                        </>
+                    }
+                    {!this.state.isRecognition &&
+                        <></>
                     }
                     {
-                        this.state.try >= 3 &&
-                        <Typography variant="h6" style={{ margin: "auto", textAlign: "center"}}>
-                            {t.__("Vous n'avez plus d'essais possible")}
+                        (this.state.try >= 3 && !this.state.isRecognition) &&
+                        <Typography variant="h6" style={{ margin: "auto", textAlign: "center" }}>
+                            {t.__("Vous n'avez plus d'essais possibles")}
                         </Typography>
                     }
-                            <Button color="secondary" variant="contained" className={clsx(classes.buttons)} onClick={() => this.goBack()} fullWidth>
-                                <Undo />
-                                {t.__("Retour")}
-                            </Button>                       
+                    {this.state.isRecognition &&
+                        <Typography variant="h6" style={{ margin: "auto", textAlign: "center" }}>
+                            {t.__("Vous avez correctement identifié l'arbre.")}
+                        </Typography>
+                    }
+                    <Button color="secondary" variant="contained" className={clsx(classes.buttons)} onClick={() => this.goBack()} fullWidth>
+                        <Undo />
+                        {t.__("Retour")}
+                    </Button>
                 </Box>
             </>
         )

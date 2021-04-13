@@ -127,6 +127,7 @@ namespace Web.Controllers
                     MissionHistoryModel mhm = new MissionHistoryModel();
                     mhm.ObservationId = h.ObservationId;
                     mhm.Recognition = h.SuccessRecognition != null ? (bool)h.SuccessRecognition : false ;
+                    history.Add(mhm);
                 }
             }
                 return history.ToArray(); 

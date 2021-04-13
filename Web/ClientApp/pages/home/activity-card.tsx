@@ -83,6 +83,9 @@ class ActivityCardComponent extends BaseComponent<ActivityCardProps, ActivityCar
                         <Box width="100%" >
 
                             <Typography variant="caption" component="h2">
+                                {t.__(mission.title)}
+                            </Typography>
+                            <Typography variant="caption" component="h4">                              
                                 {t.__(mission.description)}
                             </Typography>
 
