@@ -65,5 +65,11 @@ namespace Business
 
             return Path.Combine(directory, fileName);
         }
+
+        public async Task<string> GetRealPath(string path)
+        {
+            string trueDirectory = Path.Combine(this.Configuration["ContentDir"], path);
+            return trueDirectory;
+        }
     }
 }

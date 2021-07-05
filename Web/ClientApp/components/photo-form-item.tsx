@@ -22,7 +22,8 @@ const styles = (theme: Theme) => createStyles({
     photoContent: {
         margin: "0 auto",
         marginTop: "8px",
-        width: "33vh",
+        minWidth: "15vh",
+        maxWidth: "33vh",
         height: "25vh",
         backgroundRepeat: "no-repeat",
         backgroundSize: "contain"
@@ -44,16 +45,13 @@ const styles = (theme: Theme) => createStyles({
         marginBottom: "10px"
     },
     btn: {
-        minWidth : "0px",
+        minWidth: "0px",
         marginLeft: "-15px",
         marginTop: "-20px",
         width: "20px",
         height: "20px"
-
-        }
-
+    }
 })
-
 
 interface PhotoFormItemProps extends WithStyles<typeof styles> {
     label: string;
@@ -61,6 +59,7 @@ interface PhotoFormItemProps extends WithStyles<typeof styles> {
     value: string[];
     onAdd: (photoData: any) => Promise<any>;
     onDelete: (index: any) => Promise<any>;
+    maxPhoto?: number;
 }
 
 class PhotoFormItemState {
@@ -75,7 +74,6 @@ class PhotoFormItemState {
 class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoFormItemState>{
     constructor(props: PhotoFormItemProps) {
         super(props, "photo-form-item", new PhotoFormItemState());
-
     }
 
     async takeSnapShot() {
@@ -92,17 +90,16 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
         this.videoStream.getTracks().forEach(function (track) {
             track.stop();
         });
-        
+
         await this.setState({ showCamera: false });
     }
 
     async takePicture(sourceType: string) {
-
         if (sourceType === "library") {
             this.controlPicker.click();
-        } else if (sourceType === "camera") {            
+        } else if (sourceType === "camera") {
             this.control.click();
-        } 
+        }
         else {
             await this.setState({ showCamera: true, showSnapShot: false });
 
@@ -115,8 +112,6 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
                     // video.src = window.URL.createObjectURL(stream);
                     this.video.srcObject = this.videoStream;
                     this.video.play();
-
-
                 }
             } catch (e) {
                 if (e.name == "NotAllowedError") {
@@ -130,23 +125,20 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
     }
 
     async onFileSelected(fileList: FileList) {
-
         if (this.state.loading || fileList.length === 0) {
             return;
         }
 
-        this.setState({ loading: true }).then(async() => {
-
+        this.setState({ loading: true }).then(async () => {
             const reader = new FileReader();
 
-            reader.onloadend =  result => {
+            reader.onloadend = result => {
                 this.setState({ loading: false, showSourceSelection: false });
                 this.props.onAdd((result.target as FileReader).result);
             };
             var compressFile = await compress(fileList[0], { maxWidth: 1200, outputFormat: 'jpeg', quality: 0.4 });
             reader.readAsDataURL(compressFile);
         });
-
     }
 
     control: HTMLInputElement;
@@ -163,8 +155,7 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
         await this.setState({ showCamera: false, showSnapShot: false, showSourceSelection: false });
     }
 
-    render() {
-
+    render() {     
         return (
             <div className="photo-form-item">
                 <div className="photo-form-item-preview">
@@ -176,13 +167,13 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
                         this.props.value && this.props.value.map((img, i) =>
                             <div key={"photoContent" + i} className={clsx("photo-content", this.props.classes.photoContent)} style={{ backgroundImage: `url("${img}")` }}>
                                 <Button variant="contained" color="secondary" className={clsx(this.props.classes.btn)} onClick={() => this.props.onDelete(i)} >
-                                   <Close />
+                                    <Close />
                                 </Button>
                             </div>
-                            
+
                         )
                     }
-                    {
+                    {(this.props.maxPhoto == null || this.props.maxPhoto < (this.props.value == null ? 2 : this.props.value.length)) &&
                         <div className="photo-form-item-button text-center m-2" onClick={() => this.openModale()}>
                             <Icon className={clsx("fas fa-camera", this.props.classes.cameraIcon)} />
                             <input type="file" accept="image/*"
@@ -234,25 +225,25 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
                                 }
                                 {this.state.md.mobile() &&
                                     <>
-                                    <Button color="secondary" variant="contained" className="button button-primary  button-block mb-1"
-                                        onClick={() => this.takePicture("library")}>
-                                        Choisir une photo existante
+                                        <Button color="secondary" variant="contained" className="button button-primary  button-block mb-1"
+                                            onClick={() => this.takePicture("library")}>
+                                            Choisir une photo existante
                                     </Button>
-                                    <div className="photo-form-item-button text-center m-2" >
+                                        <div className="photo-form-item-button text-center m-2" >
 
-                                        <input type="file" accept=".jpg, .jpeg, .png" ref={input => this.controlPicker = input} onChange={(e) => this.onFileSelected(e.target.files)}
-                                            className={clsx(this.props.classes.input)}
-                                        />
-                                    </div>
+                                            <input type="file" accept=".jpg, .jpeg, .png" ref={input => this.controlPicker = input} onChange={(e) => this.onFileSelected(e.target.files)}
+                                                className={clsx(this.props.classes.input)}
+                                            />
+                                        </div>
                                     </>
                                 }
-                                {   !this.state.md.mobile() &&
+                                {!this.state.md.mobile() &&
                                     <Button color="secondary" variant="contained" className="button button-primary  button-block mb-1"
                                         onClick={() => this.takePicture("camera")}>
                                         Selectionner une photo
                                     </Button>
                                 }
-                               
+
                             </div>
                         </DialogActions>
                     </Dialog>

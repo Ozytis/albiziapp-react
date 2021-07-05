@@ -1,6 +1,7 @@
 using Business;
 using Common;
 using Entities;
+using Folia;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -37,7 +38,7 @@ namespace Web
 
             MongoDBConfig config = new MongoDBConfig();
             this.Configuration.Bind("MongoDB", config);
-System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
             services.AddScoped<Entities.DataContext>((_) => new DataContext(config));
             services.AddScoped<UsersManager>();
@@ -47,11 +48,16 @@ System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Inst
             services.AddScoped<FileManager>();
             services.AddScoped<TrophiesManager>();
             services.AddScoped<TitlesManager>();
+            services.AddScoped<FoliaManager>();
             services.AddSignalR();
             services.AddSingleton<HubConnectionManager>();
             services.AddSingleton<HubPositionManager>();
             services.AddSingleton<IUserNotify, NotifyHub>();
             services.AddSingleton<IUserPosition, PositionHub>();
+
+            var fs = new FoliaScript(this.Configuration["FoliaPath"]);
+            services.AddSingleton<FoliaScript>(fs);
+
             services.AddSwaggerGen();
         }
 

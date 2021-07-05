@@ -106,8 +106,8 @@
           ]
         }
       },
-      "Title": "Identifier cinq relevés spécifiques dans une zone définie",
-      "Description": "Identifier cinq relevés spécifiques dans une zone définie"
+      "Title": "Identifier cinq relevés spécifiques dans une zone définit",
+      "Description": "Identifier cinq relevés spécifiques dans une zone définit"
     },
     {
       "$type": "Api.Missions.IdentificationMissionModel, Api",
@@ -171,8 +171,8 @@
         },
         "Radius": 1000.0
       },
-      "Title": "Verifier des relevés spécifiques dans une zone circulaire avec photo",
-      "Description": "Verifier des relevés spécifiques dans une zone circulaire avec photo"
+      "Title": "Vérifier des relevés spécifiques dans une zone circulaire avec photo",
+      "Description": "Vérifier des relevés spécifiques dans une zone circulaire avec photo"
     },
     {
       "$type": "Api.Missions.VerificationMissionModel, Api",
@@ -222,8 +222,8 @@
           ]
         }
       },
-      "Title": "Verifier des relevés spécifiques dans une zone polygonale avec chrono",
-      "Description": "Verifier des relevés spécifiques dans une zone polygonale avec chrono"
+      "Title": "Vérifier des relevés spécifiques dans une zone polygonale avec chrono",
+      "Description": "Vérifier des relevés spécifiques dans une zone polygonale avec chrono"
     },
     {
       "$type": "Api.Missions.VerificationMissionModel, Api",
@@ -235,8 +235,8 @@
         "Minutes": 10
       },
       "RestrictedArea": null,
-      "Title": "Verifier des relevés spécifiques dans une zone circulaire",
-      "Description": "Verifier des relevés spécifiques dans une zone circulaire"
+      "Title": "Vérifier des relevés spécifiques dans une zone circulaire",
+      "Description": "Vérifier des relevés spécifiques dans une zone circulaire"
     }
   ]
 }

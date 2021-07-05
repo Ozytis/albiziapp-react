@@ -52,6 +52,8 @@ class App extends BaseComponent<AppProps, AppState>{
 
         this.appHistory = createBrowserHistory();
 
+        //clear folia search
+        localStorage.setItem("foliaResult", null);
     }
 
     async componentDidMount() {     

@@ -14,7 +14,6 @@ namespace Business
         public IUserNotify UserNotify { get; }
         public TrophiesManager(DataContext dataContext, IUserNotify userNotify) : base(dataContext)
         {
-
             this.UserNotify = userNotify;
         }
 

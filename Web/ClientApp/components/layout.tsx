@@ -1,5 +1,5 @@
 import { AppBar, createStyles, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Theme, Toolbar, Typography, withStyles, WithStyles, Switch } from "@material-ui/core";
-import { AccountTree, Book, Eco, ExitToApp, SupervisorAccount, ArrowBack, ClearAll, VerifiedUser, DoubleArrow } from "@material-ui/icons";
+import { AccountTree, Book, Eco, ExitToApp, SupervisorAccount, ArrowBack, ClearAll, VerifiedUser, DoubleArrow,Search } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -27,6 +27,7 @@ import { Confirm } from "./confirm";
 import { UserRole } from "../services/generated/user-role";
 import { UserEditionModel } from "../services/generated/user-edition-model";
 import { CreateMissionComponentConfig } from "../pages/Missions/create-mission-config";
+import { FoliaPage } from "../pages/folia/folia-page";
 
 const styles = (theme: Theme) => createStyles({
     menu: {
@@ -47,7 +48,6 @@ const styles = (theme: Theme) => createStyles({
 });
 
 interface LayoutProps extends IPropsWithAppContext, RouteComponentProps, WithStyles<typeof styles> {
-
 }
 
 class LayoutState {
@@ -60,11 +60,8 @@ class LayoutState {
 }
 
 class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
-
-
     constructor(props: LayoutProps) {
         super(props, "layout", new LayoutState());
-
     }
 
     async componentDidMount() {
@@ -96,7 +93,6 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
     }
 
     async onContextChanged() {
-
         this.isConnected();
 
         if (this.props.appContext.title && this.props.appContext.title.length > 0 && this.state.title !== this.props.appContext.title) {
@@ -114,7 +110,7 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
     }
 
     async goTo(route: string) {
-        this.props.history.replace({
+        this.props.history.push({
             pathname: route
         });
 
@@ -129,7 +125,6 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
         else {
             await this.setState({ isUserConnected: false })
         }
-
     }
     async DeleteAllObservations() {
         if (!await Confirm("Voulez vous effacer tous les relevés existant?")) {
@@ -142,11 +137,10 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
             await this.setState({ isExpert: true });
         }
         else {
-           await this.setState({ isExpert: false });
+            await this.setState({ isExpert: false });
         }
     }
     async BecomeExpert() {
-        
         this.state.uem.name = this.state.user.name;
         this.state.uem.osmId = this.state.user.osmId;
         if (this.state.user.role == UserRole.expert) {
@@ -168,7 +162,7 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
     }
     hideBackButton() {
         const routes = this.props.appContext.routes.map(route => route.routes).reduce((a, b) => a.concat(b), []);
-        const matched = matchRoutes(routes, this.props.location.pathname)[0];  
+        const matched = matchRoutes(routes, this.props.location.pathname)[0];
         const routesConfig = [
             HomePageConfig,
             LoginPageConfig,
@@ -210,13 +204,13 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                         {!this.hideBackButton() &&
 
                             <IconButton
-                                edge="start"
-                                className={classes.menuButton}
-                                color="inherit"
-                                aria-label="menu"
-                                disableFocusRipple
-                                disableRipple
-                                onClick={() => (this.props.history as any).goBack()}
+                            edge="start"
+                            className={classes.menuButton}
+                            color="inherit"
+                            aria-label="menu"
+                            disableFocusRipple
+                            disableRipple
+                            onClick={() => { console.log(this.props.history);(this.props.history as any).goBack(); }}
                             >
                                 <ArrowBack />
                             </IconButton>
@@ -224,7 +218,6 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                         <Typography variant="h6" className={classes.title}>
                             {this.state.title ? t.__(this.state.title) : "Albiziapp"}
                         </Typography>
-
 
                     </Toolbar>
                 </AppBar>
@@ -255,12 +248,12 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                                 </ListItemIcon>
                                 <ListItemText primary={t.__("Flore")} />
                             </ListItem>
-                        {/*<ListItem button onClick={() => this.goTo("/folia")}>
+                            <ListItem button onClick={() => this.goTo("/folia")}>
                                 <ListItemIcon>
                                     <Search />
                                 </ListItemIcon>
                                 <ListItemText primary={t.__("Folia")} />
-                            </ListItem>*/}
+                            </ListItem>
                             <ListItem button onClick={() => this.goTo("/determination-key")}>
                                 <ListItemIcon>
                                     <AccountTree />
@@ -274,34 +267,33 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                                     </ListItemIcon>
                                     <ListItemText primary={t.__("Gestion des utilisateurs")} />
                                 </ListItem>
-                        }                       
+                            }
                             <ListItem button onClick={() => this.DeleteAllObservations()}>
-                            <ListItemIcon>
-                                <ClearAll />
+                                <ListItemIcon>
+                                    <ClearAll />
                                 </ListItemIcon>
                                 <ListItemText primary={t.__("Supprimer tous les relevés")} />
                             </ListItem>
-                          
 
-                        <ListItem button onClick={() => this.goTo("/create-mission")}>
-                            <ListItemIcon>
-                                <DoubleArrow />
-                            </ListItemIcon>
-                            <ListItemText primary={t.__("Création d'une mission")} />
-                        </ListItem>
+                            <ListItem button onClick={() => this.goTo("/create-mission")}>
+                                <ListItemIcon>
+                                    <DoubleArrow />
+                                </ListItemIcon>
+                                <ListItemText primary={t.__("Création d'une mission")} />
+                            </ListItem>
                             <ListItem button onClick={() => this.logOut()}>
                                 <ListItemIcon>
                                     <ExitToApp />
                                 </ListItemIcon>
                                 <ListItemText primary={t.__("Me déconnecter")} />
-                        </ListItem>
-                    </List>
-                    <List style={{ marginTop: "auto", marginRight:"auto"}}>
-                        <ListItem>
-                                <Switch onChange={() => this.BecomeExpert()} checked={this.state.isExpert} color="primary"/>                           
-                            <ListItemText primary={t.__("Expert")} />
-                        </ListItem>
-                    </List>
+                            </ListItem>
+                        </List>
+                        <List style={{ marginTop: "auto", marginRight: "auto" }}>
+                            <ListItem>
+                                <Switch onChange={() => this.BecomeExpert()} checked={this.state.isExpert} color="primary" />
+                                <ListItemText primary={t.__("Expert")} />
+                            </ListItem>
+                        </List>
                     </Drawer>
                 }
 
@@ -315,4 +307,3 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
 }
 
 export const Layout = withStyles(styles, { withTheme: true })(withRouter(withAppContext(LayoutComponent)));
-
