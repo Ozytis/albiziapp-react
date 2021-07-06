@@ -48,7 +48,11 @@ const styles = (theme: Theme) => createStyles({
     buttons: {
         marginTop: theme.spacing(2),
         color: theme.palette.common.white,
-        marginBottom: theme.spacing(4)
+    },
+    buttonsSend: {
+        marginTop: theme.spacing(2),
+        color: theme.palette.common.white,
+        marginBottom: theme.spacing(6)
     },
     titleBox: {
         color: theme.palette.common.black,
@@ -82,7 +86,6 @@ class FoliaPageComponent extends BaseComponent<FoliaPageProps, FoliaPageState>{
     }
 
     componentDidMount() {
-        console.log("CDM");
         var foliaResult = localStorage.getItem("foliaResult");
         if (foliaResult != null) {
             var foliaParsed = JSON.parse(foliaResult);
@@ -176,6 +179,7 @@ class FoliaPageComponent extends BaseComponent<FoliaPageProps, FoliaPageState>{
         else {
             await this.setState({ isProcessing: false, result: result.data });
             localStorage.setItem("foliaResult", JSON.stringify(result.data));
+            window.scrollTo({ left: 0, top: 0 });
         }
     }
 
@@ -246,7 +250,7 @@ class FoliaPageComponent extends BaseComponent<FoliaPageProps, FoliaPageState>{
 
                                 </FormControl>
                             </div>
-                            <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.process()}>
+                        <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttonsSend)} onClick={() => this.process()}>
                                 <Loader loading={this.state.isProcessing} usualIcon="check" />
                                 {t.__("Valider")}
                             </Button>
@@ -255,6 +259,10 @@ class FoliaPageComponent extends BaseComponent<FoliaPageProps, FoliaPageState>{
 
                     {this.state.result != null &&
                         <>
+                        <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.reset()}>
+                            <Loader loading={false} usualIcon="check" />
+                            {t.__("Nouvelle recherche")}
+                        </Button>
                             {this.state.result.map((fr, i) => {
                                 return (
                                     <ListItem key={fr.species} className={clsx(classes.card)}>
@@ -268,10 +276,7 @@ class FoliaPageComponent extends BaseComponent<FoliaPageProps, FoliaPageState>{
                                 )
                             })
                             }
-                            <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.reset()}>
-                                <Loader loading={false} usualIcon="check" />
-                                {t.__("Nouvelle recherche")}
-                            </Button>
+                          
                         </>
                     }
                 </Box>
