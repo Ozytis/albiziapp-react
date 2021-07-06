@@ -12,10 +12,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Folia\Folia.csproj" />
     <ProjectReference Include="..\Api\Api.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\Entities\Entities.csproj" />
+    <ProjectReference Include="..\Folia\Folia.csproj" />
   </ItemGroup>
 
 </Project>

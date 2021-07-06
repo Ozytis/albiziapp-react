@@ -22,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{67DADF8E-79AD-492E-BDDE-54CEAEEC208F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Folia", "..\Folia\Folia.csproj", "{EFF6C0C5-8965-4B45-8634-1BE5FCCD16CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Folia", "Folia\Folia.csproj", "{EFF6C0C5-8965-4B45-8634-1BE5FCCD16CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
