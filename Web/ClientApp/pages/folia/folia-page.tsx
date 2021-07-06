@@ -23,7 +23,8 @@ const styles = (theme: Theme) => createStyles({
         maxHeight: "calc(100vh - 120px)",
         overflowY: "auto",
         paddingBottom: "1vh",
-        paddingTop: "2vh"
+        paddingTop: "2vh",
+        marginBottom: theme.spacing(6)
     },
     title: {
         marginBottom: "3vh",
@@ -52,7 +53,6 @@ const styles = (theme: Theme) => createStyles({
     buttonsSend: {
         marginTop: theme.spacing(2),
         color: theme.palette.common.white,
-        marginBottom: theme.spacing(6)
     },
     titleBox: {
         color: theme.palette.common.black,
@@ -250,7 +250,7 @@ class FoliaPageComponent extends BaseComponent<FoliaPageProps, FoliaPageState>{
 
                                 </FormControl>
                             </div>
-                        <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttonsSend)} onClick={() => this.process()}>
+                            <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.process()}>
                                 <Loader loading={this.state.isProcessing} usualIcon="check" />
                                 {t.__("Valider")}
                             </Button>
@@ -259,10 +259,10 @@ class FoliaPageComponent extends BaseComponent<FoliaPageProps, FoliaPageState>{
 
                     {this.state.result != null &&
                         <>
-                        <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.reset()}>
-                            <Loader loading={false} usualIcon="check" />
-                            {t.__("Nouvelle recherche")}
-                        </Button>
+                            <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.reset()}>
+                                <Loader loading={false} usualIcon="check" />
+                                {t.__("Nouvelle recherche")}
+                            </Button>
                             {this.state.result.map((fr, i) => {
                                 return (
                                     <ListItem key={fr.species} className={clsx(classes.card)}>
@@ -276,7 +276,7 @@ class FoliaPageComponent extends BaseComponent<FoliaPageProps, FoliaPageState>{
                                 )
                             })
                             }
-                          
+
                         </>
                     }
                 </Box>
