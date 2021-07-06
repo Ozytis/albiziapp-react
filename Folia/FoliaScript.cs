@@ -41,11 +41,12 @@ namespace Folia
                 throw new BusinessException("No args found");
             }
             // args += $"-b {barkPath} ";
+            Console.WriteLine(args);
             mut.WaitOne();
             try
             {
                 ProcessStartInfo start = new ProcessStartInfo();
-                start.FileName = "python";
+                start.FileName = "python3";
                 start.WorkingDirectory = this.FoliaPath;
                 Console.WriteLine($"classify.py {args}");
                 start.Arguments = $"classify.py {args}";

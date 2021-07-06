@@ -47,7 +47,8 @@ const styles = (theme: Theme) => createStyles({
     },
     buttons: {
         marginTop: theme.spacing(2),
-        color: theme.palette.common.white
+        color: theme.palette.common.white,
+        marginBottom: theme.spacing(2)
     },
     titleBox: {
         color: theme.palette.common.black,
@@ -78,7 +79,6 @@ class FoliaPageState {
 class FoliaPageComponent extends BaseComponent<FoliaPageProps, FoliaPageState>{
     constructor(props: FoliaPageProps) {
         super(props, " FoliaPage", new FoliaPageState());
-  
     }
 
     componentDidMount() {
@@ -175,7 +175,7 @@ class FoliaPageComponent extends BaseComponent<FoliaPageProps, FoliaPageState>{
         }
         else {
             await this.setState({ isProcessing: false, result: result.data });
-            localStorage.setItem("foliaResult", JSON.stringify(  result.data ));
+            localStorage.setItem("foliaResult", JSON.stringify(result.data));
         }
     }
 
@@ -220,31 +220,32 @@ class FoliaPageComponent extends BaseComponent<FoliaPageProps, FoliaPageState>{
                         <>
                             <Box className={clsx(classes.titleBox)}>
                                 Veuillez prendre au moins une photo
-                    </Box>
-                            <FormControl className={clsx(classes.formControl)}>
-                                <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                                    {t.__("Fleur ou fruit")}
-                                </Typography>
-                                <PhotoFormItem label={t.__("")} maxPhoto={1} value={this.state.flowerOrFruitImage} onAdd={val => this.addflowerOrFruitImagePicture(val)} onDelete={index => this.deleteflowerOrFruitImage(index)} />
+                            </Box>
+                            <div>
+                                <FormControl className={clsx(classes.formControl)}>
+                                    <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                                        {t.__("Fleur ou fruit")}
+                                    </Typography>
+                                    <PhotoFormItem label={t.__("")} maxPhoto={1} value={this.state.flowerOrFruitImage} onAdd={val => this.addflowerOrFruitImagePicture(val)} onDelete={index => this.deleteflowerOrFruitImage(index)} />
 
-                            </FormControl>
+                                </FormControl>
 
-                            <FormControl className={clsx(classes.formControl)}>
-                                <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                                    {t.__("Feuille")}
-                                </Typography>
-                                <PhotoFormItem label={t.__("")} maxPhoto={1} value={this.state.leaf} onAdd={val => this.addLeafPicture(val)} onDelete={index => this.deleteLeafImage(index)} />
+                                <FormControl className={clsx(classes.formControl)}>
+                                    <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                                        {t.__("Feuille")}
+                                    </Typography>
+                                    <PhotoFormItem label={t.__("")} maxPhoto={1} value={this.state.leaf} onAdd={val => this.addLeafPicture(val)} onDelete={index => this.deleteLeafImage(index)} />
 
-                            </FormControl>
+                                </FormControl>
 
-                            <FormControl className={clsx(classes.formControl)}>
-                                <Typography variant="h6" className={clsx(classes.sectionHeading)}>
-                                    {t.__("Écorse")}
-                                </Typography>
-                                <PhotoFormItem label={t.__("")} maxPhoto={1} value={this.state.bark} onAdd={val => this.addBarkPicture(val)} onDelete={index => this.deleteBarkImage(index)} />
+                                <FormControl className={clsx(classes.formControl)}>
+                                    <Typography variant="h6" className={clsx(classes.sectionHeading)}>
+                                        {t.__("Écorse")}
+                                    </Typography>
+                                    <PhotoFormItem label={t.__("")} maxPhoto={1} value={this.state.bark} onAdd={val => this.addBarkPicture(val)} onDelete={index => this.deleteBarkImage(index)} />
 
-                            </FormControl>
-
+                                </FormControl>
+                            </div>
                             <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.process()}>
                                 <Loader loading={this.state.isProcessing} usualIcon="check" />
                                 {t.__("Valider")}
@@ -266,11 +267,11 @@ class FoliaPageComponent extends BaseComponent<FoliaPageProps, FoliaPageState>{
                                     </ListItem>
                                 )
                             })
-                        }
-                        <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.reset()}>
-                            <Loader loading={false} usualIcon="check" />
-                            {t.__("Nouvelle recherche")}
-                        </Button>
+                            }
+                            <Button color="primary" variant="contained" fullWidth className={clsx(classes.buttons)} onClick={() => this.reset()}>
+                                <Loader loading={false} usualIcon="check" />
+                                {t.__("Nouvelle recherche")}
+                            </Button>
                         </>
                     }
                 </Box>
