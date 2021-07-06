@@ -84,6 +84,7 @@ class FoliaPageComponent extends BaseComponent<FoliaPageProps, FoliaPageState>{
     constructor(props: FoliaPageProps) {
         super(props, " FoliaPage", new FoliaPageState());
     }
+    boxElement: any;
 
     componentDidMount() {
         var foliaResult = localStorage.getItem("foliaResult");
@@ -177,9 +178,9 @@ class FoliaPageComponent extends BaseComponent<FoliaPageProps, FoliaPageState>{
             })
         }
         else {
-            await this.setState({ isProcessing: false, result: result.data });
+            await this.setState({ isProcessing: false, result: result.data, errors : null });
             localStorage.setItem("foliaResult", JSON.stringify(result.data));
-            window.scrollTo({ left: 0, top: 0 });
+            document.getElementById("foliaComponent").scrollTop = 0;
         }
     }
 
@@ -211,7 +212,7 @@ class FoliaPageComponent extends BaseComponent<FoliaPageProps, FoliaPageState>{
 
         return (
             <>
-                <Box className={clsx(classes.root)} >
+                <Box className={clsx(classes.root)} id={"foliaComponent"}>
                     {this.state.errors &&
                         <ErrorSummary errors={this.state.errors} />
                     }
