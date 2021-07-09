@@ -12,5 +12,7 @@
         public string CommonGenus { get; set; }
 
         public string CommonSpeciesName { get; set; }
+
+        public int? IsConfident { get; set; }
     }
 }

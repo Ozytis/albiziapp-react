@@ -117,7 +117,7 @@ class ArboretumCardComponent extends BaseComponent<ArboretumCardProps, Arboretum
 
         return (
             <Card className={clsx(classes.root)}>
-                <CardActionArea>
+                <CardContent>
 
                     {
                         info && info.pictures &&
@@ -130,15 +130,15 @@ class ArboretumCardComponent extends BaseComponent<ArboretumCardProps, Arboretum
                         </CardMedia>
                     }
 
-                    <CardContent>
+                 
                         <Typography gutterBottom variant="h6" component="h2">
                             {this.props.species.speciesName}
                         </Typography>
                         <Typography variant="body2" color="textSecondary" component="p">
                             {t.__("Nombre d'identifications :")} {this.props.nbOfViews}
                         </Typography>
-                    </CardContent>
-                </CardActionArea>
+               
+                </CardContent>
                 <CardActions>
                     <Button size="small" color="primary"
                         component={"a"}

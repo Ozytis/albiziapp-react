@@ -15,7 +15,8 @@ const styles = (theme: Theme) => createStyles({
         maxHeight: "calc(100vh - 120px)",
         overflowY: "auto",
         padding: 0,
-        color: theme.palette.common.white
+        color: theme.palette.common.white,
+        marginBottom: theme.spacing(6)
     },
     sectionHeading: {
         marginTop: theme.spacing(1),
@@ -67,6 +68,10 @@ const styles = (theme: Theme) => createStyles({
         "& p": {
             marginBottom: theme.spacing(1)
         }
+    },
+    licence: {
+        textAlign: "right",
+        fontSize:"0.6rem"
     }
 });
 
@@ -167,7 +172,7 @@ export class SpeciesInfoPageComponent extends BaseComponent<SpeciesComponentProp
 
                                     return (
                                         <div key={idx} className={clsx("slide", classes.slide)} style={{/* backgroundImage: `url("${image}")`*/ }}>
-                                            <img src={`/pictures?path=${image}`} style={{ width: "100vw", height: "auto", margin: "0 auto" }} />
+                                            <img src={`/pictures?path=${image}`} style={{ width: "50vh", height: "auto", margin: "0 auto" }} />
                                         </div>
                                     )
                                 })
@@ -187,7 +192,7 @@ export class SpeciesInfoPageComponent extends BaseComponent<SpeciesComponentProp
                             }
                         </Box>
                     }
-
+                    <div className={clsx(classes.licence)}>Source : Tela Botanica. Licence CC by SA</div>
                     <Tabs
                         value={this.state.currentTab}
                         onChange={(_, index) => this.setState({ currentTab: index })}

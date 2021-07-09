@@ -20,7 +20,7 @@ namespace Web.Controllers
     [Authorize]
     public class ObservationsController : ControllerBase
     {
-        public ObservationsController(ObservationsManager observationsManager, UsersManager userManager,FileManager fileManager, IUserNotify userNotify, IUserPosition UserPosition)
+        public ObservationsController(ObservationsManager observationsManager, UsersManager userManager, FileManager fileManager, IUserNotify userNotify, IUserPosition UserPosition)
         {
             this.ObservationsManager = observationsManager;
             this.FileManager = fileManager;
@@ -48,9 +48,9 @@ namespace Web.Controllers
         }
 
         [HttpGet("near/{latitude}/{longitude}")]
-        public async Task<IEnumerable<ObservationModel>> GetNearestObservations(double latitude,double longitude)
+        public async Task<IEnumerable<ObservationModel>> GetNearestObservations(double latitude, double longitude)
         {
-            IEnumerable<Observation> observations = await this.ObservationsManager.GetNearestObservations(latitude,longitude);
+            IEnumerable<Observation> observations = await this.ObservationsManager.GetNearestObservations(latitude, longitude);
             var userIds = observations.SelectMany(o => this.ObservationsManager.GetAllUserIdForObservation(o)).Distinct().ToArray();
             var users = (await this.UsersManager.GetUsersByOsmIds(userIds)).ToArray();
             return observations.Select(observation => observation.ToObservationModel(users));
@@ -63,9 +63,7 @@ namespace Web.Controllers
             var userIds = this.ObservationsManager.GetAllUserIdForObservation(observation).ToArray();
             var users = (await this.UsersManager.GetUsersByOsmIds(userIds)).ToArray();
             return observation.ToObservationModel(users);
-
         }
-
 
         [HttpGet("/api/users/{userId}/observations")]
         public async Task<IEnumerable<ObservationModel>> GetUserObservations(string userId)
@@ -75,6 +73,7 @@ namespace Web.Controllers
             var users = (await this.UsersManager.GetUsersByOsmIds(userIds)).ToArray();
             return observations.Select(observation => observation.ToObservationModel(users));
         }
+
         [HttpPost]
         [HandleBusinessException, ValidateModel]
         public async Task CreateObservationAysnc([FromBody] ObservationCreationModel model)
@@ -85,11 +84,10 @@ namespace Web.Controllers
                       model.Pictures, model?.TreeSize);
                 await this.UserPosition.SendRefresh(observation.Coordinates.Coordinates.Latitude, observation.Coordinates.Coordinates.Longitude);
             }
-            catch(BusinessException ex)
+            catch (BusinessException ex)
             {
                 await this.UserNotify.SendErrorNotif(this.User.Identity.Name, ex.Message);
             }
-
         }
 
         [HttpPut("setTreeSize/{observationId}/{treeSize}")]
@@ -102,7 +100,6 @@ namespace Web.Controllers
             }
             catch (BusinessException be)
             {
-
                 await this.UserNotify.SendErrorNotif(this.User.Identity.Name, be.Message);
                 throw be;
             }
@@ -114,11 +111,10 @@ namespace Web.Controllers
         {
             try
             {
-                await this.ObservationsManager.AddPictures(observationId,pictures);
+                await this.ObservationsManager.AddPictures(observationId, pictures);
             }
             catch (BusinessException be)
             {
-
                 await this.UserNotify.SendErrorNotif(this.User.Identity.Name, be.Message);
                 throw be;
             }
@@ -132,34 +128,30 @@ namespace Web.Controllers
             {
                 await this.ObservationsManager.AddStatement(observationId, model, this.User.Identity.Name);
             }
-            catch (BusinessException be) {
-                
+            catch (BusinessException be)
+            {
                 await this.UserNotify.SendErrorNotif(this.User.Identity.Name, be.Message);
                 throw be;
             }
         }
 
-
-
         [HttpPost("confirmStatement")]
         [HandleBusinessException, ValidateModel]
         public async Task ConfirmStatementAysnc([FromBody] AddObservationStatementConfirmationModel osc)
         {
-
             await this.ObservationsManager.ConfirmStatement(osc.ObservationId, osc.StatementId, this.User.Identity.Name, osc.IsOnlyGenus);
-                await this.UserNotify.SendNotif(this.User.Identity.Name, "Le relevé a bien été confirmé");
-
+            await this.UserNotify.SendNotif(this.User.Identity.Name, "Le relevé a bien été confirmé");
         }
+
         [HttpGet("picture/{observationId}/{index}")]
         [HandleBusinessException, ValidateModel]
         public async Task<IActionResult> GetFirstObservationPicture(string observationId, int index)
         {
-            
             var observation = await this.ObservationsManager.GetUserObservationbyId(observationId);
             if (observation.Pictures.Any())
             {
                 var picturePath = observation.Pictures.ElementAt(index);
-                
+
                 byte[] data = await this.FileManager.ReadFileAsync(picturePath);
                 return this.File(data, "image/" + Path.GetExtension(picturePath).Substring(0));
             }
@@ -171,16 +163,17 @@ namespace Web.Controllers
         [HandleBusinessException, ValidateModel]
         public async Task EditObservationAysnc([FromBody] ObservationEditionModel model)
         {
-          await this.ObservationsManager.EditObservationAsync(
-                new ObservationStatement
-                {
-                    Id = model.Id,
-                    Genus = model.Genus,
-                    Confident = (Entities.Enums.Confident?) model.IsConfident,
-                    SpeciesName = model.Species,
-                    UserId = this.User.Identity.Name,
-                }, this.User.Identity.Name);
+            await this.ObservationsManager.EditObservationAsync(
+                  new ObservationStatement
+                  {
+                      Id = model.Id,
+                      Genus = model.Genus,
+                      Confident = (Entities.Enums.Confident?)model.IsConfident,
+                      SpeciesName = model.Species,
+                      UserId = this.User.Identity.Name,
+                  }, this.User.Identity.Name);
         }
+
         [HttpPut("editStatement/{observationId}")]
         [HandleBusinessException, ValidateModel]
         public async Task EditObservationAysnc([FromBody] ObservationStatementEditionModel model, string observationId)
@@ -194,6 +187,7 @@ namespace Web.Controllers
                         CommonSpeciesName = model.CommonSpeciesName,
                         Genus = model.Genus,
                         SpeciesName = model.Species,
+                        Confident = (Entities.Enums.Confident?)model.IsConfident,
                         Id = model.Id
                     }, observationId);
             }
@@ -203,6 +197,7 @@ namespace Web.Controllers
                 throw be;
             }
         }
+
         [HttpPut("isCertain/{observationId}/{statementId}/{userName}")]
         [HandleBusinessException, ValidateModel]
         public async Task SetObservationToCertainAysnc(string observationId, string statementId, string userName)
@@ -217,15 +212,16 @@ namespace Web.Controllers
                 throw be;
             }
         }
+
         [HttpPut("deleteStatement/{observationId}/{statementId}/{deleteObservation}")]
         [HandleBusinessException, ValidateModel]
         public async Task DeleteObservationStatementAsync(string observationId, string statementId, bool deleteObservation)
         {
-            await this.ObservationsManager.DeleteObservationStatementAsync(observationId,statementId, this.User.Identity.Name);
+            await this.ObservationsManager.DeleteObservationStatementAsync(observationId, statementId, this.User.Identity.Name);
             if (deleteObservation)
             {
-               await this.DeleteObservationAsync(observationId);
-            }            
+                await this.DeleteObservationAsync(observationId);
+            }
         }
 
         [HttpDelete("{observationId}")]
@@ -236,6 +232,7 @@ namespace Web.Controllers
             await this.ObservationsManager.DeleteObservationAsync(observationId, this.User.Identity.Name);
             await this.UserPosition.SendRefresh(observation.Coordinates.Coordinates.Latitude, observation.Coordinates.Coordinates.Longitude);
         }
+
         [HttpDelete("deleteAll")]
         [HandleBusinessException, ValidateModel]
         public async Task DeleteAllObservationsAsync()
@@ -245,12 +242,12 @@ namespace Web.Controllers
                 await this.ObservationsManager.DeleteAllObservations();
                 await this.UserNotify.SendInfoNotif(this.User.Identity.Name, "Les données ont bien été supprimer");
             }
-            catch(BusinessException be)
+            catch (BusinessException be)
             {
                 await this.UserNotify.SendErrorNotif(this.User.Identity.Name, be.Message);
             }
-
         }
+
         [HttpPut("validate/{observationId}")]
         [HandleBusinessException, ValidateModel]
         public async Task ValidateObservationAsync(string observationId)
@@ -268,7 +265,6 @@ namespace Web.Controllers
             }
             catch (BusinessException be)
             {
-
                 await this.UserNotify.SendErrorNotif(this.User.Identity.Name, be.Message);
                 throw be;
             }

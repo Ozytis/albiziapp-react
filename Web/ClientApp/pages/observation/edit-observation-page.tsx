@@ -23,6 +23,7 @@ import { StringHelper } from "../../utils/string-helper";
 import { ObservationStatementEditionModel } from "../../services/generated/observation-statement-edition-model";
 import { ObservationModel } from "../../services/generated/observation-model";
 import { ObservationStatementModel } from "../../services/generated/observation-statement-model";
+import { Confident } from "../../services/generated/confident";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -31,7 +32,8 @@ const styles = (theme: Theme) => createStyles({
         maxHeight: "calc(100vh - 120px)",
         overflowY: "auto",
         padding: theme.spacing(1),
-        color: theme.palette.common.white
+        color: theme.palette.common.white,
+        marginBottom: theme.spacing(6)
     },
     sectionHeading: {
         marginTop: theme.spacing(1),
@@ -64,6 +66,16 @@ const styles = (theme: Theme) => createStyles({
         color: theme.palette.primary.contrastText,
         zIndex: 9999
     },
+    center: {
+        marginLeft: "auto",
+        marginRight: "auto"
+    },
+    tabConfiance: {
+        width: "20%",
+        border: "solid 1px black",
+        textAlign: "center",
+        cursor: "pointer"
+    },
 });
 
 interface EditObservationPageProps extends RouteComponentProps, IPropsWithAppContext, WithStyles<typeof styles> {
@@ -90,6 +102,9 @@ class EditObservationPageState {
     speciesCommonName: SpeciesModel;
     loaded: boolean;
     showModalSpecied = false;
+    isLowConfident: boolean;
+    isMediumConfident: boolean;
+    isHighConfident: boolean;
 }
 
 class EditObservationPageComponent extends BaseComponent<EditObservationPageProps, EditObservationPageState>{
@@ -134,6 +149,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
             model.species = statement.speciesName;
             model.commonGenus = statement.commonGenus;
             model.commonSpeciesName = statement.commonSpeciesName;
+            model.isConfident = statement.confident;
             await this.setState({ model: model });
         }
         else {
@@ -339,6 +355,12 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
         }
     }
 
+    async updateConfident(level: Confident) {
+        const model = this.state.model;
+        model.isConfident = level;
+        await this.setState({ model: model })
+    }
+
     render() {
 
         const { classes } = this.props;
@@ -448,18 +470,28 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
 
                         {this.showConfident() &&
                             <>
-                                {/*
+                                
                                 <Typography variant="h6" className={clsx(classes.sectionHeading)}>
                                     {t.__("Confiance")}
                                 </Typography>
 
-                            
-                                    <RadioGroup value={model.isConfident} onChange={(event) => { this.updateModel("isConfident", event.target.value) }} >
-                                        <FormControlLabel value={0} control={<Radio checked={model.isConfident == 0} />} label={t.__("Peu confiant")} className={clsx(classes.label)} />
-                                        <FormControlLabel value={1} control={<Radio checked={model.isConfident == 1} />} label={t.__("Moyennement confiant")} className={clsx(classes.label)} />
-                                        <FormControlLabel value={2} control={<Radio checked={model.isConfident == 2} />} label={t.__("Confiant")} className={clsx(classes.label)} />
-                                    </RadioGroup>
-                                */}
+                            <table className={clsx(classes.center)}>
+                                <tbody>
+                                    <tr>
+                                        <td style={{ width: "20%" }}>Confiance</td>
+                                        <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.model.isConfident == Confident.low ? "green" : "white", color: this.state.model.isConfident == Confident.low ? "white" : "black" }} onClick={() => this.updateConfident(Confident.low)}>
+                                            Faible
+                                    </td>
+                                        <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.model.isConfident == Confident.medium ? "green" : "white", color: this.state.model.isConfident == Confident.medium ? "white" : "black" }} onClick={() => this.updateConfident(Confident.medium)}>
+                                            Moyen
+                                </td>
+                                        <td className={clsx(classes.tabConfiance)} style={{ backgroundColor: this.state.model.isConfident == Confident.high ? "green" : "white", color: this.state.model.isConfident == Confident.high ? "white" : "black" }} onClick={() => this.updateConfident(Confident.high)} >
+                                            Haute
+                                </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                                
                                 </>
                                 
                             }

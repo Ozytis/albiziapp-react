@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
 import { Theme, WithStyles, createStyles, withStyles, Box, List, ListItem, ListItemText, ListItemIcon } from "@material-ui/core";
@@ -8,6 +8,7 @@ import { ObservationsApi } from "../../services/observation";
 import { AuthenticationApi } from "../../services/authentication-service";
 import { ChevronRight } from "@material-ui/icons";
 import { ObservationModel } from "../../services/generated/observation-model";
+import { StringHelper } from "../../utils/string-helper";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -74,7 +75,7 @@ class ObservationsPageComponent extends BaseComponent<ObservationsPageProps, Obs
                         this.state.observations && this.state.observations.filter(o => o.observationStatements[0] != null).map(observation => {
                             return (
                                 <ListItem key={observation.id} onClick={() => this.goTo(`observation/${observation.id}`)} className={clsx(classes.card)}>
-                                    <ListItemText primary={observation.observationStatements[0].speciesName} secondary={new Date(observation.observationStatements[0].date).toLocaleString()} />
+                                    <ListItemText primary={!StringHelper.isNullOrEmpty(observation.observationStatements[0].speciesName) ? observation.observationStatements[0].speciesName : !StringHelper.isNullOrEmpty(observation.observationStatements[0].genus) ? observation.observationStatements[0].genus : "Non défini"} secondary={new Date(observation.observationStatements[0].date).toLocaleString()} />
                                     <ListItemIcon>
                                         <ChevronRight />
                                     </ListItemIcon>
@@ -87,7 +88,7 @@ class ObservationsPageComponent extends BaseComponent<ObservationsPageProps, Obs
                 <Box>
                     {
                     this.state.observations == null || this.state.observations.length == 0 &&                    
-                        <p className="m-auto" style={{ width: "fit-content" }}> Vous n'avez fait encore aucun relev� </p>
+                        <p className="m-auto" style={{ width: "fit-content" }}> Vous n'avez fait encore aucun relevé </p>
                     }
                 </Box>
             </Box>

@@ -34,9 +34,6 @@ const styles = (theme: Theme) => createStyles({
     cameraIcon: {
         color: theme.palette.common.black
     },
-    dialogChoiceModal: {
-        height: '15vh'
-    },
     dialogChoice: {
         display: "flex",
         flexDirection: "column",
@@ -155,7 +152,7 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
         await this.setState({ showCamera: false, showSnapShot: false, showSourceSelection: false });
     }
 
-    render() {     
+    render() {
         return (
             <div className="photo-form-item">
                 <div className="photo-form-item-preview">

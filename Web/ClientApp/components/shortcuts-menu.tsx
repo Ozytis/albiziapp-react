@@ -17,7 +17,7 @@ const styles = (theme: Theme) => createStyles({
         bottom: 0,
         left: 0,
         width: "100%",
-      
+        zIndex:999,
         "& .MuiIcon-root": {
             width: "auto"
         },

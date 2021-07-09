@@ -688,6 +688,7 @@ namespace Business
                 existingStatement.CommonGenus = editStatement.CommonGenus;
                 existingStatement.Genus = editStatement.Genus;
                 existingStatement.SpeciesName = editStatement.SpeciesName;
+                existingStatement.Confident = editStatement.Confident;
                 if (!string.IsNullOrEmpty(existingStatement.SpeciesName))
                 {
                     Species species = await this.SpeciesManager

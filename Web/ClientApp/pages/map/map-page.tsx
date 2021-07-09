@@ -82,6 +82,7 @@ class MapPageState {
     myInterval: number;
     history: MissionHistoryModel[];
     poly: L.LatLng[];
+    temporaryMarkerPosition: LatLng = null;
 }
 
 class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
@@ -213,9 +214,11 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
     async onMapClicked(e: { latlng: LatLng }) {
 
         const zoomLvl = this.state.mapRef.current.leafletElement.getZoom();
+        await this.setState({ temporaryMarkerPosition: e.latlng });
 
         if (zoomLvl >= 15) {
             if (!await Confirm(t.__("Voulez vous réaliser un nouveau relevé ?"))) {
+                await this.setState({ temporaryMarkerPosition: null });
                 return;
             }
 
@@ -479,7 +482,13 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         await this.setState({ zoomLevel: zoom });
     }
     render() {
-
+        var  crossMarker = L.divIcon({
+            className: '',
+            iconAnchor: [12, 25],
+            popupAnchor: [0, -15],
+            iconSize: [25, 41],
+            html: `<span class="fa fa-times" style="color:orange;font-size:2rem"></span>`
+        });
         const { classes } = this.props;
         const { minutes, seconds } = this.state;
 
@@ -488,7 +497,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         return (
             <Box className={clsx(classes.root)}>
                 {
-                    this.state.userPosition && this.state.mapRef &&
+                    this.state.userPosition && 
 
                     <Map
                         ref={this.state.mapRef}
@@ -509,7 +518,12 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                             maxZoom={21}
 
                         />
-
+                        {this.state.temporaryMarkerPosition != null &&
+                            <Marker
+                            position={{ lat: this.state.temporaryMarkerPosition.lat, lng: this.state.temporaryMarkerPosition.lng }}
+                            icon={crossMarker}
+                            />
+                        }
                         <Marker
                             position={{ lat: this.state.userPosition.coords.latitude, lng: this.state.userPosition.coords.longitude }}
                         />
@@ -558,7 +572,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                 {
                     <Button style={{
                         position: "absolute",
-                        top: "10%",
+                        top: "11vh",
                         right: "3%",
                         padding: "4px",
                         minWidth: 0,
@@ -577,7 +591,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                 {
                     <Button style={{
                         position: "absolute",
-                        top: "15%",
+                        top: "17vh",
                         right: "3%",
                         padding: "4px",
                         minWidth: 0,

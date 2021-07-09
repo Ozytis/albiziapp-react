@@ -10,7 +10,7 @@ export class ObservationStatementEditionModel {
     species = "";
     commonGenus = "";
     commonSpeciesName = "";
-
+    isConfident;
     validate() {
         const errors: string[] = [];
 
