@@ -1,5 +1,5 @@
 import { AppBar, createStyles, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Theme, Toolbar, Typography, withStyles, WithStyles, Switch } from "@material-ui/core";
-import { AccountTree, Book, Eco, ExitToApp, SupervisorAccount, ArrowBack, ClearAll, VerifiedUser, DoubleArrow,Search } from "@material-ui/icons";
+import { AccountTree, Book, Eco, ExitToApp, SupervisorAccount, ArrowBack, ClearAll, VerifiedUser, DoubleArrow, Search } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -204,13 +204,13 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                         {!this.hideBackButton() &&
 
                             <IconButton
-                            edge="start"
-                            className={classes.menuButton}
-                            color="inherit"
-                            aria-label="menu"
-                            disableFocusRipple
-                            disableRipple
-                            onClick={() => { console.log(this.props.history);(this.props.history as any).goBack(); }}
+                                edge="start"
+                                className={classes.menuButton}
+                                color="inherit"
+                                aria-label="menu"
+                                disableFocusRipple
+                                disableRipple
+                                onClick={() => { console.log(this.props.history); (this.props.history as any).goBack(); }}
                             >
                                 <ArrowBack />
                             </IconButton>
@@ -261,37 +261,34 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                                 <ListItemText primary={t.__("Clé de détermination")} />
                             </ListItem>
                             {this.state.isUserAdmin &&
-                                <ListItem button onClick={() => this.goTo("/users")}>
-                                    <ListItemIcon>
-                                        <SupervisorAccount />
-                                    </ListItemIcon>
-                                    <ListItemText primary={t.__("Gestion des utilisateurs")} />
-                                </ListItem>
-                            }
-                            <ListItem button onClick={() => this.DeleteAllObservations()}>
-                                <ListItemIcon>
-                                    <ClearAll />
-                                </ListItemIcon>
-                                <ListItemText primary={t.__("Supprimer tous les relevés")} />
-                            </ListItem>
+                                <>
+                                    <ListItem button onClick={() => this.goTo("/users")}>
+                                        <ListItemIcon>
+                                            <SupervisorAccount />
+                                        </ListItemIcon>
+                                        <ListItemText primary={t.__("Gestion des utilisateurs")} />
+                                    </ListItem>
 
-                            <ListItem button onClick={() => this.goTo("/create-mission")}>
-                                <ListItemIcon>
-                                    <DoubleArrow />
-                                </ListItemIcon>
-                                <ListItemText primary={t.__("Création d'une mission")} />
-                            </ListItem>
+                                    <ListItem button onClick={() => this.DeleteAllObservations()}>
+                                        <ListItemIcon>
+                                            <ClearAll />
+                                        </ListItemIcon>
+                                        <ListItemText primary={t.__("Supprimer tous les relevés")} />
+                                    </ListItem>
+
+                                    <ListItem button onClick={() => this.goTo("/create-mission")}>
+                                        <ListItemIcon>
+                                            <DoubleArrow />
+                                        </ListItemIcon>
+                                        <ListItemText primary={t.__("Création d'une mission")} />
+                                    </ListItem>
+                                </>
+                            }
                             <ListItem button onClick={() => this.logOut()}>
                                 <ListItemIcon>
                                     <ExitToApp />
                                 </ListItemIcon>
                                 <ListItemText primary={t.__("Me déconnecter")} />
-                            </ListItem>
-                        </List>
-                        <List style={{ marginTop: "auto", marginRight: "auto" }}>
-                            <ListItem>
-                                <Switch onChange={() => this.BecomeExpert()} checked={this.state.isExpert} color="primary" />
-                                <ListItemText primary={t.__("Expert")} />
                             </ListItem>
                         </List>
                     </Drawer>

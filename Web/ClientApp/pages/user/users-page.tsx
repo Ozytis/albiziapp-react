@@ -1,4 +1,4 @@
-import { Box, Button, createStyles, Grid, Icon, InputLabel, List, ListItem, ListItemIcon, ListItemText, Switch, Tab, Tabs, Theme, Typography, WithStyles, withStyles } from "@material-ui/core";
+import { Box, Button, createStyles, Grid, Icon, InputLabel, List, ListItem, ListItemIcon, ListItemText, Switch, Tab, Tabs, Theme, Typography, WithStyles, withStyles, FormControl, Input } from "@material-ui/core";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
@@ -18,7 +18,12 @@ const styles = (theme: Theme) => createStyles({
     card: {
         //color: theme.palette.common.white,
         cursor: "pointer",
-    }
+    },
+    formControl: {
+        margin: theme.spacing(1),
+        width: `calc(100% - ${theme.spacing(6)}px)`,
+        color: theme.palette.common.white
+    },
 });
 
 interface UsersPageProps extends RouteComponentProps, IPropsWithAppContext, WithStyles<typeof styles> {
@@ -27,20 +32,23 @@ interface UsersPageProps extends RouteComponentProps, IPropsWithAppContext, With
 
 class UsersPageState {
     users: UserModel[];
+    search: string;
 }
 
 class UsersPageComponent extends BaseComponent<UsersPageProps, UsersPageState>{
+
+    timeout: any;
+
     constructor(props: UsersPageProps) {
         super(props, "users", new UsersPageState());
     }
     async componentDidMount() {
-        const users = await AuthenticationApi.getAllUsers();
-        console.log("test");
+        const users = await AuthenticationApi.searchUsers("");
         await this.setState({ users : users });
     }
 
     async goTo(path: string) {
-        this.props.history.push({
+        this.props.history.replace({
             pathname: path
         })
     }
@@ -77,11 +85,26 @@ class UsersPageComponent extends BaseComponent<UsersPageProps, UsersPageState>{
 
     }
 
+    async updateSearch(search: string) {
+        await this.setState({ search: search });
+        if (this.timeout != null) {
+            clearTimeout(this.timeout);
+        }
+        this.timeout = setTimeout(async () => { await this.searchUsers(); }, 500);
+
+    }
+    async searchUsers() {
+        const users = await AuthenticationApi.searchUsers(this.state.search);
+        await this.setState({ users: users });
+    }
+
     render() {
         const { classes } = this.props;
-        console.log(this.state.users);
         return (
             <Box className={clsx(classes.root)}>
+                <FormControl className={clsx(classes.formControl)}>
+                    <Input type="text" value={this.state.search} onChange={e => this.updateSearch(e.target.value)} placeholder="Chercher un utilisateur" />
+                </FormControl>
                 <List>
                     {
                         this.state.users && this.state.users.map(user => {

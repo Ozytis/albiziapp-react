@@ -75,7 +75,7 @@ class UserPageComponent extends BaseComponent<UserPageProps, UserPageState>{
     
 
     async goTo(path: string) {
-        this.props.history.push({
+        this.props.history.replace({
             pathname: path
         });
     }
@@ -112,7 +112,7 @@ class UserPageComponent extends BaseComponent<UserPageProps, UserPageState>{
 
     }
     async editUser() {
-        this.props.history.push({
+        this.props.history.replace({
             pathname: `/edit-user/${this.state.user.osmId}`
         });
     }

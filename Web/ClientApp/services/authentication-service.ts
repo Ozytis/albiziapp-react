@@ -127,7 +127,9 @@ class AuthenticationService extends BaseService {
     async getAllUsers() {
         return await this.get<UserModel[]>(`users/allUsers`);
     }
-
+    async searchUsers(search: string) {
+        return await this.get<UserModel[]>(`users/searchUsers?search=${search}`);
+    }
     async getUser(userId: string) {
         return await this.get<UserModel>(`users/${userId}`)
     }

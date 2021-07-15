@@ -3,6 +3,7 @@ using Common;
 using Entities;
 using Folia;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.FileProviders;
 using Ozytis.Common.Core.Storage;
 using System.IO;
 using Web.Hubs;
+using Web.Security;
 using Web.Utilities;
 
 namespace Web
@@ -54,6 +56,8 @@ namespace Web
             services.AddSingleton<HubPositionManager>();
             services.AddSingleton<IUserNotify, NotifyHub>();
             services.AddSingleton<IUserPosition, PositionHub>();
+
+            services.AddScoped<IAuthorizationHandler, RolesAuthorizationHandler>();
 
             var fs = new FoliaScript(this.Configuration["FoliaPath"]);
             services.AddSingleton<FoliaScript>(fs);

@@ -149,7 +149,7 @@ class EditUserPageComponent extends BaseComponent<EditUserPageProps, EditUserPag
         }
         else {
             await this.setState({ isProcessing: false });
-            this.props.history.push({
+            this.props.history.replace({
                 pathname: "/users"
             })
         }

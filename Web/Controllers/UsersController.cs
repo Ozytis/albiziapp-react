@@ -66,10 +66,6 @@ namespace Web.Controllers
                 new CookieOptions { Path = this.Url.Content("~/") });
 
             await this.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
-            if (user != null)
-            {
-                //await this.UsersManager.StartFirstMission(model.OsmId);
-            }
 
             return user?.ToUserApiModel();
         }
@@ -92,7 +88,6 @@ namespace Web.Controllers
             return user?.ToUserScoreModel();
         }
 
-
         [HttpGet("userAdmin")]
         [Authorize]
         public async Task<bool> IsUserAdminAsync()
@@ -103,14 +98,28 @@ namespace Web.Controllers
         }
 
         [HttpGet("allUsers")]
+        [Authorize(Roles = UserRoleName.Administrator)]
         public async Task<IEnumerable<UserModel>> GetAllUsersAsync()
         {
             IEnumerable<User> users = await this.UsersManager.GetAllUsers();
             return users.Select(u => u.ToUserApiModel());
         }
 
+        [HttpGet("searchUsers")]
+        [Authorize(Roles = UserRoleName.Administrator)]
+        public async Task<IEnumerable<UserModel>> SearchUsersAsync(string search)
+        {
+            search = search?.ToLower().RemoveDiacritics().Trim();
+            IEnumerable<User> users = await this.UsersManager.GetAllUsers();
+            if (!string.IsNullOrEmpty(search))
+            {
+                users = users.Where(x => x.Name.ToLower().Trim().RemoveDiacritics().Contains(search));
+            }
+            return users.Select(u => u.ToUserApiModel());
+        }
+
         [HttpGet("{userId}")]
-        public async Task<UserModel> GetAllUsersAsync(string userId)
+        public async Task<UserModel> GetchesUsersAsync(string userId)
         {
             var user = await this.UsersManager.SelectAsync(userId);
             return user.ToUserApiModel();
@@ -118,6 +127,7 @@ namespace Web.Controllers
 
         [HttpPut]
         [HandleBusinessException, ValidateModel]
+        [Authorize(Roles = UserRoleName.Administrator)]
         public async Task EditUserAysnc([FromBody] UserEditionModel model)
         {
             await this.UsersManager.EditUserAsync(
@@ -125,7 +135,7 @@ namespace Web.Controllers
                 {
                     OsmId = model.OsmId,
                     Name = model.Name,
-                    Role= (Entities.Enums.UserRole?)model.Role
+                    Role = (Entities.Enums.UserRole?)model.Role
                 });
         }
     }

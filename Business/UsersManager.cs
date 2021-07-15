@@ -1,5 +1,6 @@
 ﻿using Common;
 using Entities;
+using Entities.Enums;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -16,8 +17,8 @@ namespace Business
             this.MissionsManager = missionsManager;
             this.TrophiesManager = trophiesManager;
             this.UserNotify = userNotify;
-
         }
+
         public IUserNotify UserNotify { get; }
         public TitlesManager TitlesManager { get; }
 
@@ -50,10 +51,8 @@ namespace Business
 
             await this.DataContext.Users.InsertOneAsync(existing);
 
-
             return existing;
         }
-
 
         public async Task AddExplorationPoints(string userId, List<PointHistory> points)
         {
@@ -78,7 +77,6 @@ namespace Business
 
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
         }
-
 
         public async Task AddKnowledegePoints(string userId, List<PointHistory> points)
         {
@@ -128,7 +126,6 @@ namespace Business
                 }
                 await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
             }
-
         }
 
         public async Task AddTrophies(string userId)
@@ -155,9 +152,7 @@ namespace Business
                 await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
             }*/
 
-
             await this.UserNotify.SendNotif(userId, "Vous avez debloqué un nouveau trophée !");
-
         }
 
         public async Task UpdateMissionProgression(string userId, MissionProgress progress)
@@ -200,7 +195,6 @@ namespace Business
 
             await this.AddTrophies(user.OsmId);
             await this.UserNotify.SendInfoNotif(userId, $"Vous avez terminé la mission en faisant {nbReleve} relevés !");
-
         }
 
         /* public async Task StartFirstMission(string userId)
@@ -219,10 +213,7 @@ namespace Business
              }
 
              await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
-
          }*/
-
-
 
         public bool IsUserAdmin(User user)
         {
@@ -234,8 +225,20 @@ namespace Business
             {
                 return false;
             }
-
         }
+
+        public bool UserIsInRole(User user, UserRole userRole)
+        {
+            if (user.Role.HasValue && user.Role.Value.HasFlag(userRole))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public async Task<IEnumerable<User>> GetAllUsers()
         {
             return await this.DataContext.Users.Find(_ => true).ToListAsync();
@@ -245,6 +248,7 @@ namespace Business
         {
             return await this.DataContext.Users.Find(u => osmIds.Contains(u.OsmId)).ToListAsync();
         }
+
         public async Task<User> GetUserById(string osmId)
         {
             return await this.SelectAsync(osmId);
@@ -271,6 +275,7 @@ namespace Business
 
             return oldUser;
         }
+
         public async Task StartMissionAsync(MissionProgress mission, string userId)
         {
             using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
@@ -285,7 +290,7 @@ namespace Business
 
                 await this.DataContext.Users.FindOneAndReplaceAsync(x => x.Id == user.Id, user);
 
-                if(mission == null)
+                if (mission == null)
                 {
                     await this.UserNotify.SendErrorNotif(userId, $"La mission a été abandonné");
                 }
