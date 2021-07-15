@@ -113,7 +113,7 @@ namespace Web.Controllers
             IEnumerable<User> users = await this.UsersManager.GetAllUsers();
             if (!string.IsNullOrEmpty(search))
             {
-                users = users.Where(x => x.Name.ToLower().Trim().RemoveDiacritics().Contains(search));
+                users = users.Where(x => x.Name.ToLower().Trim().RemoveDiacritics().Contains(search) || x.OsmId.Contains(search));
             }
             return users.Select(u => u.ToUserApiModel());
         }

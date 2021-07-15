@@ -13,7 +13,7 @@ import { UserRole } from "../../services/generated/user-role";
 
 const styles = (theme: Theme) => createStyles({
     root: {
-
+        marginBottom: theme.spacing(6)
     },
     card: {
         //color: theme.palette.common.white,
@@ -27,7 +27,6 @@ const styles = (theme: Theme) => createStyles({
 });
 
 interface UsersPageProps extends RouteComponentProps, IPropsWithAppContext, WithStyles<typeof styles> {
-
 }
 
 class UsersPageState {
@@ -36,7 +35,6 @@ class UsersPageState {
 }
 
 class UsersPageComponent extends BaseComponent<UsersPageProps, UsersPageState>{
-
     timeout: any;
 
     constructor(props: UsersPageProps) {
@@ -44,11 +42,11 @@ class UsersPageComponent extends BaseComponent<UsersPageProps, UsersPageState>{
     }
     async componentDidMount() {
         const users = await AuthenticationApi.searchUsers("");
-        await this.setState({ users : users });
+        await this.setState({ users: users });
     }
 
     async goTo(path: string) {
-        this.props.history.replace({
+        this.props.history.push({
             pathname: path
         })
     }
@@ -67,22 +65,18 @@ class UsersPageComponent extends BaseComponent<UsersPageProps, UsersPageState>{
     }
 
     seeRole(role: number) {
-
         var listRole = this.getUserRole(role);
         var roles: string;
         if (listRole.length < 1) {
-
             return "Aucun";
         }
         else if (listRole.length == 1) {
-
             return listRole[0];
         }
         else {
             roles = listRole.join(", ");
             return roles;
         }
-
     }
 
     async updateSearch(search: string) {
@@ -91,7 +85,6 @@ class UsersPageComponent extends BaseComponent<UsersPageProps, UsersPageState>{
             clearTimeout(this.timeout);
         }
         this.timeout = setTimeout(async () => { await this.searchUsers(); }, 500);
-
     }
     async searchUsers() {
         const users = await AuthenticationApi.searchUsers(this.state.search);
@@ -110,7 +103,7 @@ class UsersPageComponent extends BaseComponent<UsersPageProps, UsersPageState>{
                         this.state.users && this.state.users.map(user => {
                             return (
                                 <ListItem key={user.id} onClick={() => this.goTo(`user/${user.osmId}`)} className={clsx(classes.card)}>
-                                    <ListItemText primary={user.name} secondary={this.seeRole(user.role)} />
+                                    <ListItemText primary={user.name} secondary={`OSM ID : ${user.osmId} / Role(s) : ${this.seeRole(user.role)}`} />
                                     <ListItemIcon>
                                         <ChevronRight />
                                     </ListItemIcon>
