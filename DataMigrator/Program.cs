@@ -14,7 +14,7 @@ namespace DataMigrator
 {
     internal class Program
     {
-        static string URL = "http://localhost:5100";
+        private static string URL = "http://localhost:5100";
 
         private static async Task Main(string[] args)
         {
@@ -39,11 +39,10 @@ namespace DataMigrator
                 Console.WriteLine("Veuillez choisir une opération :");
                 Console.WriteLine("\t1 - Essences d'arbres");
                 Console.WriteLine("\t2 - Clef de détermination");
-                Console.WriteLine("\t3 - Mission");
-                Console.WriteLine("\t4 - Trophée");
-                Console.WriteLine("\t5 - Titre");
-                Console.WriteLine("\t6 - Rareté");
-                Console.WriteLine("\t7 - Mission v2");
+                Console.WriteLine("\t3 - Trophée");
+                Console.WriteLine("\t4 - Titre");
+                Console.WriteLine("\t5 - Rareté");
+                Console.WriteLine("\t6 - Mission v2");
                 Console.WriteLine("\tQ - Quitter");
 
                 ConsoleKeyInfo key = Console.ReadKey();
@@ -55,26 +54,30 @@ namespace DataMigrator
                     case '1':
                         await MigrateSpeciesAsync();
                         break;
+
                     case '2':
                         await MigrateFloraKeysAsync();
                         break;
+
                     case '3':
-                        await MigrateMission();
-                        break;
-                    case '4':
                         await MigrateTrophies();
                         break;
-                    case '5':
+
+                    case '4':
                         await MigrateTitles();
                         break;
-                    case '6':
+
+                    case '5':
                         await MigrateRarety();
                         break;
-                    case '7':
+
+                    case '6':
                         await MigrateMissionv2();
                         break;
+
                     case 'q':
                         return;
+
                     default:
                         Console.WriteLine("Commande non prise en charge");
                         break;
@@ -122,7 +125,6 @@ namespace DataMigrator
                     Console.WriteLine(species.Common + " " + species.Common_genus);
                 }
             }
-
         }
 
         private static async Task MigrateFloraKeysAsync()
@@ -182,7 +184,6 @@ namespace DataMigrator
             //{
             //    if (jsonReader.TokenType == JsonToken.StartObject)
             //    {
-
             //        ActivityCreationModel key = serializer.Deserialize<ActivityCreationModel>(jsonReader);
             //        key.Order = order;
             //        activities.Add(key);
@@ -211,13 +212,10 @@ namespace DataMigrator
 
             JsonSerializer serializer = new JsonSerializer();
 
-
-
             while (jsonReader.Read())
             {
                 if (jsonReader.TokenType == JsonToken.StartObject)
                 {
-
                     TrophyCreationModel trophy = serializer.Deserialize<TrophyCreationModel>(jsonReader);
                     Console.WriteLine(JsonConvert.SerializeObject(trophy));
                     string json = JsonConvert.SerializeObject(trophy);
@@ -240,13 +238,10 @@ namespace DataMigrator
 
             JsonSerializer serializer = new JsonSerializer();
 
-
-
             while (jsonReader.Read())
             {
                 if (jsonReader.TokenType == JsonToken.StartObject)
                 {
-
                     TitleCreationModel title = serializer.Deserialize<TitleCreationModel>(jsonReader);
                     Console.WriteLine(JsonConvert.SerializeObject(title));
                     string json = JsonConvert.SerializeObject(title);
@@ -259,6 +254,7 @@ namespace DataMigrator
                 }
             }
         }
+
         private static async Task MigrateRarety()
         {
             using StreamReader reader = new StreamReader(Path.Combine(Directory.GetCurrentDirectory(), "Migrate", "rarete.json"));
@@ -268,13 +264,10 @@ namespace DataMigrator
 
             JsonSerializer serializer = new JsonSerializer();
 
-
-
             while (jsonReader.Read())
             {
                 if (jsonReader.TokenType == JsonToken.StartObject)
                 {
-
                     RaretyCreationModel rarety = serializer.Deserialize<RaretyCreationModel>(jsonReader);
                     Console.WriteLine(JsonConvert.SerializeObject(rarety));
                     string json = JsonConvert.SerializeObject(rarety);
@@ -287,6 +280,7 @@ namespace DataMigrator
                 }
             }
         }
+
         private static async Task MigrateMissionv2()
         {
             using StreamReader reader = new StreamReader(Path.Combine(Directory.GetCurrentDirectory(), "Migrate", "missionv2.json"));
@@ -310,14 +304,13 @@ namespace DataMigrator
                         webClient.Headers.Add("Content-Type", "text/json");
                         await webClient.UploadDataTaskAsync(new Uri($"{URL}/api/missions/createMissionFromApi"), Encoding.UTF8.GetBytes(missionJson));
                     }
-                }catch(Exception e)
+                }
+                catch (Exception e)
                 {
-
                 }
             }
 
             //Console.WriteLine(json);
-
         }
     }
 }

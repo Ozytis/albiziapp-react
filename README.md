@@ -18,10 +18,10 @@ sudo apt-get update; \
 ### Installation de mongo db ([https://docs.mongodb.com/manual/tutorial/install-mongodb-on-debian/](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-debian/))
 
 ```bash
-wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | sudo apt-key add -
-echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/5.0 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-5.0.list
+wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
+echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
 sudo apt-get update
-sudo apt-get install -y mongodb-org
+sudo apt-get install -y mongodb-org=4.2.15 mongodb-org-server=4.2.15 mongodb-org-shell=4.2.15 mongodb-org-mongos=4.2.15 mongodb-org-tools=4.2.15
 sudo systemctl start mongod
 ```
 ### Installation de python 3.7 pour folia
@@ -29,12 +29,15 @@ sudo systemctl start mongod
 sudo apt install python3.7
 sudo apt install python3-pip
 ```
-
+### Installation de nginx
+```bash
+sudo apt install nginx
+```
 ## Installation du site
 
 ```bash
 # Mettez vous dans le dossier de votre choix
-wget -O albiziapp.tar.gz https://github.com/Ozytis/albiziapp-react/dist/latest.linuxX64.tar
+wget -O albiziapp.tar.gz https://github.com/Ozytis/albiziapp-react/raw/master/dist/latest.linuxX64.tar.gz
 tar -xvf albiziapp.tar.gz
 chmod 755 Web
 # Télécharger le dossier de folia et le mettre dans le dossier du site albiziapp
@@ -73,24 +76,8 @@ Exemple de configuration
   "ContentDir": "/home/myUser/albiziapp/"
 }
 ```
-### Lancement du site
-```bash
-nohup ./Web > /dev/null 2>&1
-```
-### Insertion des données
-```bash
-cd ./DataMigrator/
-dotnet run
-```
-Suivre les instructions du logiciel pour l'insertion des données.
-Il faut insérer les differents types de données différentes afin de pouvoir faire fonctionner correctement le site
 
-### Accès au site
-Par défaut le site est disponible sur le port 5000, en http, ou 5001 en https
-
-Vous pouvez avoir accès au site depuis le navigateur http://{ip_du_serveur}:5000 ou https://{ip_du_serveur}:5001
-
-### Pour aller plus loin 
+### Configuration nginx
 Configuration de nginx ([https://docs.microsoft.com/fr-fr/aspnet/core/host-and-deploy/linux-nginx?view=aspnetcore-3.1](https://docs.microsoft.com/fr-fr/aspnet/core/host-and-deploy/linux-nginx?view=aspnetcore-3.1))
 
 Exemple de fichier de configuration nginx pour albiziapp
@@ -126,6 +113,24 @@ server {
     }
 }
 ```
+### Lancement du site
+```bash
+nohup ./Web > /dev/null 2>&1 &
+```
+### Insertion des données
+```bash
+cd ./DataMigrator/
+dotnet run
+```
+Suivre les instructions du logiciel pour l'insertion des données.
+Il faut insérer les differents types de données différentes afin de pouvoir faire fonctionner correctement le site
 
+## Pour aller plus loin 
+### Passage d'un compte en admin
+Pour passer un compte admin,
+Connectez vous à la base de données mongo.
+Dans la base utilisateur, cherchez l'utilisateur et modifier la valeur du champ "Role" à 2.
+
+### HTTPS
 Installation d'un certificat HTTPS ([https://certbot.eff.org/instructions] (https://certbot.eff.org/instructions))
 
