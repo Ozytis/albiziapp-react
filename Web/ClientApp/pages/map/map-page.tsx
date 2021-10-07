@@ -1,4 +1,4 @@
-import { Box, createStyles, Icon, Theme, WithStyles, withStyles, Button, Dialog, DialogActions } from "@material-ui/core";
+import { Box, createStyles, Icon, Theme, WithStyles, withStyles, Button, } from "@material-ui/core";
 import clsx from "clsx";
 import L, { LatLng, latLng } from "leaflet";
 import React, { createRef, Component, useState, useEffect } from "react";
@@ -13,15 +13,12 @@ import { ObservationsApi } from "../../services/observation";
 import { t } from "../../services/translation-service";
 import { MissionsApi } from "../../services/missions-service";
 import { MissionProgressionModel } from "../../services/generated/mission-progression-model";
-import { NearMe, ZoomOutMapSharp, MapRounded, Layers } from "@material-ui/icons";
+import { NearMe,Layers } from "@material-ui/icons";
 import { MapPosition } from "../../components/mapPosition";
 import * as signalR from "@microsoft/signalr";
 import { MissionModel, CircleAreaModel, PolygonArea, IdentificationMissionModel, VerificationMissionModel, RestrictionType, NumberOfActions, TimeLimit } from "../../services/models/mission-model";
-import { CoordinateModel } from "../../services/generated/coordinate-model";
-import { orange } from "@material-ui/core/colors";
 import { NotifyHelper } from "../../utils/notify-helper";
 import { MissionHistoryModel } from "../../services/generated/mission-history-model";
-//import { Services, LExtended  } from 'geoportal-extensions-leaflet';
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -128,35 +125,9 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             this.setState({ observations: obs })
         });
         await this.hub.start();
-        // await this.addMapLayer();
         await this.loadData();
     }
 
-    /*async addMapLayer() {
-         var lyrOSM = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png?');
-         var lyrOrtho = L.geoportalLayer.WMTS({
-             layer: "ORTHOIMAGERY.ORTHOPHOTOS",
-         });
-         var lyrMaps = L.geoportalLayer.WMTS({
-             layer: "GEOGRAPHICALGRIDSYSTEMS.MAPS",
-         }, { // leafletParams
-             opacity: 0.7
-         });
-      
-             this.state.mapRef.current.leafletElement.addLayer(lyrOrtho);
-         this.state.mapRef.current.leafletElement.addLayer(lyrOSM);
-         this.state.mapRef.current.leafletElement.addLayer(lyrMaps);
-         var layerSwitcher = L.geoportalControl.LayerSwitcher({
-             layers: [{
-                 layer: lyrOSM,
-                 config: {
-                     title: "OSM",
-                     description: "Couche Open Street Maps"
-                 }
-             }]
-         });
-         this.state.mapRef.current.leafletElement.addControl(layerSwitcher);
-     }*/
     async loadData() {
 
         var missions = await MissionsApi.getMissions();
