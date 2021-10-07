@@ -21,6 +21,7 @@ import { CoordinateModel } from "../../services/generated/coordinate-model";
 import { orange } from "@material-ui/core/colors";
 import { NotifyHelper } from "../../utils/notify-helper";
 import { MissionHistoryModel } from "../../services/generated/mission-history-model";
+//import { Services, LExtended  } from 'geoportal-extensions-leaflet';
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -127,8 +128,35 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             this.setState({ observations: obs })
         });
         await this.hub.start();
+        // await this.addMapLayer();
         await this.loadData();
     }
+
+    /*async addMapLayer() {
+         var lyrOSM = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png?');
+         var lyrOrtho = L.geoportalLayer.WMTS({
+             layer: "ORTHOIMAGERY.ORTHOPHOTOS",
+         });
+         var lyrMaps = L.geoportalLayer.WMTS({
+             layer: "GEOGRAPHICALGRIDSYSTEMS.MAPS",
+         }, { // leafletParams
+             opacity: 0.7
+         });
+      
+             this.state.mapRef.current.leafletElement.addLayer(lyrOrtho);
+         this.state.mapRef.current.leafletElement.addLayer(lyrOSM);
+         this.state.mapRef.current.leafletElement.addLayer(lyrMaps);
+         var layerSwitcher = L.geoportalControl.LayerSwitcher({
+             layers: [{
+                 layer: lyrOSM,
+                 config: {
+                     title: "OSM",
+                     description: "Couche Open Street Maps"
+                 }
+             }]
+         });
+         this.state.mapRef.current.leafletElement.addControl(layerSwitcher);
+     }*/
     async loadData() {
 
         var missions = await MissionsApi.getMissions();
@@ -169,17 +197,17 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
         var now = new Date();
         now = new Date(now.getTime() - 30 * 60000);
-    
+
         if (this.state.mapRef.current != null) {
             let lat = this.state.userPosition.coords.latitude, lng = this.state.userPosition.coords.longitude;
-            if (lastPos == null) {                
-                await this.state.mapRef.current.leafletElement.panTo([lat, lng]);              
+            if (lastPos == null) {
+                await this.state.mapRef.current.leafletElement.panTo([lat, lng]);
             } else {
                 var date = new Date(lastPos.Date as any);
                 if (date >= now) {
                     lat = lastPos.Latitude;
                     lng = lastPos.Longitude;
-                    await this.state.mapRef.current.leafletElement.setView([lastPos.Latitude, lastPos.Longitude], lastPos.Zoom);           
+                    await this.state.mapRef.current.leafletElement.setView([lastPos.Latitude, lastPos.Longitude], lastPos.Zoom);
                 }
                 else {
                     await this.state.mapRef.current.leafletElement.panTo([lat, lng]);
@@ -235,15 +263,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
     }
 
     getTilesUrl() {
-        if (document.location.host.indexOf("localhost") > -1 || document.location.host.indexOf("192.168.1.") > -1) {
-            return "//wxs.ign.fr/choisirgeoportail/geoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/jpeg&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}"
-        } else {
-            if (document.location.host.indexOf("albiziapp.ozytis.fr") > -1) {
-                return "//wxs.ign.fr/3urbr0dt1qgjytxdkbt6z3cq/geoportail/wmts?service=WMTS&request=GetTile&version=1.0.0&tilematrixset=PM&tilematrix={z}&tilecol={x}&tilerow={y}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&format=image/jpeg&style=normal";
-            } else if (document.location.host.indexOf("albiziapp2.ozytis.fr") > -1) {
-                return "//wxs.ign.fr/5ts1y3n87hinjyxnu8j9l9ev/geoportail/wmts?service=WMTS&request=GetTile&version=1.0.0&tilematrixset=PM&tilematrix={z}&tilecol={x}&tilerow={y}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&format=image/jpeg&style=normal";
-            }
-        }
+            return "//wxs.ign.fr/essentiels/geoportail/wmts?service=WMTS&request=GetTile&version=1.0.0&tilematrixset=PM&tilematrix={z}&tilecol={x}&tilerow={y}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&format=image/jpeg&style=normal";     
     }
 
     getColor(observation: ObservationModel) {
@@ -407,7 +427,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         else if (miss.$type.indexOf("IdentificationMissionModel") != -1) {
             mission = miss as IdentificationMissionModel;
         }
-        if ( mission.restrictedArea != null && mission.restrictedArea != undefined) {
+        if (mission.restrictedArea != null && mission.restrictedArea != undefined) {
             if ((mission.restrictedArea as CircleAreaModel).center != null) {
                 const circle = mission.restrictedArea as CircleAreaModel;
                 var cir = L.circle(latLng(circle.center.latitude, circle.center.longitude), circle.radius);
@@ -482,7 +502,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         await this.setState({ zoomLevel: zoom });
     }
     render() {
-        var  crossMarker = L.divIcon({
+        var crossMarker = L.divIcon({
             className: '',
             iconAnchor: [12, 25],
             popupAnchor: [0, -15],
@@ -497,7 +517,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         return (
             <Box className={clsx(classes.root)}>
                 {
-                    this.state.userPosition && 
+                    this.state.userPosition &&
 
                     <Map
                         ref={this.state.mapRef}
@@ -507,6 +527,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         zoom={this.state.zoomLevel}
                         zoomSnap={0.5}
                         minZoom={5}
+
                         onclick={(e) => this.onMapClicked(e)}
                         ondragend={() => this.setLastPosition(this.state.mapRef.current.leafletElement.getCenter().lat, this.state.mapRef.current.leafletElement.getCenter().lng, this.state.mapRef.current.leafletElement.getZoom())}
                         onzoomend={() => this.setZoom(this.state.mapRef.current.leafletElement.getZoom())}
@@ -520,8 +541,8 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
                         />
                         {this.state.temporaryMarkerPosition != null &&
                             <Marker
-                            position={{ lat: this.state.temporaryMarkerPosition.lat, lng: this.state.temporaryMarkerPosition.lng }}
-                            icon={crossMarker}
+                                position={{ lat: this.state.temporaryMarkerPosition.lat, lng: this.state.temporaryMarkerPosition.lng }}
+                                icon={crossMarker}
                             />
                         }
                         <Marker
@@ -623,5 +644,6 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         )
     }
 }
+//Services.getConfig({ apiKey: 'decouverte' });
 
 export const MapPage = withStyles(styles, { withTheme: true })(withAppContext(withRouter(MapPageComponent)));
