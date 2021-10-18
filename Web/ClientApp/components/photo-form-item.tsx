@@ -116,7 +116,6 @@ class PhotoFormItemComponent extends BaseComponent<PhotoFormItemProps, PhotoForm
                 } else {
                     alert(t.__("Une erreur s'est produite."));
                 }
-                console.log(e);
             }
         }
     }

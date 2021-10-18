@@ -6,7 +6,6 @@ import { RouteComponentProps, withRouter, Route } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
 import { BaseComponent } from "../../components/base-component";
 import { Confirm } from "../../components/confirm";
-import { ErrorSummary } from "../../components/error-summary";
 import { Loader } from "../../components/loader";
 import { PhotoFormItem } from "../../components/photo-form-item";
 import { AuthenticationApi } from "../../services/authentication-service";
@@ -143,7 +142,6 @@ class NewObservationPageComponent extends BaseComponent<NewObservationPageProps,
     }
 
     async updateModel(propertyName: string, value: any) {
-        console.log(propertyName, value);
         const model = this.state.model;
         model[propertyName] = value;
         await this.setState({ model: model });

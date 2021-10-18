@@ -9,8 +9,7 @@ import { SpeciesModel } from "../../services/generated/species-model";
 import { ObservationsApi } from "../../services/observation";
 import { ArboretumCard } from "./arboretum-card";
 import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { t } from "../../services/translation-service";
+import 'react-toastify/dist/ReactToastify.css'; 
 
 // eslint-disable-next-line
 const styles = (style: Theme) => createStyles({
@@ -18,15 +17,7 @@ const styles = (style: Theme) => createStyles({
         marginBottom: "15%",
     }
 });
-const notify = () => toast.success(' Wow so easy!', {
-    position: toast.POSITION.BOTTOM_CENTER,
-    autoClose: 5000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-});
+
 
 interface ArboretumPageProps extends RouteComponentProps, IPropsWithAppContext, WithStyles<typeof styles> {
 
@@ -42,8 +33,6 @@ class ArboretumPageComponent extends BaseComponent<ArboretumPageProps, Arboretum
     }
 
     async componentDidMount() {
-        console.log("CDM AP");
-
         const species = await ObservationsApi.getUserArboretum(AuthenticationApi.user.osmId);
         await this.setState({ species: species });
 

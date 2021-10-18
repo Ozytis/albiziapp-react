@@ -615,6 +615,5 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
         )
     }
 }
-//Services.getConfig({ apiKey: 'decouverte' });
 
 export const MapPage = withStyles(styles, { withTheme: true })(withAppContext(withRouter(MapPageComponent)));

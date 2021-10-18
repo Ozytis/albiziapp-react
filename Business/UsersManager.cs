@@ -11,11 +11,10 @@ namespace Business
 {
     public class UsersManager : BaseManager
     {
-        public UsersManager(DataContext dataContext, TitlesManager titlesManager, MissionsManager missionsManager, TrophiesManager trophiesManager, IUserNotify userNotify) : base(dataContext)
+        public UsersManager(DataContext dataContext, TitlesManager titlesManager, MissionsManager missionsManager, IUserNotify userNotify) : base(dataContext)
         {
             this.TitlesManager = titlesManager;
             this.MissionsManager = missionsManager;
-            this.TrophiesManager = trophiesManager;
             this.UserNotify = userNotify;
         }
 
@@ -23,8 +22,6 @@ namespace Business
         public TitlesManager TitlesManager { get; }
 
         public MissionsManager MissionsManager { get; }
-
-        public TrophiesManager TrophiesManager { get; }
 
         public async Task<User> SelectAsync(string osmId)
         {
@@ -128,32 +125,6 @@ namespace Business
             }
         }
 
-        public async Task AddTrophies(string userId)
-        {
-            var user = await this.SelectAsync(userId);
-            if (user == null)
-            {
-                return;
-            }
-            /*var trophies = await this.TrophiesManager.GetTrophiesBySuccessActivitiesCount(user.MissionCompleted?.Sum(x => x.ActivitiesCompleted.Count()) ?? 0);
-            if (trophies != null && trophies.Count > 0)
-            {
-                if (user.Trophies == null)
-                {
-                    user.Trophies = trophies.Select(t => t.Id).ToArray();
-                }
-                else
-                {
-                    var trophiesToAdd = trophies.Where(t => !user.Trophies.Any(ut => ut == t.Id)).Select(t => t.Id).ToList();
-
-                    user.Trophies = user.Trophies.Concat(trophiesToAdd).ToArray();
-                }
-
-                await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
-            }*/
-
-            await this.UserNotify.SendNotif(userId, "Vous avez debloqué un nouveau trophée !");
-        }
 
         public async Task UpdateMissionProgression(string userId, MissionProgress progress)
         {
@@ -193,27 +164,10 @@ namespace Business
 
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
 
-            await this.AddTrophies(user.OsmId);
+            
             await this.UserNotify.SendInfoNotif(userId, $"Vous avez terminé la mission en faisant {nbReleve} relevés !");
         }
-
-        /* public async Task StartFirstMission(string userId)
-         {
-             var user = await this.SelectAsync(userId);
-             if (user == null || user.MissionProgress != null)
-             {
-                 return;
-             }
-
-             var missions = await this.MissionsManager.GetAllMissionsAsync();
-             var nextMission = missions.FirstOrDefault();
-             if (nextMission != null)
-             {
-                 user.MissionProgress = new MissionProgress { MissionId = nextMission.Id, ActivityId = nextMission.Activities.OrderBy(x => x.Order).FirstOrDefault()?.Id, StartDate = DateTime.UtcNow };
-             }
-
-             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
-         }*/
+           
 
         public bool IsUserAdmin(User user)
         {
@@ -264,6 +218,7 @@ namespace Business
 
                 oldUser.OsmId = user.OsmId;
                 oldUser.Name = user.Name;
+                oldUser.Email = user.Email;
                 oldUser.Role = user.Role;
                 await this.DataContext.Users.FindOneAndReplaceAsync(u => u.OsmId == oldUser.OsmId, oldUser);
             }

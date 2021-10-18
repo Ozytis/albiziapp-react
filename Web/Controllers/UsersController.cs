@@ -125,16 +125,37 @@ namespace Web.Controllers
             return user.ToUserApiModel();
         }
 
-        [HttpPut]
+        [HttpPut("editUserAdmin")]
         [HandleBusinessException, ValidateModel]
         [Authorize(Roles = UserRoleName.Administrator)]
-        public async Task EditUserAysnc([FromBody] UserEditionModel model)
+        public async Task EditUserAdminAysnc([FromBody] UserEditionModel model)
         {
             await this.UsersManager.EditUserAsync(
                 new User
                 {
                     OsmId = model.OsmId,
                     Name = model.Name,
+                    Email = model.Email,
+                    Role = (Entities.Enums.UserRole?)model.Role
+                });
+        }
+
+        [HttpPut("editUser")]
+        [HandleBusinessException, ValidateModel]
+        [Authorize]
+        public async Task EditUserAysnc([FromBody] UserEditionModel model)
+        {
+            var currentUser = this.User.Identity.Name;
+            if(currentUser != model.OsmId)
+            {
+                throw new BusinessException("Vous ne pouvez pas modifier cet utilisateur.");
+            }
+            await this.UsersManager.EditUserAsync(
+                new User
+                {
+                    OsmId = model.OsmId,
+                    Name = model.Name,
+                    Email = model.Email,
                     Role = (Entities.Enums.UserRole?)model.Role
                 });
         }

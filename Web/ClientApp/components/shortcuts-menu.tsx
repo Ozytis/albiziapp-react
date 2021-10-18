@@ -87,7 +87,6 @@ export class ShortcutsMenuComponent extends BaseComponent<ShortcutsMenuProps, Sh
     getCurrentTabValue(): ShortcutType {
         let path = this.props.location.pathname;
 
-        console.log("menu", path);
 
         path = path.indexOf("/") === 0 ? path.substr(1) : path;
 

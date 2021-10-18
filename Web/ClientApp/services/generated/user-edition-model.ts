@@ -7,6 +7,7 @@
 export class UserEditionModel {
     name = "";
     osmId = "";
+    email = "";
     role: number = null;
 
     validate() {

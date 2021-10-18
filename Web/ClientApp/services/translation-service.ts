@@ -56,12 +56,10 @@ class TranslationService {
 
         const word = this.dic[value];
         if (word == null) {
-            //console.warn("pas traduit du tout", value);
             return this.format(value, args);
         }
 
         if (!word[this.lang]) {
-            //console.warn("pas traduit en ", this.lang, value);
             return this.format(value, args);
         }
 
@@ -89,7 +87,6 @@ class TranslationService {
         console.log("getLanguage", this.lang, this);
         return this.lang;
     }
-
 
 
     registerLanguageChangeHandler(handler: (language: availableLanguages) => Promise<void>) {

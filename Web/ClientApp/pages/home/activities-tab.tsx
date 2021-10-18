@@ -6,8 +6,6 @@ import { MissionsApi } from "../../services/missions-service";
 import { ActivityCard } from "./activity-card";
 import { AuthenticationApi } from "../../services/authentication-service";
 import { MissionUserModel } from "../../services/generated/mission-user-model";
-import { MissionsCompleteModel } from "../../services/generated/missions-user-model";
-import { forEach } from "lodash";
 
 interface ActivitiesTabProps extends RouteComponentProps {
 

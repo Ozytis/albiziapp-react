@@ -13,15 +13,15 @@ import { SpeciesPageConfig } from "./pages/species/species-page-config";
 import { EditObservationPageConfig } from "./pages/observation/edit-observation-page-config";
 import { ExplorationPointsPageConfig } from "./pages/score/exploration-points-page-config";
 import { KnowledgePointsPageConfig } from "./pages/score/knowledge-points-page-config";
-import { TrophyPageConfig } from "./pages/score/trophy-page-config";
 import { TitlePageConfig } from "./pages/score/title-page-config";
 import { UsersPageConfig } from "./pages/user/users-page-config";
 import { UserPageConfig } from "./pages/user/user-page-config";
-import { EditUserPageConfig } from "./pages/user/edit-user-page-config";
+import { EditUserPageAdminConfig } from "./pages/user/edit-user-page-admin-config";
 import { HistoryPageConfig } from "./pages/observation/history-page-config";
 import { NewIdentificationMissionPageConfig } from "./pages/Missions/new-identification-mission-config";
 import { CreateMissionComponentConfig } from "./pages/Missions/create-mission-config";
 import { FoliaPageConfig } from "./pages/folia/folia-page-config";
+import { EditUserPageConfig } from "./pages/user/edit-user-page-config";
 
 const routesConfig = [
     HomePageConfig,
@@ -38,15 +38,15 @@ const routesConfig = [
     EditObservationPageConfig,
     ExplorationPointsPageConfig,
     KnowledgePointsPageConfig,
-    TrophyPageConfig,
     TitlePageConfig,
     UsersPageConfig,
     UserPageConfig,
-    EditUserPageConfig,
+    EditUserPageAdminConfig,
     HistoryPageConfig,
     NewIdentificationMissionPageConfig,
     CreateMissionComponentConfig,
-    FoliaPageConfig
+    FoliaPageConfig,
+    EditUserPageConfig
 
 ]
 

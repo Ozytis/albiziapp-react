@@ -7,10 +7,8 @@ import clsx from "clsx";
 import { __ } from "../../services/translation";
 import { ChevronRight } from "@material-ui/icons";
 import { TitlesApi } from "../../services/titles-service";
-import { TrophiesApi } from "../../services/trophies-service";
 import { AuthenticationApi } from "../../services/authentication-service";
 import { TitleModel } from "../../services/generated/title-model";
-import { TrophyModel } from "../../services/generated/trophy-model";
 import { UserScoreModel } from "../../services/generated/user-score-model";
 
 // eslint-disable-next-line
@@ -30,7 +28,6 @@ interface ScorePageProps extends RouteComponentProps, IPropsWithAppContext, With
 
 class ScorePageState {
     titles: TitleModel[];
-    trophies: TrophyModel[];
     score: UserScoreModel;
 }
 
@@ -40,8 +37,8 @@ class ScorePageComponent extends BaseComponent<ScorePageProps, ScorePageState>{
     }
 
     async componentDidMount() {
-        const [titles, trophies, userScore] = await Promise.all([TitlesApi.getTitles(), TrophiesApi.getTrophies(), AuthenticationApi.getUserScore()]);
-        this.setState({ titles: titles, trophies: trophies, score: userScore });
+        const [titles,  userScore] = await Promise.all([TitlesApi.getTitles(), AuthenticationApi.getUserScore()]);
+        this.setState({ titles: titles,  score: userScore });
 
 
     }
@@ -57,7 +54,7 @@ class ScorePageComponent extends BaseComponent<ScorePageProps, ScorePageState>{
 
         return (
             <Box className={clsx(classes.root)}>
-                {this.state.titles != null && this.state.trophies != null && this.state.score != null &&
+                {this.state.titles != null  && this.state.score != null &&
                     <List>
 
                         <ListItem className={clsx(classes.card)}>
@@ -72,13 +69,7 @@ class ScorePageComponent extends BaseComponent<ScorePageProps, ScorePageState>{
                                 <ChevronRight />
                             </ListItemIcon>
                         </ListItem>
-
-                        <ListItem className={clsx(classes.card)}>
-                        <ListItemText primary={__("Trophées")} secondary={`${this.state.score.trophiesId != null ? this.state.score.trophiesId.length : 0} / ${this.state.trophies.length}`} onClick={() => this.goTo(`trophies`)} />
-                            <ListItemIcon>
-                                <ChevronRight />
-                            </ListItemIcon>
-                        </ListItem>
+                    
 
                         <ListItem className={clsx(classes.card)}>
                         <ListItemText primary={__("Titres")} secondary={`${this.state.score.titlesId != null ? this.state.score.titlesId.length : 0} / ${this.state.titles.length}`} onClick={() => this.goTo(`titles`)}/>

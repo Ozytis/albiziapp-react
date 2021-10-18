@@ -13,6 +13,7 @@ namespace Web.Mappings
             {
                 Id = user.Id,
                 Name = user.Name,
+                Email = user.Email,
                 OsmId = user.OsmId,
                 Role = (int?)user.Role
             };
@@ -55,8 +56,7 @@ namespace Web.Mappings
                 ExplorationPointsHistory = user.ExplorationPointsHistory?.OrderByDescending(x => x.Date).Select(eph => new PointHistoryModel { Date = eph.Date, Point = eph.Point, Type = eph.Type }).ToArray(),
                 KnowledgePoints = user.KnowledgePoints,
                 KnowledgePointsHistory =  user.KnowledgePointsHistory?.OrderByDescending(x => x.Date).Select(eph => new PointHistoryModel { Date = eph.Date, Point = eph.Point, Type = eph.Type }).ToArray(),
-                TitlesId = user.Titles,
-                TrophiesId = user.Trophies
+                TitlesId = user.Titles
             };
         }
     }

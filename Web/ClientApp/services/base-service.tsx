@@ -151,7 +151,6 @@ export class BaseService {
             const URL = window.URL || window.webkitURL;
             const downloadUrl = URL.createObjectURL(blob);
 
-            console.log("filename", filename, type, downloadUrl);
 
             if (filename) {
 

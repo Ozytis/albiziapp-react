@@ -92,12 +92,10 @@ export class SpeciesInfoPageComponent extends BaseComponent<SpeciesComponentProp
     }
 
     async componentDidMount() {
-        console.log("TOTO");
-        const speciesId = this.props.speciesId;
-        console.log("TOTO", speciesId);
+        const speciesId = this.props.speciesId;   
 
         const info = await SpeciesApi.getSpeciesInfo(speciesId);
-        console.log(info);
+       
         await this.setState({ info: info });
 
     }

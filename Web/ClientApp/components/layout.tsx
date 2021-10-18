@@ -210,7 +210,7 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                                 aria-label="menu"
                                 disableFocusRipple
                                 disableRipple
-                                onClick={() => { console.log(this.props.history); (this.props.history as any).goBack(); }}
+                                onClick={() => { (this.props.history as any).goBack(); }}
                             >
                                 <ArrowBack />
                             </IconButton>
@@ -237,8 +237,8 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
 
                         </Toolbar>
                         <List >
-                            {this.state.user &&
-                                <ListItem style={{ marginTop: "-12%" }}>
+                        {this.state.user &&
+                            <ListItem style={{ marginTop: "-12%", cursor:"pointer" }} onClick={() => this.goTo("/user")}>
                                     {this.state.user.name}
                                 </ListItem>
                             }

@@ -39,9 +39,7 @@ class ObservationsPageComponent extends BaseComponent<ObservationsPageProps, Obs
     }
 
     async loadObservations() {
-
-        const observations = await ObservationsApi.getUserObservations(AuthenticationApi.user.osmId);
-        console.log(observations);
+        const observations = await ObservationsApi.getUserObservations(AuthenticationApi.user.osmId);     
 
         if (!this.unmounted) {
             await this.setState({ observations: observations });

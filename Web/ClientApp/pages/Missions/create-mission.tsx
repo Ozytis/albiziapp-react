@@ -6,15 +6,8 @@ import { BaseComponent } from "../../components/base-component";
 import clsx from "clsx";
 import { t } from "../../services/translation-service";
 import { IdentificationMissionModel, NewObservationMissionModel, NewObservationMissionType, TimeLimit, NumberOfActions, PolygonArea, CircleAreaModel, CoordinateModel, VerificationMissionModel, RestrictionType, Restriction } from "../../services/models/mission-model";
-import { Timelapse } from "@material-ui/icons";
-import { Polygon } from "react-leaflet";
-import { Circle } from "leaflet";
 import { MissionsApi } from "../../services/missions-service";
-import { NotifyHelper } from "../../utils/notify-helper";
 import { ErrorSummary } from "../../components/error-summary";
-import { PolygonAreaModel } from "../../services/generated/polygon-area-model";
-import { RestrictionTypeModel } from "../../services/generated/restriction-type-model";
-
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -87,8 +80,8 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
     constructor(props: CreateMissionProps) {
         super(props, "CreateMissionPage", new CreateMissionState());
     }
+
     async updateModel(propertyName: string, value: any) {
-        console.log(propertyName, value);
         const model = this.state.model;
         model[propertyName] = value;
         await this.setState({ model: model });
@@ -169,8 +162,8 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
 
     async updateObservationId(index: number, value) {
         var model = this.state.model as IdentificationMissionModel;
-        console.log(index);
-        console.log(model.observationIdentified);
+      
+      
         model.observationIdentified[index] = value;
       
         await this.setState({ model: model });
@@ -231,9 +224,9 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
     }
     async send() {
         await this.checkModel();
-        console.log(this.state.errors?.length);
+        
         if (this.state.errors?.length <= 0 || this.state.errors == undefined || this.state.errors == null) {
-            console.log("pas d'erreur ca passe");
+        
             MissionsApi.createNewMission(this.state.model);
             this.props.history.replace({
                 pathname: "/"
@@ -249,7 +242,7 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
             }
         }
         else if (this.state.model.endingCondition.$type.indexOf("TimeLimitModel") != -1) {
-            console.log("timelimit")
+           
             const timeLimit = this.state.model.endingCondition as TimeLimit;
             if (timeLimit.minutes == null || timeLimit.minutes <= 0) {
                 errors.push("-Le temps limite n'est pas renseigné");
@@ -257,7 +250,7 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
         }
         if ((this.state.model as NewObservationMissionModel).type != -1) {
             if ((this.state.model as NewObservationMissionModel).type == NewObservationMissionType.ExactGender || (this.state.model as NewObservationMissionModel).type == NewObservationMissionType.ExactSpecies) {
-                console.log((this.state.model as NewObservationMissionModel).value);
+               
                 if ((this.state.model as NewObservationMissionModel).type == NewObservationMissionType.ExactGender && ((this.state.model as NewObservationMissionModel).value == "" || (this.state.model as NewObservationMissionModel).value == null)) {
                     errors.push("-Le genre précis n'est pas renseigné");
                 }
@@ -316,7 +309,7 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
                     <Select
                         label={t.__("Type de mision")}
                         value={this.state.missionType}
-                        onChange={e => { console.log(e.target.value); this.updateMissionType(e.target.value as number) }}
+                        onChange={e => { this.updateMissionType(e.target.value as number) }}
                         className={clsx(classes.select)}
                     >
                         <MenuItem key={`missionType-${1}`} value={1} >
@@ -352,7 +345,7 @@ class CreateMissionComponent extends BaseComponent<CreateMissionProps, CreateMis
                             <Select
                                 label={t.__("Restriction")}
                                 value={(this.state.model as NewObservationMissionModel).type}
-                                onChange={e => { console.log(e.target.value); this.updateModel("type", e.target.value as string) }}
+                                onChange={e => {this.updateModel("type", e.target.value as string) }}
                                 className={clsx(classes.select)}
                             >
                                 <MenuItem key={"non"} value={-1}>

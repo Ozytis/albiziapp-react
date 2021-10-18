@@ -27,7 +27,7 @@ class SpeciesInfoPageComponent extends BaseComponent<SpeciesPageProps, SpeciesPa
         const speciesId = this.props.match.params["speciesid"];
 
         const species = (await SpeciesApi.getAllSpecies()).find(s => s.telaBotanicaTaxon === speciesId);
-        console.log(species);
+
         await this.setState({ speciesId: speciesId });
         if (!species) {
             this.props.appContext.updateContext("title", "Informations non trouvées");

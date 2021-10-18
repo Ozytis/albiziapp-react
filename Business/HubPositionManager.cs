@@ -35,7 +35,7 @@ namespace Business
 
         public List<string> GetConnections(double latitude, double longitude)
         {
-            //TODO filtrer par coordonnées
+           
             List<string> conn = new List<string>();
             var point = new Position(latitude,longitude);
             try

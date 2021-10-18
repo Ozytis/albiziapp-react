@@ -183,8 +183,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
     async componentDidMount() {
         const observation = await ObservationsApi.getObservationById(this.props.match.params["observationid"]);
         const currentUser = await AuthenticationApi.getCurrentUser();
-        console.log(observation);
-
+        
         await this.setState({ observation: observation, currentUser: currentUser.osmId, currentUserRole: currentUser.role, currentUserName: currentUser.name, isCertain: observation.isCertain }); 
         if (observation.statementValidatedId != null && observation.statementValidatedId !=""){
             await this.setState({ validatedStatementId: observation.statementValidatedId });
@@ -210,7 +209,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
 
     async checkTreeSize() {
         const obsTS = this.state.observation.treeSize;
-        console.log(obsTS);
+        
         if (obsTS != null) {
             if (obsTS == 0) {
                 await this.setState({ isLessThan2m: true, isUpdatingTreeSize:false });
@@ -458,7 +457,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
         const fot = this.state.firstObservationStatement;
         const os = this.state.filteredObservationStatements;
         const cu = this.state.currentUser;
-        console.log(this.state.observation.userId);
+
         if (this.state.observation.userId == cu && os.length == 0 && (fot.observationStatementConfirmations == undefined || fot.observationStatementConfirmations.length == 0)) {
             await this.setState({ enableEditAndDeleteButton: true})
         }
@@ -486,7 +485,6 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
             await this.setState({ genusSelectedRadio: null, speciesSelectedRadio: null });
         }
         else {
-            console.log(    "CGS");
             await this.setState({ genusSelectedRadio: val, speciesSelectedRadio: null  });
         }
         
@@ -577,7 +575,6 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
 
     async updateCurrentTab(val: string) {
         await this.setState({ currentTab: val });
-        console.log(this.state.currentTab);
     }
 
     async getValidatedStatement() {

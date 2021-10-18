@@ -6,11 +6,9 @@ import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
 import { BaseComponent } from "../../components/base-component";
 import { Confirm } from "../../components/confirm";
-import { ErrorSummary } from "../../components/error-summary";
 import { Loader } from "../../components/loader";
 import { PhotoFormItem } from "../../components/photo-form-item";
 import { AuthenticationApi } from "../../services/authentication-service";
-import { ObservationCreationModel } from "../../services/generated/observation-creation-model";
 import { SpeciesModel } from "../../services/generated/species-model";
 import { TreeGenusModel } from "../../services/models/tree-species";
 import { ObservationsApi } from "../../services/observation";
@@ -123,7 +121,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
 
         this.listener = SpeciesApi.registerSpeciesListener(() => this.refreshSpecies());
         const model = this.state.model;
-        console.log(model);
+
         await this.refreshSpecies();
         await this.updateCommonGenus(model.commonGenus);
         await this.updateGenus(model.genus);
@@ -177,7 +175,6 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
     }
 
     async updateModel(propertyName: string, value: any) {
-        console.log(propertyName, value);
         const model = this.state.model;
         model[propertyName] = value;
         await this.setState({ model: model });
@@ -273,7 +270,7 @@ class EditObservationPageComponent extends BaseComponent<EditObservationPageProp
         if (this.props.match.params["statementid"]) {
             await this.setState({ isProcessing: true, errors: [] });
             const result = await ObservationsApi.editStatement(this.state.model, this.props.match.params["observationid"]);
-            console.log(result);
+          
             if (!result.success) {
                 await this.setState({
                     isProcessing: false,

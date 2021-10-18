@@ -31,7 +31,7 @@ namespace Web.Controllers
             try
             {
                 var species = await this.SpeciesManager.GetAllSpeciesAsync();
-                var result = await this.FoliaManager.Request(model.FlowerOrFruitImage, model.LeafPath, model.BarkPath);
+                var result = await this.FoliaManager.Request(model.FlowerOrFruitImage, model.LeafPath, model.BarkPath,this.User.Identity.Name);
                 List<FoliaResultModel> foliaResults = new List<FoliaResultModel>();
                 for (var i = 0; i < result.Species.Count; i++)
                 {

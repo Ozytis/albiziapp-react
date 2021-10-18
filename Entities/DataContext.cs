@@ -56,15 +56,7 @@ namespace Entities
             }
         }
 
-        public IMongoCollection<Trophy> Trophies
-        {
-            get
-            {
-                return this.Database.GetCollection<Trophy>("Trophies");
-            }
-        }
-
-        public IMongoCollection<Title> Titles
+            public IMongoCollection<Title> Titles
         {
             get
             {

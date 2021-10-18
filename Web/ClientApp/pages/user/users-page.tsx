@@ -1,10 +1,8 @@
-import { Box, Button, createStyles, Grid, Icon, InputLabel, List, ListItem, ListItemIcon, ListItemText, Switch, Tab, Tabs, Theme, Typography, WithStyles, withStyles, FormControl, Input } from "@material-ui/core";
+﻿import { Box, Button, createStyles, Grid, Icon, InputLabel, List, ListItem, ListItemIcon, ListItemText, Switch, Tab, Tabs, Theme, Typography, WithStyles, withStyles, FormControl, Input } from "@material-ui/core";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
 import { BaseComponent } from "../../components/base-component";
-import { ObservationModel } from "../../services/generated/observation-model";
-import { SpeciesInfoModel } from "../../services/generated/species-info-model";
 import { UserModel } from "../../services/generated/user-model";
 import { AuthenticationApi } from "../../services/authentication-service";
 import clsx from "clsx";
@@ -103,7 +101,7 @@ class UsersPageComponent extends BaseComponent<UsersPageProps, UsersPageState>{
                         this.state.users && this.state.users.map(user => {
                             return (
                                 <ListItem key={user.id} onClick={() => this.goTo(`user/${user.osmId}`)} className={clsx(classes.card)}>
-                                    <ListItemText primary={user.name} secondary={`OSM ID : ${user.osmId} / Role(s) : ${this.seeRole(user.role)}`} />
+                                    <ListItemText primary={user.name} secondary={`OSM ID : ${user.osmId} / Email : ${(user.email == null ) ? "Non renseignée" : user.email} / Role(s) : ${this.seeRole(user.role)}`} />
                                     <ListItemIcon>
                                         <ChevronRight />
                                     </ListItemIcon>

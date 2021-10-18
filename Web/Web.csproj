@@ -20,7 +20,6 @@
     <None Remove="ClientApp\pages\score\exploration-points-page.tsx" />
     <None Remove="ClientApp\pages\score\knowledge-points-page.tsx" />
     <None Remove="ClientApp\pages\score\title-page.tsx" />
-    <None Remove="ClientApp\pages\score\trophy-page.tsx" />
     <None Remove="ClientApp\pages\species\species-info-component.tsx" />
     <None Remove="ClientApp\services\folia-service.ts" />
     <None Remove="ClientApp\services\generated\folia-request-model.ts" />
@@ -80,9 +79,6 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="ClientApp\pages\Missions\create-mission.tsx" />
     <TypeScriptCompile Include="ClientApp\pages\score\title-page.tsx">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="ClientApp\pages\score\trophy-page.tsx">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="ClientApp\pages\score\knowledge-points-page.tsx">

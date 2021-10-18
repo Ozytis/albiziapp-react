@@ -1,5 +1,5 @@
 import { Box, createStyles, List, ListItem, ListItemIcon, ListItemText, MenuItem, Select, Tab, Tabs, Theme, WithStyles, withStyles, Popper, Fade, ClickAwayListener } from "@material-ui/core";
-import { InfoRounded, ChevronRight, Height } from "@material-ui/icons";
+import { InfoRounded, ChevronRight } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -9,8 +9,6 @@ import { FloraKeyModel } from "../../services/generated/flora-key-model";
 import { SpeciesModel } from "../../services/generated/species-model";
 import { SpeciesApi } from "../../services/species-service";
 import { t } from "../../services/translation-service";
-import { filter } from "lodash";
-import { keys } from "@material-ui/core/styles/createBreakpoints";
 
 // eslint-disable-next-line
 const styles = (theme: Theme) => createStyles({
@@ -66,27 +64,28 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
             SpeciesApi.getAllFloraKeys()
         ]);
 
-        const filters = {};
+        var filters: any = {};
 
         keys.forEach(k => {
             filters[k.id] = "";
         });
-
+        var savedFilters = sessionStorage.getItem("DeterminationKeyFilters");
+        if (savedFilters != null && savedFilters.length > 0) {
+            filters = JSON.parse(savedFilters) as any;
+        }
         await this.setState({
             keys: keys,
             species: species,
             filters: filters
         });
-        console.log(keys[0].values);
     }
 
     async updateFilter(keyId: string, value: string) {
 
-        const filters = this.state.filters;
-        console.log(filters);
-        console.log(keyId);
-        console.log(value);
+        const filters = this.state.filters;     
         filters[keyId] = value;
+        sessionStorage.setItem("jeanTest","jeanTest");
+        sessionStorage.setItem("DeterminationKeyFilters", JSON.stringify(filters));
         await this.setState({ filters: filters });
     }
 
@@ -100,9 +99,7 @@ class DeterminationKeyPageComponent extends BaseComponent<DeterminationKeyPagePr
        
         for (const filter in filters) {
 
-            const value = filters[filter];
-            console.log(filter, value);
-            console.log(value.length);
+            const value = filters[filter]; 
             if (value && value.length > 1) {
                 filteredSpecies = filteredSpecies.filter(s => s.floraKeyValues && s.floraKeyValues.some(k => k === value));
             }

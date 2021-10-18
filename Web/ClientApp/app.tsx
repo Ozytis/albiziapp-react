@@ -58,7 +58,6 @@ class App extends BaseComponent<AppProps, AppState>{
 
     async componentDidMount() {     
         await this.refreshAuth();
-        console.log(this.state.user)
         if (this.state.user) {
             ObservationsApi.loadObservations();
             SpeciesApi.loadSpecies();
@@ -67,8 +66,6 @@ class App extends BaseComponent<AppProps, AppState>{
 
     async removeContextUpdateListener(listener: (newContext: IAppContext, oldContext: IAppContext) => Promise<void>) {
         const index = this.contextUpdateListeners.indexOf(listener);
-
-        //console.log("removing context listener", index);
 
         if (index > -1) {
             this.contextUpdateListeners.splice(index, 1);
@@ -204,8 +201,6 @@ class App extends BaseComponent<AppProps, AppState>{
 
         const props = this.props;
         const { context } = this.state;
-
-        //console.log("routes", routes);
 
         return (
             <MuiThemeProvider

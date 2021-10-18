@@ -6,7 +6,6 @@ import { RouteComponentProps, withRouter } from "react-router";
 import { BaseComponent } from "../../components/base-component";
 import { t } from "../../services/translation-service";
 import { MissionModel, IdentificationMissionModel, NewObservationMissionModel, NumberOfActions } from "../../services/models/mission-model";
-import { MissionProgressionModel } from "../../services/generated/mission-progression-model";
 import { MissionsApi } from "../../services/missions-service";
 import { Confirm } from "../../components/confirm";
 import { MissionProgressionCreationModel } from "../../services/generated/mission-progression-creation-model";
@@ -72,7 +71,7 @@ class ActivityCardComponent extends BaseComponent<ActivityCardProps, ActivityCar
 
         const { mission, classes, completion, active, end} = this.props;
         const ActivityIcon = this.getIcon();
-        // console.log(activity);
+
         return (
             <Card className={clsx(classes.card, end && classes.disabledCard)} variant="elevation" raised={!end}>
                 <CardContent>

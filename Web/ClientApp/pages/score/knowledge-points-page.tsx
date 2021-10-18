@@ -5,8 +5,6 @@ import { Theme, WithStyles, createStyles, withStyles, Box, List, ListItem, ListI
 import { BaseComponent } from "../../components/base-component";
 import clsx from "clsx";
 import { __ } from "../../services/translation";
-import { TitleModel } from "../../services/generated/title-model";
-import { TrophyModel } from "../../services/generated/trophy-model";
 import { UserScoreModel } from "../../services/generated/user-score-model";
 import { AuthenticationApi } from "../../services/authentication-service";
 

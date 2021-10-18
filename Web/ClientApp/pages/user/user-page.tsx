@@ -1,20 +1,14 @@
-import { Box, Button, createStyles, Grid, Icon, InputLabel, List, ListItem, ListItemIcon, ListItemText, Switch, Tab, Tabs, Theme, Typography, WithStyles, withStyles } from "@material-ui/core";
-import { Check, Delete, Edit } from "@material-ui/icons";
+import { Box, Button, createStyles, List, ListItem, ListItemText, Tab, Theme, WithStyles, withStyles } from "@material-ui/core";
+import {  Edit } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
 import { IPropsWithAppContext, withAppContext } from "../../components/app-context";
 import { BaseComponent } from "../../components/base-component";
-import { Confirm } from "../../components/confirm";
-import { ObservationModel } from "../../services/generated/observation-model";
-import { SpeciesInfoModel } from "../../services/generated/species-info-model";
-import { ObservationsApi } from "../../services/observation";
-import { SpeciesApi } from "../../services/species-service";
 import { t } from "../../services/translation-service";
 import { AuthenticationApi } from "../../services/authentication-service";
 import { UserModel } from "../../services/generated/user-model";
 import { UserRole } from "../../services/generated/user-role";
-import { get } from "lodash";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -67,12 +61,12 @@ class UserPageComponent extends BaseComponent<UserPageProps, UserPageState>{
 
     async componentDidMount() {
         const user = await AuthenticationApi.getUser(this.props.match.params["userid"]);
-        console.log(user);
+
         await this.setState({ user: user });
         this.seeRole(user.role);
     }
 
-    
+
 
     async goTo(path: string) {
         this.props.history.replace({
@@ -83,7 +77,7 @@ class UserPageComponent extends BaseComponent<UserPageProps, UserPageState>{
     getUserRole(role: number) {
         var res = [];
         var word: string;
-        if ((role & UserRole.administrator) === UserRole.administrator) {            
+        if ((role & UserRole.administrator) === UserRole.administrator) {
             word = UserRole[2];
             res.push(word);
         }
@@ -97,7 +91,7 @@ class UserPageComponent extends BaseComponent<UserPageProps, UserPageState>{
 
         var listRole = this.getUserRole(role);
         var roles: string;
-        if (listRole.length <1) {
+        if (listRole.length < 1) {
 
             return "Aucun";
         }
@@ -127,25 +121,28 @@ class UserPageComponent extends BaseComponent<UserPageProps, UserPageState>{
             return <>Chargement</>;
         }
 
-        
-        
+
+
 
         return (
             <>
-                <Box className={clsx(classes.root)}>                    
-                        <Tab label={t.__("Informations")} className={clsx(classes.tab)} value="infos" />
-                        <>
-                            <List>
-                                <ListItem>
-                                    <ListItemText primary={t.__("Nom d'utilisateur")} secondary={user.name} />
-                                </ListItem>                                
-                                <ListItem>
-                                    <ListItemText primary={t.__("Id de l'utilisateur")} secondary={user.osmId} />
-                                </ListItem>
-                                <ListItem>
+                <Box className={clsx(classes.root)}>
+                    <Tab label={t.__("Informations")} className={clsx(classes.tab)} value="infos" />
+                    <>
+                        <List>
+                            <ListItem>
+                                <ListItemText primary={t.__("Nom d'utilisateur")} secondary={user.name} />
+                            </ListItem>
+                            <ListItem>
+                                <ListItemText primary={t.__("Adresse email")} secondary={user.email} />
+                            </ListItem>
+                            <ListItem>
+                                <ListItemText primary={t.__("Id de l'utilisateur")} secondary={user.osmId} />
+                            </ListItem>
+                            <ListItem>
                                 <ListItemText primary={t.__("Role de l'utilisateur")} secondary={this.seeRole(user.role)} />
-                                </ListItem>                                
-                            </List>                          
+                            </ListItem>
+                        </List>
                     </>
                     <Box className={clsx(classes.buttonsDiv)}>
                         <>
@@ -155,7 +152,7 @@ class UserPageComponent extends BaseComponent<UserPageProps, UserPageState>{
                         </>
                     </Box>
                 </Box>
-                
+
             </>
         )
     }

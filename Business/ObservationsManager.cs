@@ -66,7 +66,6 @@ namespace Business
         public string[] GetAllUserIdForObservation(Observation obs)
         {
             List<string> ids = new List<string>();
-            //ids.Add(obs.UserId);
             ids.AddRange(obs.ObservationStatements.Select(s => s.UserId));
 
             return ids.Distinct().ToArray();
@@ -80,7 +79,6 @@ namespace Business
 
         public async Task<IEnumerable<Observation>> GetUserIdentifyObservations(string userId, DateTime date)
         {
-            //TODO ajouter code, pour statement confirmation... REWORK
             return await this.DataContext.Observations.Find(obs => obs.ObservationStatements.Count > 0 && obs.ObservationStatements[0].UserId != userId &&
             (obs.ObservationStatements != null && (obs.ObservationStatements.Any(x => (x.UserId == userId && x.Date >= date) || (x.ObservationStatementConfirmations != null && x.ObservationStatementConfirmations.Any(c => c.UserId == userId && c.Date >= date)))))).ToListAsync();
         }
@@ -151,12 +149,6 @@ namespace Business
                 statement.Confident = confident;
                 newObservation.ObservationStatements.Add(statement);
 
-                //if(user.Role.HasValue && user.Role.Value.HasFlag( Entities.Enums.UserRole.EXPERT))
-                //{
-                //    newObservation.IsIdentified = true;
-                //}
-
-
                 if (pictures != null)
                 {
                     foreach (string picture in pictures?.Where(p => !string.IsNullOrEmpty(p)))
@@ -166,7 +158,7 @@ namespace Business
                 }
 
                 await this.DataContext.Observations.InsertOneAsync(newObservation);
-                //TODO VALidATE 
+
                 await this.AddExplorationPointsForNewObservation(newObservation);
 
 
@@ -188,7 +180,7 @@ namespace Business
         //POUR VALIDER UNE PROPOSITION EXISTANTE
         public async Task ConfirmStatement(string observationId, string statementId, string userId, bool isOnlyGenus)
         {
-            //TODO add confident
+
             var existingObservation = await this.GetUserObservationbyId(observationId);
             if (existingObservation == null)
             {
@@ -245,7 +237,7 @@ namespace Business
 
             var statement = new ObservationStatement();
             statement.Id = Guid.NewGuid().ToString("N");
-            // User user = await this.UsersManager.SelectAsync(newStatement.UserId);
+
             statement.UserId = userId;
             statement.Date = DateTime.UtcNow;
 
@@ -374,10 +366,10 @@ namespace Business
 
         public async Task CalculateKnowledegePoints(string observationId, string statementId, string confirmId)
         {
-            //TODO recoder
+
             var observation = await this.GetUserObservationbyId(observationId);
             var statement = observation.ObservationStatements.FirstOrDefault(x => x.Id == statementId);
-            var confirm = statement.ObservationStatementConfirmations?.Where(x => x.Id == confirmId);
+            var confirm = statement.ObservationStatementConfirmations?.FirstOrDefault(x => x.Id == confirmId);
 
             var pointHistory = new List<PointHistory>();
             var currentDate = DateTime.UtcNow;
@@ -398,7 +390,23 @@ namespace Business
             }
             else
             {
-                if (observation.ObservationStatements.Count == 2)
+
+                if (confirm != null)
+                {
+                    pointHistory.Add(new PointHistory { Point = 4, Type = (int)KnowledgePoint.ValidateSameGenus, Date = currentDate });
+
+                    if (!confirm.IsOnlyGenus)
+                    {
+                        pointHistory.Add(new PointHistory { Point = 2, Type = (int)KnowledgePoint.ValidateSameSpecies, Date = currentDate });
+                    }
+                    if (confirm.Confident.HasValue && confirm.Confident.Value == Entities.Enums.Confident.High)
+                    {
+                        pointHistory.Add(new PointHistory { Point = 2, Type = (int)KnowledgePoint.ObservationConfident, Date = currentDate });
+                    }
+                    await this.UsersManager.AddKnowledegePoints(statement.UserId, pointHistory);
+                    await this.UsersManager.AddTitles(statement.UserId);
+                }
+                else if (observation.ObservationStatements.Count == 2)
                 {
                     var otherStatement = observation.ObservationStatements.FirstOrDefault(x => x.Id != statementId);
 
@@ -672,11 +680,12 @@ namespace Business
                         throw new BusinessException("Un relevé avec cette espèce existe déja vous pouvez le confirmer");
                     }
                 }
-                else if(editStatement.SpeciesName == null && editStatement.Genus != null)
+                else if (editStatement.SpeciesName == null && editStatement.Genus != null)
                 {
-                    if(os.Any(x => x.Genus == editStatement.Genus))
+                    if (os.Any(x => x.Genus == editStatement.Genus))
                     {
                         throw new BusinessException("Un relevé avec ce genre existe déja, préciser l'espèce");
+
                     }
                 }
 

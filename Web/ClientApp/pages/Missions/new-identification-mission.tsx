@@ -134,7 +134,6 @@ class NewIdentificationMissionPageComponent extends BaseComponent<NewIdentificat
     }
 
     async updateModel(propertyName: string, value: any) {
-        console.log(propertyName, value);
         const model = this.state.model;
         model[propertyName] = value;
         await this.setState({ model: model });

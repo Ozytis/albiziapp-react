@@ -106,7 +106,7 @@ class AuthenticationService extends BaseService {
             }, (error, result) => {
 
                 const user = result.getElementsByTagName('user')[0]
-
+              
                 let userObject = {
                     name: user.getAttribute('display_name'),
                     id: user.getAttribute('id')
@@ -133,8 +133,14 @@ class AuthenticationService extends BaseService {
     async getUser(userId: string) {
         return await this.get<UserModel>(`users/${userId}`)
     }
+    async editUserAdmin(user: UserEditionModel) {
+        const result = await this.put<UserEditionModel>(`users/editUserAdmin`, user);
+        await this.refreshUser();
+        return result;
+    }
+
     async editUser(user: UserEditionModel) {
-        const result = await this.put<UserEditionModel>(`users`, user);
+        const result = await this.put<UserEditionModel>(`users/editUser`, user);
         await this.refreshUser();
         return result;
     }

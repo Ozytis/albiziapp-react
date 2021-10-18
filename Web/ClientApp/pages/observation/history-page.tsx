@@ -74,7 +74,6 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
         this.filterObservationStatements();
         this.getUserObservation();
         this.isEditAndDeleteEnable();
-        console.log(this.props.history);
     }
 
     async filterObservationStatements() {
@@ -101,7 +100,6 @@ class HistoryPageComponent extends BaseComponent<HistoryPageProps, HistoryPageSt
 
     async updateCurrentTab(val: string) {
         await this.setState({ currentTab: val });
-        console.log(this.state.currentTab);
     }
 
     async isEditAndDeleteEnable() {

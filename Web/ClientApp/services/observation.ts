@@ -4,10 +4,7 @@ import { SpeciesApi } from "./species-service";
 import { ObservationModel } from "./generated/observation-model";
 import { ObservationCreationModel } from "./generated/observation-creation-model";
 import { ObservationEditionModel } from "./generated/observation-edition-model";
-import { ObservationStatementModel } from "./generated/observation-statement-model";
-import { ObservationStatementConfirmationModel } from "./generated/observation-statement-confirmation-model";
 import { AddObservationStatementConfirmationModel } from "./generated/add-observation-statement-confirmation-model";
-import { ObservationCommentaryModel } from "./generated/observation-commentary-model";
 import { ObservationStatementEditionModel } from "./generated/observation-statement-edition-model";
 
 class ObservationsService extends BaseService {

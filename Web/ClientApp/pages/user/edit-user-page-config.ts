@@ -1,13 +1,13 @@
-import { PageConfig } from "../page-config";
+﻿import { PageConfig } from "../page-config";
 import { EditUserPage } from "./edit-user-page";
 
 export const EditUserPageConfig: PageConfig = {
     settings: {
         authenticationRequired: true,
-        title: "Modification d'un utilisateur"
+        title: "Modification des données utilisateur"
     },
     routes: [{
-        path: '/edit-user/:userid',
+        path: '/user',
         component: EditUserPage,
         exact: true
     }]
