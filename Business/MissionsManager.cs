@@ -24,20 +24,8 @@ namespace Business
 
         public async Task CreateMissionAsync(Mission mission)
         {
-            using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
-
-            try
-            {
-                session.StartTransaction();
-
-                mission.Id = Guid.NewGuid().ToString("N");
-                await this.DataContext.Missions.InsertOneAsync(mission);
-            }
-            catch
-            {
-                await session.AbortTransactionAsync();
-                throw;
-            }
+            mission.Id = Guid.NewGuid().ToString("N");
+            await this.DataContext.Missions.InsertOneAsync(mission);
         }
 
         public async Task GenerateMission()
@@ -69,10 +57,10 @@ namespace Business
             };
             mission2.RestrictedArea = new PolygonArea
             {
-                Polygon = GeoJson.Polygon(new GeoJson2DGeographicCoordinates(-0.746958,48.074989), new GeoJson2DGeographicCoordinates(-0.767936,48.083799),
-               new GeoJson2DGeographicCoordinates(-0.777394,48.079838), new GeoJson2DGeographicCoordinates(-0.778360, 48.072354),
-               new GeoJson2DGeographicCoordinates(-0.773097,48.063175),new GeoJson2DGeographicCoordinates(-0.761133,48.060604),
-                new GeoJson2DGeographicCoordinates(-0.746958,48.074989))
+                Polygon = GeoJson.Polygon(new GeoJson2DGeographicCoordinates(-0.746958, 48.074989), new GeoJson2DGeographicCoordinates(-0.767936, 48.083799),
+               new GeoJson2DGeographicCoordinates(-0.777394, 48.079838), new GeoJson2DGeographicCoordinates(-0.778360, 48.072354),
+               new GeoJson2DGeographicCoordinates(-0.773097, 48.063175), new GeoJson2DGeographicCoordinates(-0.761133, 48.060604),
+                new GeoJson2DGeographicCoordinates(-0.746958, 48.074989))
             };
 
             mission2.Type = NewObservationMissionType.DifferentSpecies;
@@ -192,18 +180,18 @@ namespace Business
                 Value = "Abricotier commun",
             };
             await this.CreateMissionAsync(mission3);
-        } 
+        }
         public async Task AddCompleteMission(User user)
         {
-            if(user == null)
+            if (user == null)
             {
                 return;
             }
             var completeMission = new MissionComplete { IdMission = "0fbae5829539411e9bad8f90397c0738", StartDate = DateTime.Now, CompletedDate = DateTime.Now };
-    user.MissionCompleted = new MissionComplete[]{completeMission};
+            user.MissionCompleted = new MissionComplete[] { completeMission };
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
         }
-        
+
         public async Task GenerateVerifyMission()
         {
             var mission = new VerificationMission();
@@ -219,7 +207,7 @@ namespace Business
                 Center = new GeoJsonPoint<GeoJson2DGeographicCoordinates>(new GeoJson2DGeographicCoordinates(-0.7595157623291017, 48.0699066369019)),
                 Radius = 1000,
             };
-            await this.CreateMissionAsync(mission); 
+            await this.CreateMissionAsync(mission);
             var mission2 = new VerificationMission();
             mission2.Id = Guid.NewGuid().ToString("N");
             mission2.Title = "Mission vérification : Verifier des relevés d'abricotier commun en 10 minutes";
@@ -252,26 +240,26 @@ namespace Business
                new GeoJson2DGeographicCoordinates(-0.773097, 48.063175), new GeoJson2DGeographicCoordinates(-0.761133, 48.060604),
                 new GeoJson2DGeographicCoordinates(-0.746958, 48.074989))
             };
-            await this.CreateMissionAsync(mission); 
+            await this.CreateMissionAsync(mission);
 
-          /*  var mission2 = new NewObservationMission();
-            mission2.Id = Guid.NewGuid().ToString("N");
-            mission2.Title = "Mission de nouveau relevé : faites 2 relevés d'Ailante dans la zone cicrulaire";
-            mission2.Description = "Mission de nouveau relevé : faites 2 relevés d'Ailante dans la zone cicrulaire";
-            mission.EndingCondition = new NumberOfActions
-            {
-                Number = 2,
-            };
-            mission2.EndingCondition = new e
-            {
-                Type = RestrictionType.ExactSpecies,
-                Value = "Abricotier commun",
-                Genus = "Prunus",
-                Species = "Prunus Armeniaca"
-            };
-            await this.CreateMissionAsync(mission2);*/
+            /*  var mission2 = new NewObservationMission();
+              mission2.Id = Guid.NewGuid().ToString("N");
+              mission2.Title = "Mission de nouveau relevé : faites 2 relevés d'Ailante dans la zone cicrulaire";
+              mission2.Description = "Mission de nouveau relevé : faites 2 relevés d'Ailante dans la zone cicrulaire";
+              mission.EndingCondition = new NumberOfActions
+              {
+                  Number = 2,
+              };
+              mission2.EndingCondition = new e
+              {
+                  Type = RestrictionType.ExactSpecies,
+                  Value = "Abricotier commun",
+                  Genus = "Prunus",
+                  Species = "Prunus Armeniaca"
+              };
+              await this.CreateMissionAsync(mission2);*/
         }
 
-        
+
     }
 }

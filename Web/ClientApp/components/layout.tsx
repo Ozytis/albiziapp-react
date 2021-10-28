@@ -1,5 +1,5 @@
-import { AppBar, createStyles, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Theme, Toolbar, Typography, withStyles, WithStyles, Switch } from "@material-ui/core";
-import { AccountTree, Book, Eco, ExitToApp, SupervisorAccount, ArrowBack, ClearAll, VerifiedUser, DoubleArrow, Search } from "@material-ui/icons";
+import { AppBar, createStyles, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Theme, Toolbar, Typography, withStyles, WithStyles, Switch, Modal, Button, Icon } from "@material-ui/core";
+import { AccountTree, Book, Eco, ExitToApp, SupervisorAccount, ArrowBack, ClearAll, VerifiedUser, DoubleArrow, Search, Close } from "@material-ui/icons";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -13,21 +13,20 @@ import { UserModel } from "../services/generated/user-model";
 import PWAPrompt from 'react-ios-pwa-prompt'
 import HomePageConfig from "../pages/home/home-page-config";
 import { ScorePageConfig } from "../pages/score/score-page-config";
-import { SpeciesInfoPageConfig } from "../pages/species/species-info-page-config";
 import LoginPageConfig from "../pages/login/login-page-config";
 import { MapPageConfig } from "../pages/map/map-page-config";
 import { ArboretumPageConfig } from "../pages/arboretum/arboretum-page-config";
 import { DeterminationKeyPageConfig } from "../pages/determination-key/determination-key-page-config";
-import { TitlePageConfig } from "../pages/score/title-page-config";
 import { SpeciesPageConfig } from "../pages/species/species-page-config";
 import { ObservationsPageConfig } from "../pages/observation/observations-page-config";
 import { ObservationsApi } from "../services/observation";
-import { TrophyPageConfig } from "../pages/score/trophy-page-config";
 import { Confirm } from "./confirm";
 import { UserRole } from "../services/generated/user-role";
 import { UserEditionModel } from "../services/generated/user-edition-model";
 import { CreateMissionComponentConfig } from "../pages/Missions/create-mission-config";
-import { FoliaPage } from "../pages/folia/folia-page";
+import { ObservationModel } from "../services/generated/observation-model";
+import { Loader } from "./loader";
+import { OSMStatus } from "../services/models/osmStatus-model";
 
 const styles = (theme: Theme) => createStyles({
     menu: {
@@ -44,6 +43,34 @@ const styles = (theme: Theme) => createStyles({
     },
     title: {
         flexGrow: 1,
+    },
+    modal: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        margin: 'auto',
+    },
+    modalContent: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "white",
+        border: "1px solid " + theme.palette.primary.main,
+        minHeight: '15vh',
+        width: '20rem',
+        paddingLeft: theme.spacing(2),
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2)
+
+    },
+    modalButton: {
+        marginTop: theme.spacing(2),
+        textAlign:"right"
+    },
+    closeButton: {
+        right: theme.spacing(1),
+        top: -theme.spacing(7),
+        color: theme.palette.primary.dark,
     }
 });
 
@@ -57,6 +84,9 @@ class LayoutState {
     user: UserModel;
     uem = new UserEditionModel();
     isExpert: boolean;
+    observationsToSend: ObservationModel[];
+    sendObservationIsProcessing: boolean;
+    showModal: boolean = false;
 }
 
 class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
@@ -73,6 +103,10 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
         this.setState({ isUserAdmin: isUserAdmin, user: user });
         this.isConnected();
         this.CheckRole();
+
+        var observations = await ObservationsApi.getObservationToSendToOSM();
+        await this.setState({ observationsToSend: observations, showModal: observations.length > 0 });
+        console.log(observations);
     }
 
     async componentWillUnmount() {
@@ -133,7 +167,7 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
         await ObservationsApi.deleteAllObservations();
     }
     async CheckRole() {
-        if (this.state.user.role == UserRole.expert) {
+        if (this.state.user != null && this.state.user.role == UserRole.expert) {
             await this.setState({ isExpert: true });
         }
         else {
@@ -178,6 +212,22 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
             return routesConfig.find(route => route.routes.some(r => r.path === matched.route.path)) != null;
         }
         return true;
+    }
+
+    async sendObservationToOsm(sendToOsm: boolean) {
+        if (this.state.sendObservationIsProcessing) {
+            return;
+        }
+        await this.setState({ sendObservationIsProcessing : true});
+        //todo start loader
+        this.state.observationsToSend.map(async (o) => {
+            if (sendToOsm) {
+                await AuthenticationApi.sendObservationToOsm(o);
+            } else {
+                await ObservationsApi.setObservationOSMStatus(o.id, OSMStatus.REFUSED);
+            }
+            await this.setState({ sendObservationIsProcessing: false,showModal:false });
+        });
     }
 
     render() {
@@ -233,12 +283,12 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
 
                             <Typography variant="h6" className={classes.title}>
                                 Albiziapp
-                        </Typography>
+                            </Typography>
 
                         </Toolbar>
                         <List >
-                        {this.state.user &&
-                            <ListItem style={{ marginTop: "-12%", cursor:"pointer" }} onClick={() => this.goTo("/user")}>
+                            {this.state.user &&
+                                <ListItem style={{ marginTop: "-12%", cursor: "pointer" }} onClick={() => this.goTo("/user")}>
                                     {this.state.user.name}
                                 </ListItem>
                             }
@@ -298,6 +348,33 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
                 {this.state.isUserConnected &&
                     <ShortcutsMenu />
                 }
+
+                <Modal
+                    disableAutoFocus
+                    className={clsx(classes.modal)}
+                    open={this.state.showModal}
+                    onClose={() => { this.setState({ showModal: false }) }}
+                >
+                    <>
+                        <div className={clsx(classes.modalContent)}>
+                            <div>
+                                Des relevés ont été confirmés par la communauté, souhaitez-vous les partager sur OpenStreetMap?
+
+                                <div className={clsx(classes.modalButton)} onClick={async () => await this.sendObservationToOsm(false)}>
+                                    <Button variant="text">
+                                        <Loader loading={this.state.sendObservationIsProcessing} usualIcon="times" /> {t.__("non")}
+                                    </Button>
+                                    <Button color="primary" onClick={async () => await this.sendObservationToOsm(true)} >
+                                        <Loader loading={this.state.sendObservationIsProcessing} usualIcon="check" /> {t.__("Oui")}
+                                    </Button>
+                                </div>
+                            </div>
+                            <IconButton aria-label="Close" className={classes.closeButton} onClick={() => { this.setState({ showModal: false }) }}>
+                                <Close />
+                            </IconButton>
+                        </div>
+                    </>
+                </Modal>
             </div>
         )
     }

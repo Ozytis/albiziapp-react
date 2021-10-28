@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Ozytis.Common.Core.Utilities;
 using Ozytis.Common.Core.Web.WebApi;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -282,6 +283,23 @@ namespace Web.Controllers
         public void NotifyInfo(string userId, string error)
         {
             this.UserNotify.SendInfoNotif(userId, error);
+        }
+
+        [HttpGet("toSendToOSM")]
+        [HandleBusinessException]
+        public async Task<ObservationModel[]> ObservationToSendToOSM(string userId, string error)
+        {
+            IEnumerable<Observation> observations = await this.ObservationsManager.GetObservationToSendToOSM(this.User.Identity.Name);
+            var userIds = observations.SelectMany(o => this.ObservationsManager.GetAllUserIdForObservation(o)).Distinct().ToArray();
+            var users = (await this.UsersManager.GetUsersByOsmIds(userIds)).ToArray();
+            return observations.Select(observation => observation.ToObservationModel(users)).ToArray();
+        }
+
+        [HttpGet("setOSMStatus/{observationId}/{status}")]
+        [HandleBusinessException]
+        public async Task SetObservationOSMStatus(string observationId, OSMStatus status)
+        {
+            await this.ObservationsManager.EditObservationOSMStatus(observationId, status);
         }
     }
 }

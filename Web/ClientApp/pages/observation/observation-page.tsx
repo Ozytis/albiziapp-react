@@ -15,6 +15,7 @@ import { ObservationStatementModel } from "../../services/generated/observation-
 import { AddObservationStatementConfirmationModel } from "../../services/generated/add-observation-statement-confirmation-model";
 import { PhotoFormItem } from "../../components/photo-form-item";
 import { UserRole } from "../../services/generated/user-role";
+import { Authorization } from "../../components/authorization";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -604,7 +605,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
             await this.setState({ certainStatementId: val });
         }
 
-    }
+    }      
 
     render() {
 
@@ -1097,7 +1098,7 @@ class ObservationPageComponent extends BaseComponent<ObservationPageProps, Obser
                                         {t.__("Anuler")}
                                     </Button>
                                 </Box>
-                            }
+                            }                            
                         </Box>
                     }
                 </Box>

@@ -164,10 +164,10 @@ namespace Business
 
             await this.DataContext.Users.FindOneAndReplaceAsync(u => u.Id == user.Id, user);
 
-            
+
             await this.UserNotify.SendInfoNotif(userId, $"Vous avez terminé la mission en faisant {nbReleve} relevés !");
         }
-           
+
 
         public bool IsUserAdmin(User user)
         {
@@ -210,50 +210,28 @@ namespace Business
 
         public async Task<User> EditUserAsync(User user)
         {
-            using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
             var oldUser = await this.SelectAsync(user.OsmId);
-            try
-            {
-                session.StartTransaction();
 
-                oldUser.OsmId = user.OsmId;
-                oldUser.Name = user.Name;
-                oldUser.Email = user.Email;
-                oldUser.Role = user.Role;
-                await this.DataContext.Users.FindOneAndReplaceAsync(u => u.OsmId == oldUser.OsmId, oldUser);
-            }
-            catch
-            {
-                await session.AbortTransactionAsync();
-                throw;
-            }
+            oldUser.OsmId = user.OsmId;
+            oldUser.Name = user.Name;
+            oldUser.Email = user.Email;
+            oldUser.Role = user.Role;
+            await this.DataContext.Users.FindOneAndReplaceAsync(u => u.OsmId == oldUser.OsmId, oldUser);
 
             return oldUser;
         }
 
         public async Task StartMissionAsync(MissionProgress mission, string userId)
         {
-            using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
+            User user = await this.SelectAsync(userId);
 
-            try
+            user.MissionProgress = mission;
+
+            await this.DataContext.Users.FindOneAndReplaceAsync(x => x.Id == user.Id, user);
+
+            if (mission == null)
             {
-                session.StartTransaction();
-
-                User user = await this.SelectAsync(userId);
-
-                user.MissionProgress = mission;
-
-                await this.DataContext.Users.FindOneAndReplaceAsync(x => x.Id == user.Id, user);
-
-                if (mission == null)
-                {
-                    await this.UserNotify.SendErrorNotif(userId, $"La mission a été abandonné");
-                }
-            }
-            catch
-            {
-                await session.AbortTransactionAsync();
-                throw;
+                await this.UserNotify.SendErrorNotif(userId, $"La mission a été abandonné");
             }
         }
     }

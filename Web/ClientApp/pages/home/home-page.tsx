@@ -1,4 +1,4 @@
-import { Container, createStyles, Theme, WithStyles, withStyles } from "@material-ui/core";
+import { Container, createStyles, Theme, WithStyles, withStyles, Modal, IconButton } from "@material-ui/core";
 import clsx from "clsx";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
@@ -26,6 +26,18 @@ const styles = (theme: Theme) => createStyles({
     tabs: {
         maxWidth: "1000vw",
         marginBottom: "1vh"
+    },
+    modal: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    closeButton: {
+        position: 'absolute',
+        right: theme.spacing(2),
+        top: theme.spacing(7),
+        color: theme.palette.primary.contrastText,
+        zIndex: 9999
     }
 });
 
@@ -34,12 +46,15 @@ interface HomePageProps extends RouteComponentProps, IPropsWithAppContext, WithS
 }
 
 class HomePageState {
-
 }
 
 class HomePageComponent extends BaseComponent<HomePageProps, HomePageState>{
     constructor(props: HomePageProps) {
         super(props, "HomePage", new HomePageState());
+    }
+
+    async componentDidMount() {
+    
     }
   
 
@@ -49,9 +64,7 @@ class HomePageComponent extends BaseComponent<HomePageProps, HomePageState>{
 
         return (
             <Container fixed className={clsx(classes.root)}>
-
-                <ActivitiesTab />
-
+                <ActivitiesTab />   
             </Container>
         )
     }

@@ -13,7 +13,7 @@ import { ObservationsApi } from "../../services/observation";
 import { t } from "../../services/translation-service";
 import { MissionsApi } from "../../services/missions-service";
 import { MissionProgressionModel } from "../../services/generated/mission-progression-model";
-import { NearMe,Layers } from "@material-ui/icons";
+import { NearMe, Layers } from "@material-ui/icons";
 import { MapPosition } from "../../components/mapPosition";
 import * as signalR from "@microsoft/signalr";
 import { MissionModel, CircleAreaModel, PolygonArea, IdentificationMissionModel, VerificationMissionModel, RestrictionType, NumberOfActions, TimeLimit } from "../../services/models/mission-model";
@@ -86,7 +86,7 @@ class MapPageState {
 class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
 
     hub: signalR.HubConnection;
-    myInterval: number;
+    myInterval: any;
     constructor(props: MapPageProps) {
         super(props, "MapPage", new MapPageState());
     }
@@ -99,11 +99,14 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
             this.loadObservations();
             this.positionWatcher = navigator.geolocation.watchPosition(async (position: Position) => {
                 var lastPos: MapPosition = JSON.parse(localStorage.getItem("mapPosition"));
-                var now = new Date();
-                now = new Date(now.getTime() - 30 * 60000);
-                var date = new Date(lastPos.Date as any);
-                if (!(date >= now)) {
-                    await this.setState({ userPosition: position });
+                if (lastPos != null) {
+
+                    var now = new Date();
+                    now = new Date(now.getTime() - 30 * 60000);
+                    var date = new Date(lastPos.Date as any);
+                    if (!(date >= now)) {
+                        await this.setState({ userPosition: position });
+                    }
                 }
             });
         }, async () => {
@@ -234,7 +237,7 @@ class MapPageComponent extends BaseComponent<MapPageProps, MapPageState>{
     }
 
     getTilesUrl() {
-            return "//wxs.ign.fr/essentiels/geoportail/wmts?service=WMTS&request=GetTile&version=1.0.0&tilematrixset=PM&tilematrix={z}&tilecol={x}&tilerow={y}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&format=image/jpeg&style=normal";     
+        return "//wxs.ign.fr/essentiels/geoportail/wmts?service=WMTS&request=GetTile&version=1.0.0&tilematrixset=PM&tilematrix={z}&tilecol={x}&tilerow={y}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&format=image/jpeg&style=normal";
     }
 
     getColor(observation: ObservationModel) {

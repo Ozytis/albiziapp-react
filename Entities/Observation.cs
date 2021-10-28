@@ -39,5 +39,7 @@ namespace Entities
         public bool IsCertain { get; set; }
         public string IsCertainBy { get; set; }
 
+        public OSMStatus? OSMStatus { get; set; }
+
     }
 }

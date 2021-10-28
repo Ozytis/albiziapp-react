@@ -6,6 +6,7 @@ import { ObservationCreationModel } from "./generated/observation-creation-model
 import { ObservationEditionModel } from "./generated/observation-edition-model";
 import { AddObservationStatementConfirmationModel } from "./generated/add-observation-statement-confirmation-model";
 import { ObservationStatementEditionModel } from "./generated/observation-statement-edition-model";
+import { OSMStatus } from "./models/osmStatus-model";
 
 class ObservationsService extends BaseService {
 
@@ -265,6 +266,15 @@ class ObservationsService extends BaseService {
 
         return result;
     }
+
+    async getObservationToSendToOSM() {
+        return await this.get<ObservationModel[]>(`observations/toSendToOSM`);
+    }
+
+    async setObservationOSMStatus(observationId: string, status: OSMStatus) {
+        return await this.get<void>(`observations/setOSMStatus/${observationId}/${status}`);
+    }
+
    }
 
 export const ObservationsApi = new ObservationsService();

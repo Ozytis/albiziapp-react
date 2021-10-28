@@ -144,7 +144,7 @@ class EditUserPageComponent extends BaseComponent<EditUserPageProps, EditUserPag
 
                 <Typography variant="h6" className={clsx(classes.sectionHeading)}>{t.__("Email")}</Typography>
                 <FormControl className={clsx(classes.formControl)}>
-                    <TextField id="name" value={model.email} onChange={n => this.updateModel("email", n.target.value)} />
+                    <TextField id="email" value={model.email} onChange={n => this.updateModel("email", n.target.value)} />
                 </FormControl>
 
 

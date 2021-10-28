@@ -16,21 +16,8 @@ namespace Business
 
         public async Task CreateTitleAsync(Title title)
         {
-            using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
-
-            try
-            {
-                session.StartTransaction();
-
-                title.Id = Guid.NewGuid().ToString("N");
-
-                await this.DataContext.Titles.InsertOneAsync(title);
-            }
-            catch
-            {
-                await session.AbortTransactionAsync();
-                throw;
-            }
+            title.Id = Guid.NewGuid().ToString("N");
+            await this.DataContext.Titles.InsertOneAsync(title);
         }
 
         public async Task<List<Title>> GetTitlesByPoints(int explorationPoints, int knowledgePoints)

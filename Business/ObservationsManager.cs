@@ -1,14 +1,18 @@
 ﻿using Api;
+using Business.Emails;
 using Business.Extensions;
 using Business.MissionValidation;
 using Common;
 using Entities;
 using Entities.Enums;
+using Hangfire;
 using Microsoft.Extensions.Configuration;
+using MimeKit;
 using MongoDB.Bson.IO;
 using MongoDB.Driver;
 using MongoDB.Driver.GeoJsonObjectModel;
 using Ozytis.Common.Core.Utilities;
+using RazorLight;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,8 +32,10 @@ namespace Business
 
         public IConfiguration Configuration;
 
+        public IRazorLightEngine RazorEngine { get; }
+
         public ObservationsManager(DataContext dataContext, FileManager fileManager,
-            SpeciesManager speciesManager, UsersManager usersManager, IServiceProvider serviceProvider, IUserNotify userNotify, IConfiguration configuration)
+            SpeciesManager speciesManager, UsersManager usersManager, IServiceProvider serviceProvider, IUserNotify userNotify, IConfiguration configuration, IRazorLightEngine razorLightEngine)
             : base(dataContext)
         {
             this.FileManager = fileManager;
@@ -38,6 +44,7 @@ namespace Business
             this.ServiceProvider = serviceProvider;
             this.UserNotify = userNotify;
             this.Configuration = configuration;
+            this.RazorEngine = razorLightEngine;
         }
 
         public async Task<IEnumerable<Observation>> GetAllObservations()
@@ -97,12 +104,10 @@ namespace Business
         }
         public async Task<Observation> CreateObservationAsync(string speciesName, string genus, string userid, Entities.Enums.Confident confident, double latitude, double longitude, string[] pictures, int? treeSize)
         {
-            using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
             Observation newObservation = new Observation();
             try
             {
-                session.StartTransaction();
-
+                
                 newObservation.Id = Guid.NewGuid().ToString("N");
                 newObservation.Pictures = new List<string>();
                 newObservation.Date = DateTime.UtcNow;
@@ -168,9 +173,8 @@ namespace Business
                     await validator?.UpdateMissionProgression(newObservation, statement, ActionType.CreateObservation);
                 }
             }
-            catch
+            catch (Exception e)
             {
-                await session.AbortTransactionAsync();
                 throw;
             }
 
@@ -329,6 +333,14 @@ namespace Business
                 existingObservation.IsIdentified = true;
                 existingObservation.StatementValidatedId = identifyStatement.Id;
                 await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
+                if (!existingObservation.OSMStatus.HasValue)
+                {
+                    var user = await this.UsersManager.SelectAsync(existingObservation.UserId);
+                    if (user != null)
+                    {
+                        BackgroundJob.Enqueue(() => this.SendMailForObservationToSendToOsm(user.Email, user.Name));
+                    }
+                }
             }
         }
 
@@ -463,20 +475,7 @@ namespace Business
                             await this.UsersManager.AddTitles(compareHistory.UserId);
                         }
 
-                        /* if (statement.Genus == compareObservation.Genus)
-                         {
-                             pointHistoryPb.Add(new PointHistory { Point = (!genusPnToP0Isvalid ? 4 : 2), Type = (int)KnowledgePoint.ValidateSameGenus, Date = currentDate });
-                         }
-
-                         if (statement.SpeciesName == compareObservation.SpeciesName || statement.CommonSpeciesName == compareObservation.CommonSpeciesName)
-                         {
-                             pointHistoryPb.Add(new PointHistory { Point = (!genusPnToP0Isvalid ? 2 : 1), Type = (int)KnowledgePoint.ValidateSameSpecies, Date = currentDate });
-                         }
-                         if (statement.Confident.HasValue && statement.Confident.Value == Confident.High)
-                         {
-                             pointHistoryPb.Add(new PointHistory { Point = 2, Type = (int)KnowledgePoint.ObservationConfident, Date = currentDate });
-                         }
-                        */
+               
                         await this.UsersManager.AddKnowledegePoints(statement.UserId, pointHistoryPb);
                         await this.UsersManager.AddTitles(statement.UserId);
                     }
@@ -487,80 +486,12 @@ namespace Business
         [Obsolete]
         public async Task<Observation> EditObservationAsync(ObservationStatement editObservation, string currentUserId)
         {
-            using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
             var existingObservation = await this.GetUserObservationbyId(editObservation.Id);
             if (existingObservation == null)
             {
                 throw new BusinessException("Ce relevé n'existe pas");
             }
-            /*
-            try
-            {
-                session.StartTransaction();
-                //if (existingObservation.History == null)
-                //{
-                //    existingObservation.History = new List<BaseObservation>();
-                //}
-                ////si ce n'est pas le même utilisateur alors on passe l'observation en historique
-                //if (existingObservation.UserId != currentUserId)
-                //{
-                //    existingObservation.History.Add(this.CloneObservationToBaseObservation(existingObservation));
-                //}
-
-
-                if (!string.IsNullOrEmpty(editObservation.Genus))
-                {
-                    existingObservation.CommonGenus = (await this.SpeciesManager
-                        .GetSpeciesByGenusAsync(editObservation.Genus))
-                        .FirstOrDefault()?.CommonGenus;
-                }
-
-                if (!string.IsNullOrEmpty(editObservation.SpeciesName))
-                {
-                    Species species = await this.SpeciesManager
-                       .GetSpeciesByNameAsync(editObservation.SpeciesName);
-
-                    existingObservation.CommonSpeciesName = species?.CommonSpeciesName;
-                    existingObservation.TelaBotanicaTaxon = species?.TelaBotanicaTaxon;
-                }
-
-                User user = await this.UsersManager.SelectAsync(editObservation.UserId);
-                existingObservation.UserId = editObservation.UserId;
-                existingObservation.AuthorName = user?.Name;
-                existingObservation.Confident = editObservation.Confident;
-                existingObservation.UpdateDate = DateTime.UtcNow;
-                if (pictures?.Length > 0)
-                {
-                    if (existingObservation.Pictures == null)
-                    {
-                        existingObservation.Pictures = new List<string>();
-                    }
-                    foreach (var existingPictures in existingObservation.Pictures)
-                    {
-                        await this.FileManager.DeleteFile(existingPictures);
-                    }
-                    existingObservation.Pictures.Clear();
-
-                    foreach (string picture in pictures.Where(p => !string.IsNullOrEmpty(p)))
-                    {
-                        existingObservation.Pictures.Add(await this.FileManager.SaveDataUrlAsFileAsync("observations", picture));
-                    }
-                }
-
-                await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
-
-                await this.CalculateKnowledegePoints(existingObservation);
-                // TODO: mettre à jour la mission
-                var validator = await MissionValidator.GetValidatorFromActivity(this.ServiceProvider, user);
-                await validator.UpdateActivityProgression();
-
-            }
-            catch
-            {
-                await session.AbortTransactionAsync();
-                throw;
-            }
-            */
+       
             return existingObservation;
         }
 
@@ -636,6 +567,14 @@ namespace Business
             existingObservation.StatementValidatedId = statementId;
 
             await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
+            if (!existingObservation.OSMStatus.HasValue)
+            {
+                var user = await this.UsersManager.SelectAsync(existingObservation.UserId);
+                if (user != null)
+                {
+                    BackgroundJob.Enqueue(() => this.SendMailForObservationToSendToOsm(user.Email, user.Name));
+                }
+            }
         }
 
         public async Task AddCommentary(string observationId, string newCommentary, string userId)
@@ -662,7 +601,7 @@ namespace Business
 
         public async Task<Observation> EditObservationStatementAsync(ObservationStatement editStatement, string observationId)
         {
-            using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
+            
             var existingObservation = await this.GetUserObservationbyId(observationId);
             var existingStatement = existingObservation.ObservationStatements.Find(s => s.Id == editStatement.Id);
             var os = existingObservation.ObservationStatements;
@@ -692,7 +631,7 @@ namespace Business
             }
             try
             {
-                session.StartTransaction();
+         
 
                 existingStatement.CommonGenus = editStatement.CommonGenus;
                 existingStatement.Genus = editStatement.Genus;
@@ -711,7 +650,6 @@ namespace Business
             }
             catch
             {
-                await session.AbortTransactionAsync();
                 throw;
             }
 
@@ -725,6 +663,59 @@ namespace Business
             observation.ObservationStatements.Remove(observation.ObservationStatements.Find(o => o.Id == statementId));
 
             await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == observation.Id, observation);
+        }
+
+        public async Task<IEnumerable<Observation>> GetObservationToSendToOSM(string osmId)
+        {
+            return await this.DataContext.Observations.Find(o => o.UserId == osmId && !string.IsNullOrEmpty(o.StatementValidatedId) && o.OSMStatus == null).ToListAsync();
+        }
+
+        public async Task<Observation> EditObservationOSMStatus(string observationId, OSMStatus status)
+        {
+            var existingObservation = await this.GetUserObservationbyId(observationId);
+            
+            if (existingObservation == null)
+            {
+                throw new BusinessException("Ce relevé n'existe pas");
+            }
+       
+            try
+            {
+                existingObservation.OSMStatus = status;               
+                await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
+            }
+            catch
+            {
+                throw;
+            }
+
+            return existingObservation;
+        }
+
+        public async Task SendMailForObservationToSendToOsm(string userEmail,string username)
+        {
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return;
+            }
+            var model = new NewObservationToSendToOsmModel();
+            model.UserName = username;
+            var email = new MimeMessage();
+            email.Subject = $"Albiziapp :  Un relevé à été confirmé par la communauté";
+            email.To.Add(MailboxAddress.Parse(userEmail));
+
+            email.From.Add(new MailboxAddress(this.Configuration["Data:Emails:DefaultSenderName"], this.Configuration["Data:Emails:DefaultSenderEmail"]));
+            try
+            {
+                var html = await this.RazorEngine.CompileRenderAsync("Emails.NewObservationToSendToOsm", model);
+
+                email.AddBody(null, html);
+
+                await email.SendWithSmtpAsync(false);
+            }catch(Exception e)
+            {
+
+            }
         }
     }
 }

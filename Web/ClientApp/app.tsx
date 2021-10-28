@@ -1,4 +1,4 @@
-import { MuiThemeProvider } from "@material-ui/core";
+import { MuiThemeProvider, Modal, IconButton, Theme, createStyles } from "@material-ui/core";
 import { BrowserHistory, createBrowserHistory } from 'history';
 import React from "react";
 import ReactDOM from "react-dom";
@@ -21,7 +21,6 @@ import 'react-toastify/dist/ReactToastify.css';
 
 
 
-
 interface AppProps {
     theme?: string;
 }
@@ -34,8 +33,8 @@ class AppState {
 
     context: IAppContext = null;
     user: UserModel;
+  
 }
-
 
 class App extends BaseComponent<AppProps, AppState>{
    
@@ -211,7 +210,7 @@ class App extends BaseComponent<AppProps, AppState>{
                     <BrowserRouter ref={router => this.router = router} >
                         <Authorization>
                             <Layout>
-                                
+                      
                             </Layout>
                         </Authorization>
                     </BrowserRouter>

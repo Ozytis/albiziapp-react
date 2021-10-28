@@ -6,6 +6,8 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+	<PreserveCompilationReferences>true</PreserveCompilationReferences>
+    <PreserveCompilationContext>true</PreserveCompilationContext>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,12 +27,16 @@
     <None Remove="ClientApp\services\generated\folia-request-model.ts" />
     <None Remove="ClientApp\services\generated\folia-result-model.ts" />
     <None Remove="ClientApp\services\models\mission-model.ts" />
+    <None Remove="ClientApp\services\models\osm-model.ts" />
+    <None Remove="ClientApp\services\models\osmStatus-model.ts" />
     <None Remove="ClientApp\services\titles-service.ts" />
     <None Remove="ClientApp\utils\notify-helper.tsx" />
     <None Remove="ClientApp\utils\string-helper.ts" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Hangfire" Version="1.7.25" />
+    <PackageReference Include="Hangfire.Mongo" Version="0.7.25" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
   </ItemGroup>
 
@@ -90,6 +96,8 @@
     <TypeScriptCompile Include="ClientApp\services\generated\folia-request-model.ts" />
     <TypeScriptCompile Include="ClientApp\services\generated\folia-result-model.ts" />
     <TypeScriptCompile Include="ClientApp\services\models\mission-model.ts" />
+    <TypeScriptCompile Include="ClientApp\services\models\osm-model.ts" />
+    <TypeScriptCompile Include="ClientApp\services\models\osmStatus-model.ts" />
     <TypeScriptCompile Include="ClientApp\services\titles-service.ts" />
     <TypeScriptCompile Include="ClientApp\utils\notify-helper.tsx" />
     <TypeScriptCompile Include="ClientApp\utils\string-helper.ts" />

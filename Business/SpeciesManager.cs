@@ -33,64 +33,34 @@ namespace Business
         }
         public async Task UpdateSpeciesRarety(Species species)
         {
-            using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
-
-            try
+            var sName = species.SpeciesName?.ToLower()?.Trim();
+            Species speciesReplace = this.DataContext.Species.Find(_ => true).ToList().Where(s => s.SpeciesName.ToLower().Trim() == sName).FirstOrDefault();
+            if (speciesReplace != null)
             {
-                session.StartTransaction();
-                var sName = species.SpeciesName?.ToLower()?.Trim();
-                Species speciesReplace = this.DataContext.Species.Find(_ => true).ToList().Where(s => s.SpeciesName.ToLower().Trim() == sName).FirstOrDefault();
-                if (speciesReplace != null)
-                {
-                    speciesReplace.Rarity = species.Rarity;
-                    speciesReplace.Difficult = species.Difficult;
-                    await this.DataContext.Species.FindOneAndReplaceAsync(u => u.Id == speciesReplace.Id, speciesReplace);
-                    await session.CommitTransactionAsync();
-                }
-                else
-                {
-                    await session.AbortTransactionAsync();
-                }
-            }
-            catch
-            {
-                await session.AbortTransactionAsync();
-                throw;
+                speciesReplace.Rarity = species.Rarity;
+                speciesReplace.Difficult = species.Difficult;
+                await this.DataContext.Species.FindOneAndReplaceAsync(u => u.Id == speciesReplace.Id, speciesReplace);
             }
         }
         public async Task CreateOrUpdateSpeciesAsync(Species species, string[] pictures)
         {
-            using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
+            Species existing = await this.SelectByTaxonAsync(species.TelaBotanicaTaxon);
 
-            try
+            if (existing != null)
             {
-                session.StartTransaction();
-
-                Species existing = await this.SelectByTaxonAsync(species.TelaBotanicaTaxon);
-
-                if (existing != null)
-                {
-                    await this.DataContext.Species.DeleteOneAsync(s => s.TelaBotanicaTaxon == species.TelaBotanicaTaxon);
-                }
-
-                species.Id = Guid.NewGuid().ToString("N");
-
-                species.Pictures = new List<string>();
-
-                foreach (string picture in pictures)
-                {
-                    species.Pictures.Add(await this.FileManager.SaveDataUrlAsFileAsync("species", picture));
-                }
-
-                await this.DataContext.Species.InsertOneAsync(species);
-
-                await session.CommitTransactionAsync();
+                await this.DataContext.Species.DeleteOneAsync(s => s.TelaBotanicaTaxon == species.TelaBotanicaTaxon);
             }
-            catch
+
+            species.Id = Guid.NewGuid().ToString("N");
+
+            species.Pictures = new List<string>();
+
+            foreach (string picture in pictures)
             {
-                await session.AbortTransactionAsync();
-                throw;
+                species.Pictures.Add(await this.FileManager.SaveDataUrlAsFileAsync("species", picture));
             }
+
+            await this.DataContext.Species.InsertOneAsync(species);
         }
 
         public async Task<Species> GetSpeciesByNameAsync(string speciesName)
@@ -100,36 +70,24 @@ namespace Business
 
         public async Task CreateOrUpdateFloraKeyAsync(FloraKey floraKey, FloraKeyValue[] floraKeyValues)
         {
-            using IClientSessionHandle session = await this.DataContext.MongoClient.StartSessionAsync();
+            IFindFluent<FloraKey, FloraKey> existing = this.DataContext.FloraKeys.Find(key => key.NormalizedForm == floraKey.NormalizedForm);
 
-            try
+            if (existing != null)
             {
-                session.StartTransaction();
-                await session.CommitTransactionAsync();
-
-                IFindFluent<FloraKey, FloraKey> existing = this.DataContext.FloraKeys.Find(key => key.NormalizedForm == floraKey.NormalizedForm);
-
-                if (existing != null)
-                {
-                    await this.DataContext.FloraKeys.DeleteOneAsync(key => key.NormalizedForm == floraKey.NormalizedForm);
-                }
-
-                floraKey.Id = Guid.NewGuid().ToString("N");
-                floraKey.Values = new List<FloraKeyValue>();
-
-                foreach (FloraKeyValue value in floraKeyValues)
-                {
-                    value.FloraKeyId = floraKey.Id;
-                    floraKey.Values.Add(value);
-                }
-
-                await this.DataContext.FloraKeys.InsertOneAsync(floraKey);
+                await this.DataContext.FloraKeys.DeleteOneAsync(key => key.NormalizedForm == floraKey.NormalizedForm);
             }
-            catch
+
+            floraKey.Id = Guid.NewGuid().ToString("N");
+            floraKey.Values = new List<FloraKeyValue>();
+
+            foreach (FloraKeyValue value in floraKeyValues)
             {
-                await session.AbortTransactionAsync();
-                throw;
+                value.FloraKeyId = floraKey.Id;
+                floraKey.Values.Add(value);
             }
+
+            await this.DataContext.FloraKeys.InsertOneAsync(floraKey);
+
         }
 
         public async Task<IEnumerable<Species>> GetSpeciesByGenusAsync(string genus)
@@ -145,7 +103,7 @@ namespace Business
         public async Task<decimal> CalculRarityGenus(string genus)
         {
             var species = await this.GetSpeciesByGenusAsync(genus);
-            if(species == null || species.Count() == 0)
+            if (species == null || species.Count() == 0)
             {
                 return 0;
             }
@@ -162,14 +120,14 @@ namespace Business
 
             decimal a = 0;
             decimal b = 0;
-            foreach(var s in species)
+            foreach (var s in species)
             {
                 var ponderate = this.CalculPonderateRaritySpecies(s);
                 a += s.Difficult * ponderate;
                 b += ponderate;
             }
 
-            return b != 0 ? a/b : 0;
+            return b != 0 ? a / b : 0;
         }
 
         private decimal CalculPonderateRaritySpecies(Species species)
