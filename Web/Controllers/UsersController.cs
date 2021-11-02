@@ -129,8 +129,7 @@ namespace Web.Controllers
         [HandleBusinessException, ValidateModel]
         [Authorize(Roles = UserRoleName.Administrator)]
         public async Task EditUserAdminAysnc([FromBody] UserEditionModel model)
-        {
-            //TODO validate email
+        {            
             await this.UsersManager.EditUserAsync(
                 new User
                 {
@@ -146,8 +145,6 @@ namespace Web.Controllers
         [Authorize]
         public async Task EditUserAysnc([FromBody] UserEditionModel model)
         {
-
-            //TODO validate email
             var currentUser = this.User.Identity.Name;
             if(currentUser != model.OsmId)
             {

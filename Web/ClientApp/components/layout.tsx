@@ -219,7 +219,7 @@ class LayoutComponent extends BaseComponent<LayoutProps, LayoutState>{
             return;
         }
         await this.setState({ sendObservationIsProcessing : true});
-        //todo start loader
+       
         this.state.observationsToSend.map(async (o) => {
             if (sendToOsm) {
                 await AuthenticationApi.sendObservationToOsm(o);

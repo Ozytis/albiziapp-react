@@ -46,7 +46,7 @@ namespace Business.MissionValidation
             var missionProgressHistory = User.MissionProgress.History?.ToList() ?? new List<MissionProgressionHistory>();
             var observationsFromHistory = await this.ObservationsManager.GetObservationsByIds(missionProgressHistory.Select(x => x.ObservationId).ToArray());
 
-            //TODO vérification des type de donénes botanique
+        
             //Question Est-ce que si le relevé est certains, on vérifie qu'il valide bien la bonne données
 
             if (this.Mission.Restriction != null)
@@ -103,48 +103,6 @@ namespace Business.MissionValidation
             {
                 await this.UpdateProgression(missionProgressHistory.ToArray());
             }
-
-            /* var opts = Activity.Options;           
-             int count = 0;
-             foreach (var endCondition in this.Activity.EndConditions)
-             {
-                 if (endCondition.ActionCount.HasValue)
-                 {
-                     var observations = (await this.ObservationsManager.GetUserVerifyObservations(User.OsmId, User.MissionProgress.StartDate));
-                     count = observations.Count();
-
-                     if (count < endCondition.ActionCount.Value)
-                     {
-                         conditionsCompleted = false;
-                     }
-
-                 }
-                 if (endCondition.Time.HasValue)
-                 {
-                     var maxDate = DateTime.UtcNow.AddMinutes(-endCondition.Time.Value);
-                     var date = new DateTime(Math.Max(User.MissionProgress.StartDate.Ticks, maxDate.Ticks));
-                     var observations = (await this.ObservationsManager.GetUserVerifyObservations(User.OsmId,date)); ;
-                     count = observations.Count();                
-
-                     //todo check code existant mini requis
-                     if (count < 5)
-                     {
-                         conditionsCompleted = false;
-                     }
-                 }
-             }
-
-             if (conditionsCompleted)
-             {
-                 await this.ValidateActivity();
-             }
-             else
-             {
-                 await this.UpdateProgression(count);
-                 //todo updateMissionProgression
-             }
-
-             return conditionsCompleted;*/
             return false;
         }
 

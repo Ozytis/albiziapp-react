@@ -107,7 +107,7 @@ namespace Business
             Observation newObservation = new Observation();
             try
             {
-                
+
                 newObservation.Id = Guid.NewGuid().ToString("N");
                 newObservation.Pictures = new List<string>();
                 newObservation.Date = DateTime.UtcNow;
@@ -227,7 +227,6 @@ namespace Business
             {
                 await validator?.UpdateMissionProgression(existingObservation, statement, ActionType.ConfirmStatement);
             }
-            //TODO voir calcul de points
         }
 
         //AJOUT D'UNE PROPOSITION
@@ -475,7 +474,7 @@ namespace Business
                             await this.UsersManager.AddTitles(compareHistory.UserId);
                         }
 
-               
+
                         await this.UsersManager.AddKnowledegePoints(statement.UserId, pointHistoryPb);
                         await this.UsersManager.AddTitles(statement.UserId);
                     }
@@ -491,7 +490,7 @@ namespace Business
             {
                 throw new BusinessException("Ce relevé n'existe pas");
             }
-       
+
             return existingObservation;
         }
 
@@ -511,8 +510,6 @@ namespace Business
         public async Task VaidateObservationAsync(string observationId, string currentUserId)
         {
             Observation observation = await this.DataContext.Observations.Find(o => o.Id == observationId).FirstOrDefaultAsync();
-
-            //TODO VALIDATE VOIR SI on garde
         }
 
         public async Task<int> CalculateUserSpeciesExpertise(string userId, string speciesName)
@@ -523,8 +520,7 @@ namespace Business
             data = data.Where(o => o.ObservationStatements.Any(s => s.Id == o.StatementValidatedId)).ToList();
 
             var count = data.Count;
-            var species = await this.SpeciesManager.GetSpeciesByNameAsync(speciesName);
-            //TODO voir si on add +1 si besoin
+            var species = await this.SpeciesManager.GetSpeciesByNameAsync(speciesName);   
             var expertise = (count * species.Difficult * species.Rarity) + 1;
 
             return (int)Math.Min(expertise, 50);
@@ -537,7 +533,7 @@ namespace Business
             data = data.Where(o => o.ObservationStatements.Any(s => s.Id == o.StatementValidatedId)).ToList();
 
             var count = data.Count;
-            //TODO voir si on add +1 si besoin
+
             var genusDifficult = await this.SpeciesManager.CalculDifficultGenus(genus);
             var genusRarity = await this.SpeciesManager.CalculRarityGenus(genus);
             var expertise = (count * genusDifficult * genusRarity) + 1;
@@ -601,7 +597,7 @@ namespace Business
 
         public async Task<Observation> EditObservationStatementAsync(ObservationStatement editStatement, string observationId)
         {
-            
+
             var existingObservation = await this.GetUserObservationbyId(observationId);
             var existingStatement = existingObservation.ObservationStatements.Find(s => s.Id == editStatement.Id);
             var os = existingObservation.ObservationStatements;
@@ -627,12 +623,10 @@ namespace Business
 
                     }
                 }
-
             }
+
             try
             {
-         
-
                 existingStatement.CommonGenus = editStatement.CommonGenus;
                 existingStatement.Genus = editStatement.Genus;
                 existingStatement.SpeciesName = editStatement.SpeciesName;
@@ -659,7 +653,6 @@ namespace Business
         {
             Observation observation = await this.DataContext.Observations.Find(o => o.Id == observationId).FirstOrDefaultAsync();
 
-
             observation.ObservationStatements.Remove(observation.ObservationStatements.Find(o => o.Id == statementId));
 
             await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == observation.Id, observation);
@@ -673,15 +666,15 @@ namespace Business
         public async Task<Observation> EditObservationOSMStatus(string observationId, OSMStatus status)
         {
             var existingObservation = await this.GetUserObservationbyId(observationId);
-            
+
             if (existingObservation == null)
             {
                 throw new BusinessException("Ce relevé n'existe pas");
             }
-       
+
             try
             {
-                existingObservation.OSMStatus = status;               
+                existingObservation.OSMStatus = status;
                 await this.DataContext.Observations.FindOneAndReplaceAsync(o => o.Id == existingObservation.Id, existingObservation);
             }
             catch
@@ -692,7 +685,7 @@ namespace Business
             return existingObservation;
         }
 
-        public async Task SendMailForObservationToSendToOsm(string userEmail,string username)
+        public async Task SendMailForObservationToSendToOsm(string userEmail, string username)
         {
             if (string.IsNullOrEmpty(userEmail))
             {
@@ -705,17 +698,13 @@ namespace Business
             email.To.Add(MailboxAddress.Parse(userEmail));
 
             email.From.Add(new MailboxAddress(this.Configuration["Data:Emails:DefaultSenderName"], this.Configuration["Data:Emails:DefaultSenderEmail"]));
-            try
-            {
-                var html = await this.RazorEngine.CompileRenderAsync("Emails.NewObservationToSendToOsm", model);
 
-                email.AddBody(null, html);
+            var html = await this.RazorEngine.CompileRenderAsync("Emails.NewObservationToSendToOsm", model);
 
-                await email.SendWithSmtpAsync(false);
-            }catch(Exception e)
-            {
+            email.AddBody(null, html);
 
-            }
+            await email.SendWithSmtpAsync(false);
+
         }
     }
 }

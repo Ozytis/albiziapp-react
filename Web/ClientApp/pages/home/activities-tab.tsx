@@ -70,11 +70,8 @@ class ActivitiesTabComponent extends BaseComponent<ActivitiesTabProps, Activitie
         return (
             <>
                 {
-                    this.state.missions && this.state.missions.map((mission, index) => {
-
-                        /** TODO: récupérer la complétion d'une activité */
-                        const completion = this.state.missionProgress?.missionProgression?.progression ?? 0;
-                        
+                    this.state.missions && this.state.missions.map((mission, index) => {                        
+                        const completion = this.state.missionProgress?.missionProgression?.progression ?? 0;                        
                         return (
                             <ActivityCard completion={completion} key={index} mission={mission} active={this.state.currentActivityId == mission.id} onChange={() => this.refreshMissions()} end={this.state.endMissions?.includes(mission.id)} />
                         )

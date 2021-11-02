@@ -15,50 +15,10 @@ namespace Business.MissionValidation
 
         }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public override async Task<bool> UpdateMissionProgression(Observation observation, ObservationStatement statement, ActionType? type)
-        {
-            bool conditionsCompleted = false;
-            
-            int count = 0;
-            /*foreach (var endCondition in this.Activity.EndConditions)
-            {
-                if (endCondition.ActionCount.HasValue)
-                {
-                    var observations = await this.ObservationsManager.GetUserIdentifyObservations(User.OsmId, User.MissionProgress.StartDate);
-                     count = observations.Count();
-
-                    if (count < endCondition.ActionCount.Value)
-                    {
-                        conditionsCompleted = false;
-                    }
-
-                }
-                if (endCondition.Time.HasValue)
-                {
-                    var maxDate = DateTime.UtcNow.AddMinutes(-endCondition.Time.Value);
-                    var date = new DateTime(Math.Max(User.MissionProgress.StartDate.Ticks, maxDate.Ticks));
-                    var observations = await this.ObservationsManager.GetUserIdentifyObservations(User.OsmId, date);
-                     count = observations.Count();
-
-                    //todo check code existant mini requis
-                    if (count < 5)
-                    {
-                        conditionsCompleted = false;
-                    }
-                }
-            }
-
-            if (conditionsCompleted)
-            {
-                await this.ValidateActivity();
-            }
-            else
-            {
-                await this.UpdateProgression(count);
-                //todo updateMissionProgression
-            }
-
-            return conditionsCompleted;*/
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+        {            
             return false;
         }
         public async Task<bool> UpdateIdentifyMissionProgression(string observationId, Mission mission, ObservationStatement identification,  string osmId)

@@ -73,7 +73,17 @@ Exemple de configuration
     "MinimunScore": 150,
     "MinimunPercent": 50
   },
-  "ContentDir": "/home/myUser/albiziapp/"
+  "ContentDir": "/home/myUser/albiziapp/",
+  "Data": {
+    "Emails": {
+      "DefaultSenderName": "Albiziapp",
+      "DefaultSenderEmail": "ne-pas-repondre@albiziapp.com",
+      "SmtpUser": "",
+      "SmtpPassword": "",
+      "SmtpHost": "",
+      "SmtpPort": ""
+    }
+  }
 }
 ```
 
@@ -119,11 +129,13 @@ nohup ./Web > /dev/null 2>&1 &
 ```
 ### Insertion des données
 ```bash
+wget https://github.com/Ozytis/albiziapp-react/raw/master/dist/DataMigrator.zip
+unzip DataMigrator.zip -d ./DataMigrator
 cd ./DataMigrator/
-dotnet run
+dotnet DataMigrator.dll
 ```
-Suivre les instructions du logiciel pour l'insertion des données.
-Il faut insérer les differents types de données différentes afin de pouvoir faire fonctionner correctement le site
+Suivez les instructions du logiciel pour l'insertion des données.
+Il faut insérer les différents types de données différentes afin de pouvoir faire fonctionner correctement le site
 
 ## Pour aller plus loin 
 ### Passage d'un compte en admin
